@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Made & Noel</title>
 
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#7c3aed" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -13,7 +12,6 @@
   <meta name="apple-mobile-web-app-title" content="Made & Noel" />
   <link rel="apple-touch-icon" href="icon-192.png" />
 
-  <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
@@ -21,318 +19,96 @@
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #ede9fe;
-      min-height: 100vh;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
+      background: #ede9fe; min-height: 100vh;
+      display: flex; align-items: flex-start; justify-content: center;
       padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
+    .app { width: 100%; max-width: 430px; min-height: 100vh; background: #faf5ff; display: flex; flex-direction: column; }
 
-    .app {
-      width: 100%;
-      max-width: 430px;
-      min-height: 100vh;
-      background: #faf5ff;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-
-    /* HEADER */
-    .hdr {
-      background: linear-gradient(135deg, #c084fc, #7c3aed);
-      padding: 52px 20px 22px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
+    .hdr { background: linear-gradient(135deg, #c084fc, #7c3aed); padding: 52px 20px 22px; text-align: center; position: relative; overflow: hidden; flex-shrink: 0; }
     .hdr-hearts { position: absolute; inset: 0; pointer-events: none; }
-    .hf {
-      position: absolute; color: #fff; opacity: 0.2; font-size: 18px;
-      animation: floatUp 5s ease-in-out infinite;
-    }
-    @keyframes floatUp {
-      0%   { transform: translateY(0) scale(1); opacity: .2; }
-      50%  { opacity: .35; }
-      100% { transform: translateY(-60px) scale(.5); opacity: 0; }
-    }
-    .hdr-icon  { font-size: 28px; margin-bottom: 6px; }
-    .hdr-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 26px; color: #fff; font-weight: 400;
-    }
+    .hf { position: absolute; color: #fff; opacity: 0.2; font-size: 18px; animation: floatUp 5s ease-in-out infinite; }
+    @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: .2; } 50% { opacity: .35; } 100% { transform: translateY(-60px) scale(.5); opacity: 0; } }
+    .hdr-icon { font-size: 28px; margin-bottom: 6px; }
+    .hdr-title { font-family: 'Playfair Display', serif; font-size: 26px; color: #fff; font-weight: 400; }
     .hdr-sub { font-size: 13px; color: #e9d5ff; margin-top: 3px; }
 
-    /* TABS */
-    .tabs {
-      display: flex; background: #fff;
-      border-bottom: 0.5px solid #ede9fe;
-      flex-shrink: 0;
-    }
-    .tab {
-      flex: 1; padding: 14px 0; font-size: 13px;
-      text-align: center; color: #a78bfa;
-      cursor: pointer; border: none; background: none;
-      font-family: inherit; transition: color .15s;
-    }
+    .tabs { display: flex; background: #fff; border-bottom: 0.5px solid #ede9fe; flex-shrink: 0; }
+    .tab { flex: 1; padding: 14px 0; font-size: 13px; text-align: center; color: #a78bfa; cursor: pointer; border: none; background: none; font-family: inherit; transition: color .15s; }
     .tab.on { color: #7c3aed; border-bottom: 2px solid #7c3aed; font-weight: 500; }
 
-    /* PAGES */
-    .page {
-      display: none; padding: 16px;
-      flex-direction: column; gap: 14px;
-      overflow-y: auto;
-      flex: 1;
-      padding-bottom: calc(16px + env(safe-area-inset-bottom));
-    }
+    .page { display: none; padding: 16px; flex-direction: column; gap: 14px; overflow-y: auto; flex: 1; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
     .page.on { display: flex; }
 
-    /* NOTE CARD */
-    .note-card {
-      background: #fff; border-radius: 18px;
-      border: 0.5px solid #ede9fe;
-      padding: 18px 18px 14px;
-      position: relative; overflow: hidden;
-    }
-    .note-card::before {
-      content: ''; position: absolute;
-      top: 0; left: 0; width: 4px; height: 100%;
-      background: linear-gradient(#c084fc, #7c3aed);
-    }
-    .note-label {
-      font-size: 10px; letter-spacing: 1.2px;
-      text-transform: uppercase; color: #a855f7;
-      font-weight: 500; margin-bottom: 8px;
-    }
-    .note-body {
-      font-family: 'Playfair Display', serif;
-      font-size: 16px; color: #3b0764;
-      line-height: 1.7; font-style: italic;
-      min-height: 80px;
-    }
-    .note-attr {
-      font-size: 12px; color: #c084fc;
-      text-align: right; margin-top: 10px;
-    }
-    .note-nav {
-      display: flex; align-items: center;
-      justify-content: space-between; margin-top: 12px;
-    }
-    .note-nav button {
-      background: none; border: 0.5px solid #d8b4fe;
-      border-radius: 20px; padding: 7px 18px;
-      font-size: 12px; color: #7c3aed;
-      cursor: pointer; font-family: inherit;
-      transition: background .15s;
-      -webkit-tap-highlight-color: transparent;
-    }
+    .note-card { background: #fff; border-radius: 18px; border: 0.5px solid #ede9fe; padding: 18px 18px 14px; position: relative; overflow: hidden; }
+    .note-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(#c084fc, #7c3aed); }
+    .note-label { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: #a855f7; font-weight: 500; margin-bottom: 8px; }
+    .note-body { font-family: 'Playfair Display', serif; font-size: 16px; color: #3b0764; line-height: 1.7; font-style: italic; min-height: 80px; }
+    .note-attr { font-size: 12px; color: #c084fc; text-align: right; margin-top: 10px; }
+    .note-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+    .note-nav button { background: none; border: 0.5px solid #d8b4fe; border-radius: 20px; padding: 7px 18px; font-size: 12px; color: #7c3aed; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
     .note-nav button:active { background: #f3e8ff; }
     .note-pos { font-size: 12px; color: #c4b5fd; }
 
-    /* ADD NOTE */
-    .add-toggle {
-      display: flex; align-items: center;
-      justify-content: space-between;
-      background: transparent;
-      border-radius: 16px; border: 0.5px solid #d8b4fe;
-      padding: 12px 16px; cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
+    .add-toggle { display: flex; align-items: center; justify-content: space-between; background: transparent; border-radius: 16px; border: 0.5px solid #d8b4fe; padding: 12px 16px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
     .add-toggle span { font-size: 13px; color: #a855f7; font-weight: 500; }
     .add-toggle .chev { font-size: 16px; color: #c084fc; transition: transform .2s; }
-    .add-form {
-      display: none; background: transparent;
-      border-radius: 0 0 16px 16px;
-      border: 0.5px solid #d8b4fe; border-top: none;
-      padding: 12px 16px 14px;
-      flex-direction: column; gap: 10px;
-    }
+    .add-form { display: none; background: transparent; border-radius: 0 0 16px 16px; border: 0.5px solid #d8b4fe; border-top: none; padding: 12px 16px 14px; flex-direction: column; gap: 10px; }
     .add-form.open { display: flex; }
-    .add-form textarea {
-      width: 100%; border: 0.5px solid #ede9fe;
-      border-radius: 12px; padding: 10px;
-      font-size: 15px; font-family: 'Playfair Display', serif;
-      font-style: italic; color: #3b0764;
-      resize: none; height: 80px;
-      background: rgba(255,255,255,0.7); outline: none;
-    }
+    .add-form textarea { width: 100%; border: 0.5px solid #ede9fe; border-radius: 12px; padding: 10px; font-size: 15px; font-family: 'Playfair Display', serif; font-style: italic; color: #3b0764; resize: none; height: 80px; background: rgba(255,255,255,0.7); outline: none; }
     .add-form textarea:focus { border-color: #c084fc; }
     .add-form-row { display: flex; gap: 8px; }
-    .add-form-row input {
-      flex: 1; border: 0.5px solid #ede9fe;
-      border-radius: 10px; padding: 9px 12px;
-      font-size: 13px; font-family: inherit;
-      color: #4c1d95; background: rgba(255,255,255,0.7); outline: none;
-    }
+    .add-form-row input { flex: 1; border: 0.5px solid #ede9fe; border-radius: 10px; padding: 9px 12px; font-size: 13px; font-family: inherit; color: #4c1d95; background: rgba(255,255,255,0.7); outline: none; }
     .add-form-row input:focus { border-color: #c084fc; }
-    .add-btn {
-      background: linear-gradient(135deg, #a855f7, #7c3aed);
-      color: #fff; border: none; border-radius: 22px;
-      padding: 9px 18px; font-size: 13px;
-      cursor: pointer; font-family: inherit;
-      white-space: nowrap;
-      -webkit-tap-highlight-color: transparent;
-    }
+    .add-btn { background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; border: none; border-radius: 22px; padding: 9px 18px; font-size: 13px; cursor: pointer; font-family: inherit; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
 
-    /* SURPRISE */
-    .surprise-box {
-      background: linear-gradient(135deg, #fdf4ff, #ede9fe);
-      border-radius: 18px; border: 0.5px solid #d8b4fe;
-      padding: 20px; text-align: center;
-    }
+    .surprise-box { background: linear-gradient(135deg, #fdf4ff, #ede9fe); border-radius: 18px; border: 0.5px solid #d8b4fe; padding: 20px; text-align: center; }
     .surprise-box .s-icon { font-size: 30px; margin-bottom: 6px; }
-    .surprise-box h3 {
-      font-family: 'Playfair Display', serif;
-      font-size: 16px; color: #6b21a8; margin-bottom: 4px;
-    }
+    .surprise-box h3 { font-family: 'Playfair Display', serif; font-size: 16px; color: #6b21a8; margin-bottom: 4px; }
     .surprise-box p { font-size: 13px; color: #a78bfa; margin-bottom: 14px; }
-    .rvl-btn {
-      background: linear-gradient(135deg, #a855f7, #7c3aed);
-      color: #fff; border: none; border-radius: 26px;
-      padding: 10px 28px; font-size: 14px;
-      cursor: pointer; font-family: inherit;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .rvl-txt {
-      font-family: 'Playfair Display', serif;
-      font-size: 15px; color: #6b21a8;
-      font-style: italic; line-height: 1.7;
-      display: none; animation: fadeIn .5s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: none; }
-    }
+    .rvl-btn { background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; border: none; border-radius: 26px; padding: 10px 28px; font-size: 14px; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
+    .rvl-txt { font-family: 'Playfair Display', serif; font-size: 15px; color: #6b21a8; font-style: italic; line-height: 1.7; display: none; animation: fadeIn .5s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-    /* US */
-    .us-intro {
-      background: #fff; border-radius: 18px;
-      border: 0.5px solid #ede9fe; padding: 18px;
-    }
-    .us-origin {
-      font-family: 'Playfair Display', serif;
-      font-size: 15px; color: #7c3aed;
-      font-style: italic; text-align: center;
-      line-height: 1.6; margin-bottom: 14px;
-    }
+    .us-intro { background: #fff; border-radius: 18px; border: 0.5px solid #ede9fe; padding: 18px; }
+    .us-origin { font-family: 'Playfair Display', serif; font-size: 15px; color: #7c3aed; font-style: italic; text-align: center; line-height: 1.6; margin-bottom: 14px; }
     .days-hero { text-align: center; padding: 4px 0; }
-    .days-num {
-      font-family: 'Playfair Display', serif;
-      font-size: 52px; color: #7c3aed;
-      font-weight: 600; line-height: 1;
-    }
-    .days-lbl  { font-size: 13px; color: #a78bfa; margin-top: 5px; }
-    .days-note {
-      font-size: 13px; color: #c084fc;
-      font-style: italic; margin-top: 8px;
-      font-family: 'Playfair Display', serif;
-    }
+    .days-num { font-family: 'Playfair Display', serif; font-size: 52px; color: #7c3aed; font-weight: 600; line-height: 1; }
+    .days-lbl { font-size: 13px; color: #a78bfa; margin-top: 5px; }
+    .days-note { font-size: 13px; color: #c084fc; font-style: italic; margin-top: 8px; font-family: 'Playfair Display', serif; }
     .us-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .stat-card {
-      background: #fff; border-radius: 16px;
-      border: 0.5px solid #ede9fe; padding: 16px; text-align: center;
-    }
-    .stat-num {
-      font-family: 'Playfair Display', serif;
-      font-size: 26px; color: #7c3aed; font-weight: 600;
-    }
+    .stat-card { background: #fff; border-radius: 16px; border: 0.5px solid #ede9fe; padding: 16px; text-align: center; }
+    .stat-num { font-family: 'Playfair Display', serif; font-size: 26px; color: #7c3aed; font-weight: 600; }
     .stat-lbl { font-size: 12px; color: #a78bfa; margin-top: 4px; }
-    .reasons-card {
-      background: #fff; border-radius: 18px;
-      border: 0.5px solid #ede9fe; padding: 18px;
-    }
-    .reasons-card h4 {
-      font-size: 10px; letter-spacing: 1.2px;
-      text-transform: uppercase; color: #a855f7;
-      font-weight: 500; margin-bottom: 12px;
-    }
-    .reason {
-      display: flex; align-items: flex-start; gap: 10px;
-      padding: 8px 0; border-bottom: 0.5px solid #f3e8ff;
-      font-size: 14px; color: #4c1d95; line-height: 1.5;
-    }
+    .reasons-card { background: #fff; border-radius: 18px; border: 0.5px solid #ede9fe; padding: 18px; }
+    .reasons-card h4 { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: #a855f7; font-weight: 500; margin-bottom: 12px; }
+    .reason { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid #f3e8ff; font-size: 14px; color: #4c1d95; line-height: 1.5; }
     .reason:last-child { border-bottom: none; }
     .reason span { color: #c084fc; flex-shrink: 0; }
 
-    /* MOMENTS */
-    .moments-header {
-      display: flex; justify-content: space-between; align-items: center;
-    }
+    .moments-header { display: flex; justify-content: space-between; align-items: center; }
     .moments-header h4 { font-size: 14px; font-weight: 500; color: #6b21a8; }
-    .upload-btn {
-      background: linear-gradient(135deg, #c084fc, #7c3aed);
-      color: #fff; border: none; border-radius: 22px;
-      padding: 9px 16px; font-size: 13px;
-      cursor: pointer; display: flex; align-items: center;
-      gap: 6px; font-family: inherit;
-      -webkit-tap-highlight-color: transparent;
-    }
+    .upload-btn { background: linear-gradient(135deg, #c084fc, #7c3aed); color: #fff; border: none; border-radius: 22px; padding: 9px 16px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: inherit; -webkit-tap-highlight-color: transparent; }
     #photoInput { display: none; }
-    .photo-grid {
-      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
-    }
-    .photo-cell {
-      aspect-ratio: 1; border-radius: 12px; overflow: hidden;
-      background: #ede9fe; border: 0.5px solid #d8b4fe; position: relative;
-    }
+    .photo-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .photo-cell { aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #ede9fe; border: 0.5px solid #d8b4fe; position: relative; }
     .photo-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .photo-cell .del-btn {
-      position: absolute; top: 4px; right: 4px;
-      background: rgba(109,40,217,.75); border: none;
-      border-radius: 50%; width: 24px; height: 24px;
-      color: #fff; font-size: 12px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .empty-grid {
-      grid-column: 1 / -1; text-align: center;
-      padding: 40px 0; color: #c4b5fd; font-size: 14px; line-height: 1.6;
-    }
-    .empty-grid i {
-      font-size: 40px; display: block;
-      margin-bottom: 10px; color: #d8b4fe;
-    }
+    .photo-cell .del-btn { position: absolute; top: 4px; right: 4px; background: rgba(109,40,217,.75); border: none; border-radius: 50%; width: 24px; height: 24px; color: #fff; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .empty-grid { grid-column: 1 / -1; text-align: center; padding: 40px 0; color: #c4b5fd; font-size: 14px; line-height: 1.6; }
+    .empty-grid i { font-size: 40px; display: block; margin-bottom: 10px; color: #d8b4fe; }
 
-    /* NAV */
-    .nav {
-      display: flex; justify-content: space-around;
-      padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
-      border-top: 0.5px solid #ede9fe; background: #fff;
-      flex-shrink: 0;
-    }
-    .nav-it {
-      display: flex; flex-direction: column; align-items: center;
-      gap: 3px; cursor: pointer; opacity: .4;
-      transition: opacity .15s; font-size: 11px; color: #7c3aed;
-      border: none; background: none; font-family: inherit;
-      -webkit-tap-highlight-color: transparent;
-    }
+    .nav { display: flex; justify-content: space-around; padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); border-top: 0.5px solid #ede9fe; background: #fff; flex-shrink: 0; }
+    .nav-it { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; opacity: .4; transition: opacity .15s; font-size: 11px; color: #7c3aed; border: none; background: none; font-family: inherit; -webkit-tap-highlight-color: transparent; }
     .nav-it.on { opacity: 1; }
     .nav-it i { font-size: 24px; }
 
-    /* Install banner */
-    .install-banner {
-      display: none; background: linear-gradient(135deg,#fdf4ff,#ede9fe);
-      border: 0.5px solid #d8b4fe; border-radius: 14px;
-      padding: 12px 14px; margin: 0 16px 0;
-      flex-direction: row; align-items: center; gap: 10px;
-    }
+    .install-banner { display: none; background: linear-gradient(135deg,#fdf4ff,#ede9fe); border: 0.5px solid #d8b4fe; border-radius: 14px; padding: 12px 14px; margin: 0 16px; flex-direction: row; align-items: center; gap: 10px; }
     .install-banner.show { display: flex; }
     .install-banner p { font-size: 13px; color: #6b21a8; flex: 1; line-height: 1.4; }
-    .install-banner button {
-      background: linear-gradient(135deg,#a855f7,#7c3aed);
-      color: #fff; border: none; border-radius: 18px;
-      padding: 7px 14px; font-size: 12px; cursor: pointer;
-      font-family: inherit; white-space: nowrap;
-    }
-    .install-banner .dismiss {
-      background: none; border: none; color: #c084fc;
-      font-size: 20px; cursor: pointer; padding: 0 4px; border-radius: 50%;
-    }
+    .install-banner button { background: linear-gradient(135deg,#a855f7,#7c3aed); color: #fff; border: none; border-radius: 18px; padding: 7px 14px; font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+    .install-banner .dismiss { background: none; border: none; color: #c084fc; font-size: 20px; cursor: pointer; padding: 0 4px; }
   </style>
 </head>
 <body>
@@ -342,149 +118,146 @@
     <div class="hdr-hearts" id="hc"></div>
     <div class="hdr-icon">💜</div>
     <div class="hdr-title">Made & Noel</div>
-    <div class="hdr-sub">just for you, my love</div>
+    <div class="hdr-sub">solo para ti, mi amor</div>
   </div>
 
   <div class="install-banner" id="installBanner">
-    <p>Add to your home screen for the full app experience 💜</p>
-    <button onclick="doInstall()">Install</button>
+    <p>Agrega esto a tu pantalla de inicio para la experiencia completa 💜</p>
+    <button onclick="doInstall()">Instalar</button>
     <button class="dismiss" onclick="dismissInstall()">×</button>
   </div>
 
   <div class="tabs">
-    <button class="tab on" onclick="switchTab('notes',this)">💌 Notes</button>
-    <button class="tab" onclick="switchTab('us',this)">💜 Us</button>
-    <button class="tab" onclick="switchTab('moments',this)">📸 Moments</button>
+    <button class="tab on" onclick="switchTab('notes',this)">💌 Notas</button>
+    <button class="tab" onclick="switchTab('us',this)">💜 Nosotros</button>
+    <button class="tab" onclick="switchTab('moments',this)">📸 Momentos</button>
   </div>
 
-  <!-- NOTES -->
+  <!-- NOTAS -->
   <div class="page on" id="page-notes">
     <div class="note-card">
-      <div class="note-label" id="noteLabel">note for you</div>
+      <div class="note-label" id="noteLabel">nota para ti</div>
       <div class="note-body" id="noteText"></div>
       <div class="note-attr" id="noteAttr"></div>
       <div class="note-nav">
-        <button onclick="prevNote()">← prev</button>
+        <button onclick="prevNote()">← anterior</button>
         <span class="note-pos" id="notePos"></span>
-        <button onclick="nextNote()">next →</button>
+        <button onclick="nextNote()">siguiente →</button>
       </div>
     </div>
 
     <div id="addToggle" class="add-toggle" onclick="toggleAdd()">
-      <span><i class="ti ti-plus"></i> &nbsp;add a note</span>
+      <span><i class="ti ti-plus"></i> &nbsp;agregar una nota</span>
       <i class="ti ti-chevron-down chev" id="chevron"></i>
     </div>
     <div class="add-form" id="addForm">
-      <textarea id="newNoteText" placeholder="Write something from your heart…"></textarea>
+      <textarea id="newNoteText" placeholder="Escribe algo desde el corazón…"></textarea>
       <div class="add-form-row">
-        <input id="newNoteAttr" placeholder="— attribution (optional)" />
-        <button class="add-btn" onclick="addNote()">Add 💜</button>
+        <input id="newNoteAttr" placeholder="— atribución (opcional)" />
+        <button class="add-btn" onclick="addNote()">Agregar 💜</button>
       </div>
     </div>
 
     <div class="surprise-box">
       <div class="s-icon">🎁</div>
-      <h3>A little surprise is waiting…</h3>
-      <p>Tap when you're ready, Made</p>
-      <button class="rvl-btn" id="rvlBtn" onclick="revealSurprise()">Open it 💜</button>
+      <h3>Una pequeña sorpresa te espera…</h3>
+      <p>Ábrela cuando estés lista, Made</p>
+      <button class="rvl-btn" id="rvlBtn" onclick="revealSurprise()">Ábrela 💜</button>
       <div class="rvl-txt" id="rvlTxt">
-        "Something magical is coming for us.<br>I can't wait to share it with you.<br>
-        You're the best part of every adventure, and every day with you is my favorite."
+        "Algo mágico nos espera.<br>No puedo esperar para vivirlo contigo.<br>
+        Eres la mejor parte de cada aventura, y cada día a tu lado es mi favorito."
       </div>
     </div>
   </div>
 
-  <!-- US -->
+  <!-- NOSOTROS -->
   <div class="page" id="page-us">
     <div class="us-intro">
-      <div class="us-origin">"The day after you conquered your thesis,<br>you also conquered my heart."</div>
+      <div class="us-origin">"El día después de que conquistaste tu tesis,<br>también conquistaste mi corazón."</div>
       <div class="days-hero">
         <div class="days-num" id="daysNum">—</div>
-        <div class="days-lbl">days together since March 7, 2026</div>
+        <div class="days-lbl">días juntos desde el 7 de marzo, 2026</div>
         <div class="days-note" id="daysNote"></div>
       </div>
     </div>
     <div class="us-stats">
       <div class="stat-card">
         <div class="stat-num" id="weeksNum">—</div>
-        <div class="stat-lbl">weeks of us</div>
+        <div class="stat-lbl">semanas juntos</div>
       </div>
       <div class="stat-card">
         <div class="stat-num">∞</div>
-        <div class="stat-lbl">reasons I love you</div>
+        <div class="stat-lbl">razones por las que te amo</div>
       </div>
       <div class="stat-card">
         <div class="stat-num">1</div>
-        <div class="stat-lbl">person I choose daily</div>
+        <div class="stat-lbl">persona que elijo cada día</div>
       </div>
       <div class="stat-card">
         <div class="stat-num">💜</div>
-        <div class="stat-lbl">always & forever</div>
+        <div class="stat-lbl">siempre y para siempre</div>
       </div>
     </div>
     <div class="reasons-card">
       <h4>Razones por las cuales te amo</h4>
-      <div class="reason"><span>✦</span> La forma en la que me haces reir siempre me hace bien.</div>
-      <div class="reason"><span>✦</span> Tu perserverancia y actitud son una inspiracion.</div>
+      <div class="reason"><span>✦</span> La forma en la que me haces reír siempre me hace bien.</div>
+      <div class="reason"><span>✦</span> Tu perseverancia y actitud son una inspiración.</div>
       <div class="reason"><span>✦</span> Tu amabilidad y forma de querer sin ataduras.</div>
-      <div class="reason"><span>✦</span> Haces que hasta lo mas ordinario sea bonito.</div>
+      <div class="reason"><span>✦</span> Haces que hasta lo más ordinario sea bonito.</div>
       <div class="reason"><span>✦</span> La forma en la que me haces sentir visto y amado.</div>
-      <div class="reason"><span>✦</span> Simplemente siendo tu, no necesito mas.</div>
+      <div class="reason"><span>✦</span> Simplemente siendo tú, no necesito más.</div>
     </div>
   </div>
 
-  <!-- MOMENTS -->
+  <!-- MOMENTOS -->
   <div class="page" id="page-moments">
     <div class="moments-header">
-      <h4>Our photo memories</h4>
+      <h4>Nuestros recuerdos</h4>
       <button class="upload-btn" onclick="document.getElementById('photoInput').click()">
-        <i class="ti ti-upload"></i> Add photo
+        <i class="ti ti-upload"></i> Agregar foto
       </button>
     </div>
     <input type="file" id="photoInput" accept="image/*" multiple onchange="addPhotos(event)" />
     <div class="photo-grid" id="photoGrid">
       <div class="empty-grid">
         <i class="ti ti-photo-heart"></i>
-        Tap "Add photo" to fill this<br>album with your memories 💜
+        Toca "Agregar foto" para llenar<br>este álbum con nuestros recuerdos 💜
       </div>
     </div>
   </div>
 
   <div class="nav">
     <button class="nav-it on" id="nav-notes" onclick="switchTab('notes',null,this)">
-      <i class="ti ti-heart"></i>Notes
+      <i class="ti ti-heart"></i>Notas
     </button>
     <button class="nav-it" id="nav-us" onclick="switchTab('us',null,this)">
-      <i class="ti ti-users"></i>Us
+      <i class="ti ti-users"></i>Nosotros
     </button>
     <button class="nav-it" id="nav-moments" onclick="switchTab('moments',null,this)">
-      <i class="ti ti-camera"></i>Moments
+      <i class="ti ti-camera"></i>Momentos
     </button>
   </div>
 </div>
 
 <script>
-// ── Notes ──────────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'madeNoel_notes';
 const DEFAULT_NOTES = [
-  { text: "Every single day I wake up grateful that I get to call you mine, Made.", attr: "— Noel 💜", label: "note for you" },
-  { text: "You make ordinary days feel like the greatest adventure.", attr: "— Noel 💜", label: "note for you" },
-  { text: "No matter where life takes us, I choose you. Again and again.", attr: "— Noel 💜", label: "note for you" },
-  { text: "Being with you feels like home, wherever we are.", attr: "— Noel 💜", label: "note for you" },
-  { text: "You are my favorite distraction, my favorite everything.", attr: "— Noel 💜", label: "note for you" },
-  { text: "Ever thine, ever mine, ever ours.", attr: "— Ludwig van Beethoven", label: "immortal beloved" },
-  { text: "Since I left you, I have been sad. My happiness is to be near you. Incessantly I live over in my memory your caresses, your tears, your affectionate solicitude.", attr: "— Napoléon Bonaparte, to Joséphine", label: "words across history" },
-  { text: "I love you without knowing how, or when, or from where. I love you directly without problems or pride: I love you like this because I don't know any other way to love.", attr: "— Pablo Neruda", label: "poem for you" },
-  { text: "You are my heart, my life, my one and only thought.", attr: "— Arthur Conan Doyle", label: "words across history" },
-  { text: "Whatever our souls are made of, his and mine are the same.", attr: "— Emily Brontë, Wuthering Heights", label: "words across history" },
-  { text: "I carry your heart with me. I carry it in my heart.", attr: "— E.E. Cummings", label: "poem for you" }
+  { text: "Cada día me despierto agradecido de poder llamarte mía, Made.", attr: "— Noel 💜", label: "nota para ti" },
+  { text: "Haces que los días ordinarios se sientan como la más grande aventura.", attr: "— Noel 💜", label: "nota para ti" },
+  { text: "Sin importar a dónde nos lleve la vida, te elijo a ti. Una y otra vez.", attr: "— Noel 💜", label: "nota para ti" },
+  { text: "Estar contigo se siente como estar en casa, sin importar dónde estemos.", attr: "— Noel 💜", label: "nota para ti" },
+  { text: "Eres mi distracción favorita, mi absolutamente todo.", attr: "— Noel 💜", label: "nota para ti" },
+  { text: "Ever thine, ever mine, ever ours.", attr: "— Ludwig van Beethoven", label: "amada inmortal" },
+  { text: "Desde que te dejé, estoy triste. Mi felicidad es estar cerca de ti. Sin cesar revivo en mi memoria tus caricias, tus lágrimas, tu afectuosa solicitud.", attr: "— Napoléon Bonaparte, a Joséphine", label: "palabras a través de la historia" },
+  { text: "Te amo sin saber cómo, ni cuándo, ni de dónde. Te amo directamente sin problemas ni orgullo: así te amo porque no sé amar de otra manera.", attr: "— Pablo Neruda", label: "poema para ti" },
+  { text: "Eres mi corazón, mi vida, mi único y exclusivo pensamiento.", attr: "— Arthur Conan Doyle", label: "palabras a través de la historia" },
+  { text: "De lo que estén hechas nuestras almas, la tuya y la mía son iguales.", attr: "— Emily Brontë, Cumbres Borrascosas", label: "palabras a través de la historia" },
+  { text: "Llevo tu corazón conmigo. Lo llevo en mi corazón.", attr: "— E.E. Cummings", label: "poema para ti" }
 ];
 
 function loadNotes() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : DEFAULT_NOTES;
-  } catch(e) { return DEFAULT_NOTES; }
+  try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : DEFAULT_NOTES; }
+  catch(e) { return DEFAULT_NOTES; }
 }
 function saveNotes() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); } catch(e) {}
@@ -509,17 +282,16 @@ function animateNote() {
 }
 function toggleAdd() {
   const form = document.getElementById('addForm');
-  const toggle = document.getElementById('addToggle');
   const chevron = document.getElementById('chevron');
   const open = form.classList.toggle('open');
   chevron.style.transform = open ? 'rotate(180deg)' : 'rotate(0)';
-  toggle.style.borderRadius = open ? '16px 16px 0 0' : '16px';
+  document.getElementById('addToggle').style.borderRadius = open ? '16px 16px 0 0' : '16px';
 }
 function addNote() {
   const txt = document.getElementById('newNoteText').value.trim();
   if (!txt) return;
   const attr = document.getElementById('newNoteAttr').value.trim() || '— Noel 💜';
-  notes.push({ text: txt, attr: attr, label: 'note for you' });
+  notes.push({ text: txt, attr: attr, label: 'nota para ti' });
   saveNotes();
   document.getElementById('newNoteText').value = '';
   document.getElementById('newNoteAttr').value = '';
@@ -532,7 +304,6 @@ function revealSurprise() {
   document.getElementById('rvlTxt').style.display = 'block';
 }
 
-// ── Tabs ───────────────────────────────────────────────────────────────────
 function switchTab(name, tabEl) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
@@ -543,7 +314,6 @@ function switchTab(name, tabEl) {
   else { const map={notes:0,us:1,moments:2}; document.querySelectorAll('.tab')[map[name]].classList.add('on'); }
 }
 
-// ── Photos ─────────────────────────────────────────────────────────────────
 function addPhotos(e) {
   const grid = document.getElementById('photoGrid');
   const empty = grid.querySelector('.empty-grid');
@@ -553,30 +323,36 @@ function addPhotos(e) {
     const cell = document.createElement('div');
     cell.className = 'photo-cell';
     const img = document.createElement('img');
-    img.src = url; img.alt = 'memory';
+    img.src = url; img.alt = 'recuerdo';
     const del = document.createElement('button');
     del.className = 'del-btn';
     del.innerHTML = '<i class="ti ti-x"></i>';
-    del.onclick = () => { cell.remove(); if (!grid.querySelector('.photo-cell')) { const e2=document.createElement('div'); e2.className='empty-grid'; e2.innerHTML='<i class="ti ti-photo-heart"></i>Tap "Add photo" to fill this<br>album with your memories 💜'; grid.appendChild(e2); }};
+    del.onclick = () => {
+      cell.remove();
+      if (!grid.querySelector('.photo-cell')) {
+        const e2 = document.createElement('div');
+        e2.className = 'empty-grid';
+        e2.innerHTML = '<i class="ti ti-photo-heart"></i>Toca "Agregar foto" para llenar<br>este álbum con nuestros recuerdos 💜';
+        grid.appendChild(e2);
+      }
+    };
     cell.appendChild(img); cell.appendChild(del);
     grid.appendChild(cell);
   });
   e.target.value = '';
 }
 
-// ── Days together ──────────────────────────────────────────────────────────
 const start = new Date('2026-03-07');
 const today = new Date();
 const days  = Math.max(0, Math.floor((today - start) / 86400000));
 const weeks = Math.floor(days / 7);
-document.getElementById('daysNum').textContent  = days === 0 ? 'Day 1 💜' : days.toLocaleString();
+document.getElementById('daysNum').textContent  = days === 0 ? 'Día 1 💜' : days.toLocaleString();
 document.getElementById('weeksNum').textContent = weeks;
-if      (days === 0) document.getElementById('daysNote').textContent = 'Today is the beginning of everything.';
-else if (days < 7)  document.getElementById('daysNote').textContent = 'Just ' + days + ' days in, and already everything feels different.';
-else if (days < 30) document.getElementById('daysNote').textContent = 'Every single one of these days has been a gift.';
-else                document.getElementById('daysNote').textContent = days + ' days of choosing each other. Here\'s to every one that follows.';
+if      (days === 0) document.getElementById('daysNote').textContent = 'Hoy empieza todo.';
+else if (days < 7)  document.getElementById('daysNote').textContent = 'Solo ' + days + ' días, y ya todo se siente diferente.';
+else if (days < 30) document.getElementById('daysNote').textContent = 'Cada uno de estos días ha sido un regalo.';
+else                document.getElementById('daysNote').textContent = days + ' días eligiéndonos. Por todos los que vienen.';
 
-// ── Floating hearts ────────────────────────────────────────────────────────
 const hc = document.getElementById('hc');
 ['♥','♡','♥','♡','♥','♡','♥'].forEach((s,i) => {
   const d = document.createElement('div');
@@ -588,7 +364,6 @@ const hc = document.getElementById('hc');
   hc.appendChild(d);
 });
 
-// ── PWA install prompt ─────────────────────────────────────────────────────
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault(); deferredPrompt = e;
@@ -599,15 +374,10 @@ function doInstall() {
   deferredPrompt.prompt();
   deferredPrompt.userChoice.then(() => { deferredPrompt = null; dismissInstall(); });
 }
-function dismissInstall() {
-  document.getElementById('installBanner').classList.remove('show');
-}
+function dismissInstall() { document.getElementById('installBanner').classList.remove('show'); }
 window.addEventListener('appinstalled', () => dismissInstall());
 
-// ── Service Worker ─────────────────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js');
-}
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
 
 renderNote();
 </script>

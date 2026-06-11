@@ -1,7 +1,7 @@
 {
   "name": "Made & Noel",
   "short_name": "Made & Noel",
-  "description": "Remember why we started",
+  "description": "Recuerda por qué empezamos",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#faf5ff",
