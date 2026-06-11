@@ -47,10 +47,14 @@
     .note-label { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: #a855f7; font-weight: 500; margin-bottom: 8px; }
     .note-body { font-family: 'Playfair Display', serif; font-size: 16px; color: #3b0764; line-height: 1.7; font-style: italic; min-height: 80px; }
     .note-attr { font-size: 12px; color: #c084fc; text-align: right; margin-top: 10px; }
-    .note-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+    .note-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; gap: 6px; }
     .note-nav button { background: none; border: 0.5px solid #d8b4fe; border-radius: 20px; padding: 7px 18px; font-size: 12px; color: #7c3aed; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
     .note-nav button:active { background: #f3e8ff; }
+    .note-nav .del-note-btn { border-color: #fca5a5; color: #ef4444; padding: 7px 12px; }
+    .note-nav .del-note-btn:active { background: #fff1f1; }
     .note-pos { font-size: 12px; color: #c4b5fd; }
+    .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: #3b0764; color: #e9d5ff; font-size: 13px; padding: 10px 20px; border-radius: 20px; opacity: 0; transition: opacity .3s, transform .3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     .add-toggle { display: flex; align-items: center; justify-content: space-between; background: transparent; border-radius: 16px; border: 0.5px solid #d8b4fe; padding: 12px 16px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
     .add-toggle span { font-size: 13px; color: #a855f7; font-weight: 500; }
@@ -143,6 +147,7 @@
         <button onclick="prevNote()">← anterior</button>
         <span class="note-pos" id="notePos"></span>
         <button onclick="nextNote()">siguiente →</button>
+        <button class="del-note-btn" onclick="deleteNote()" title="Eliminar nota"><i class="ti ti-trash"></i></button>
       </div>
     </div>
 
@@ -238,6 +243,7 @@
     </button>
   </div>
 </div>
+<div class="toast" id="toast"></div>
 
 <script>
 const STORAGE_KEY = 'madeNoel_notes';
@@ -280,6 +286,20 @@ function animateNote() {
   el.style.transition = 'opacity .25s'; el.style.opacity = '0';
   setTimeout(() => { renderNote(); el.style.opacity = '1'; }, 230);
 }
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+function deleteNote() {
+  if (notes.length === 1) { showToast('No puedes eliminar la última nota 💜'); return; }
+  if (!confirm('¿Eliminar esta nota?')) return;
+  notes.splice(idx, 1);
+  saveNotes();
+  if (idx >= notes.length) idx = notes.length - 1;
+  animateNote();
+  showToast('Nota eliminada');
+}
 function toggleAdd() {
   const form = document.getElementById('addForm');
   const chevron = document.getElementById('chevron');
@@ -298,6 +318,7 @@ function addNote() {
   toggleAdd();
   idx = notes.length - 1;
   animateNote();
+  showToast('Nota agregada 💜');
 }
 function revealSurprise() {
   document.getElementById('rvlBtn').style.display = 'none';
@@ -314,32 +335,82 @@ function switchTab(name, tabEl) {
   else { const map={notes:0,us:1,moments:2}; document.querySelectorAll('.tab')[map[name]].classList.add('on'); }
 }
 
-function addPhotos(e) {
+// ── IndexedDB photo persistence ────────────────────────────────────────────
+const DB_NAME = 'madeNoelPhotos', DB_VER = 1, STORE = 'photos';
+let db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      if (!e.target.result.objectStoreNames.contains(STORE))
+        e.target.result.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(); };
+    req.onerror = () => reject(req.error);
+  });
+}
+function dbSave(blob) {
+  return new Promise((resolve, reject) => {
+    const req = db.transaction(STORE,'readwrite').objectStore(STORE).add({ blob, ts: Date.now() });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror  = () => reject(req.error);
+  });
+}
+function dbDelete(id) {
+  return new Promise((resolve, reject) => {
+    const req = db.transaction(STORE,'readwrite').objectStore(STORE).delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror  = () => reject(req.error);
+  });
+}
+function dbGetAll() {
+  return new Promise((resolve, reject) => {
+    const req = db.transaction(STORE,'readonly').objectStore(STORE).getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror  = () => reject(req.error);
+  });
+}
+
+function addPhotoCell(id, url) {
   const grid = document.getElementById('photoGrid');
   const empty = grid.querySelector('.empty-grid');
   if (empty) empty.remove();
-  Array.from(e.target.files).forEach(file => {
-    const url = URL.createObjectURL(file);
-    const cell = document.createElement('div');
-    cell.className = 'photo-cell';
-    const img = document.createElement('img');
-    img.src = url; img.alt = 'recuerdo';
-    const del = document.createElement('button');
-    del.className = 'del-btn';
-    del.innerHTML = '<i class="ti ti-x"></i>';
-    del.onclick = () => {
-      cell.remove();
-      if (!grid.querySelector('.photo-cell')) {
+  const cell = document.createElement('div');
+  cell.className = 'photo-cell'; cell.dataset.id = id;
+  const img = document.createElement('img');
+  img.src = url; img.alt = 'recuerdo';
+  const del = document.createElement('button');
+  del.className = 'del-btn'; del.innerHTML = '<i class="ti ti-x"></i>';
+  del.onclick = async () => {
+    try {
+      await dbDelete(id); cell.remove();
+      if (!document.getElementById('photoGrid').querySelector('.photo-cell')) {
         const e2 = document.createElement('div');
         e2.className = 'empty-grid';
         e2.innerHTML = '<i class="ti ti-photo-heart"></i>Toca "Agregar foto" para llenar<br>este álbum con nuestros recuerdos 💜';
-        grid.appendChild(e2);
+        document.getElementById('photoGrid').appendChild(e2);
       }
-    };
-    cell.appendChild(img); cell.appendChild(del);
-    grid.appendChild(cell);
-  });
-  e.target.value = '';
+      showToast('Foto eliminada');
+    } catch(e) { showToast('Error al eliminar'); }
+  };
+  cell.appendChild(img); cell.appendChild(del);
+  grid.appendChild(cell);
+}
+
+async function addPhotos(e) {
+  const files = Array.from(e.target.files); e.target.value = '';
+  for (const file of files) {
+    try { const id = await dbSave(file); addPhotoCell(id, URL.createObjectURL(file)); }
+    catch(err) { showToast('Error al guardar foto'); }
+  }
+}
+
+async function loadPhotos() {
+  try {
+    const photos = await dbGetAll();
+    photos.forEach(p => addPhotoCell(p.id, URL.createObjectURL(p.blob)));
+  } catch(e) { console.error('Error cargando fotos', e); }
 }
 
 const start = new Date('2026-03-07');
@@ -380,6 +451,7 @@ window.addEventListener('appinstalled', () => dismissInstall());
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
 
 renderNote();
+openDB().then(() => loadPhotos()).catch(e => console.error('IndexedDB error:', e));
 </script>
 </body>
 </html>
