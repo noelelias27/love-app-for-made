@@ -184,6 +184,7 @@
     .lb-next { right: 12px; }
     .lb-counter { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); color: #d8b4fe; font-size: 13px; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 </head>
 <body>
 
@@ -335,9 +336,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const STORAGE_KEY = 'madeNoel_notes';
-const NOTES_VERSION = 2; // bump this whenever default notes change
-const VERSION_KEY = 'madeNoel_notesVersion';
 const DEFAULT_NOTES = [
   { text: "Cada día me despierto agradecido de poder llamarte mía, Made.", attr: "— Noel 💜", label: "nota para ti" },
   { text: "Haces que los días ordinarios se sientan como la más grande aventura.", attr: "— Noel 💜", label: "nota para ti" },
@@ -352,57 +350,92 @@ const DEFAULT_NOTES = [
   { text: "Llevo tu corazón conmigo. Lo llevo en mi corazón.", attr: "— E.E. Cummings", label: "poema para ti" }
 ];
 
-function loadNotes() {
-  try {
-    const savedVersion = parseInt(localStorage.getItem(VERSION_KEY) || '0');
-    if (savedVersion < NOTES_VERSION) {
-      // Old or missing version — wipe and reload defaults
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.setItem(VERSION_KEY, NOTES_VERSION);
-      return DEFAULT_NOTES;
-    }
-    const s = localStorage.getItem(STORAGE_KEY);
-    return s ? JSON.parse(s) : DEFAULT_NOTES;
-  } catch(e) { return DEFAULT_NOTES; }
-}
-function saveNotes() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-    localStorage.setItem(VERSION_KEY, NOTES_VERSION);
-  } catch(e) {}
-}
-
-let notes = loadNotes();
+let notes = [];
 let idx = 0;
 
+async function loadNotes() {
+  try {
+    const { data, error } = await sb.from('notes').select('id,text,attr,label').order('created_at', { ascending: true });
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      const { error: seedError } = await sb.from('notes').insert(DEFAULT_NOTES);
+      if (seedError) throw seedError;
+      return loadNotes();
+    }
+
+    notes = data;
+    idx = Math.max(0, Math.min(idx, notes.length - 1));
+    renderNote();
+  } catch (e) {
+    console.error('Error cargando notas', e);
+    notes = DEFAULT_NOTES.map(note => ({ ...note, id: null }));
+    idx = 0;
+    renderNote();
+  }
+}
+
 function renderNote() {
-  const n = notes[idx];
-  document.getElementById('noteText').textContent = '\u201c' + n.text + '\u201d';
-  document.getElementById('noteAttr').textContent = n.attr;
-  document.getElementById('noteLabel').textContent = n.label;
+  if (!notes || notes.length === 0) {
+    document.getElementById('noteText').textContent = '';
+    document.getElementById('noteAttr').textContent = '';
+    document.getElementById('noteLabel').textContent = 'nota para ti';
+    document.getElementById('notePos').textContent = '0 / 0';
+    return;
+  }
+
+  const n = notes[idx] || notes[0];
+  document.getElementById('noteText').textContent = '\u201c' + (n.text || '') + '\u201d';
+  document.getElementById('noteAttr').textContent = n.attr || '';
+  document.getElementById('noteLabel').textContent = n.label || 'nota para ti';
   document.getElementById('notePos').textContent = (idx + 1) + ' / ' + notes.length;
 }
-function nextNote() { idx = (idx + 1) % notes.length; animateNote(); }
-function prevNote() { idx = (idx - 1 + notes.length) % notes.length; animateNote(); }
+
+function nextNote() {
+  if (!notes.length) return;
+  idx = (idx + 1) % notes.length;
+  animateNote();
+}
+
+function prevNote() {
+  if (!notes.length) return;
+  idx = (idx - 1 + notes.length) % notes.length;
+  animateNote();
+}
+
 function animateNote() {
   const el = document.getElementById('noteText');
-  el.style.transition = 'opacity .25s'; el.style.opacity = '0';
+  el.style.transition = 'opacity .25s';
+  el.style.opacity = '0';
   setTimeout(() => { renderNote(); el.style.opacity = '1'; }, 230);
 }
+
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
+  t.textContent = msg;
+  t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2200);
 }
-function deleteNote() {
+
+async function deleteNote() {
+  if (!notes.length) { showToast('No hay notas para eliminar'); return; }
   if (notes.length === 1) { showToast('No puedes eliminar la última nota 💜'); return; }
   if (!confirm('¿Eliminar esta nota?')) return;
-  notes.splice(idx, 1);
-  saveNotes();
-  if (idx >= notes.length) idx = notes.length - 1;
-  animateNote();
-  showToast('Nota eliminada');
+
+  const noteId = notes[idx]?.id;
+  if (!noteId) { showToast('Error al eliminar'); return; }
+
+  try {
+    const { error } = await sb.from('notes').delete().eq('id', noteId);
+    if (error) throw error;
+    await loadNotes();
+    showToast('Nota eliminada');
+  } catch (e) {
+    console.error('Error eliminando nota', e);
+    showToast('Error al eliminar');
+  }
 }
+
 function toggleAdd() {
   const form = document.getElementById('addForm');
   const chevron = document.getElementById('chevron');
@@ -410,19 +443,31 @@ function toggleAdd() {
   chevron.style.transform = open ? 'rotate(180deg)' : 'rotate(0)';
   document.getElementById('addToggle').style.borderRadius = open ? '16px 16px 0 0' : '16px';
 }
-function addNote() {
+
+async function addNote() {
   const txt = document.getElementById('newNoteText').value.trim();
   if (!txt) return;
+
   const attr = document.getElementById('newNoteAttr').value.trim() || '— Noel 💜';
-  notes.push({ text: txt, attr: attr, label: 'nota para ti' });
-  saveNotes();
-  document.getElementById('newNoteText').value = '';
-  document.getElementById('newNoteAttr').value = '';
-  toggleAdd();
-  idx = notes.length - 1;
-  animateNote();
-  showToast('Nota agregada 💜');
+  const label = 'nota para ti';
+
+  try {
+    const { error } = await sb.from('notes').insert({ text: txt, attr, label });
+    if (error) throw error;
+
+    document.getElementById('newNoteText').value = '';
+    document.getElementById('newNoteAttr').value = '';
+    toggleAdd();
+    await loadNotes();
+    idx = notes.length - 1;
+    renderNote();
+    showToast('Nota agregada 💜');
+  } catch (e) {
+    console.error('Error agregando nota', e);
+    showToast('Error al agregar nota');
+  }
 }
+
 function revealSurprise() {
   document.getElementById('rvlBtn').style.display = 'none';
   document.getElementById('rvlTxt').style.display = 'block';
@@ -438,83 +483,146 @@ function switchTab(name, tabEl) {
   else { const map={notes:0,us:1,moments:2}; document.querySelectorAll('.tab')[map[name]].classList.add('on'); }
 }
 
-// ── IndexedDB photo persistence ────────────────────────────────────────────
-const DB_NAME = 'madeNoelPhotos', DB_VER = 1, STORE = 'photos';
-let db = null;
+const SUPABASE_URL = 'REPLACE_ME';
+const SUPABASE_ANON_KEY = 'REPLACE_ME';
 
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VER);
-    req.onupgradeneeded = e => {
-      if (!e.target.result.objectStoreNames.contains(STORE))
-        e.target.result.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
-    };
-    req.onsuccess = e => { db = e.target.result; resolve(); };
-    req.onerror = () => reject(req.error);
-  });
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const photoGrid = document.getElementById('photoGrid');
+let photoChannel = null;
+let noteChannel = null;
+
+function extractStoragePath(url) {
+  try {
+    const parsed = new URL(url);
+    const segments = parsed.pathname.split('/');
+    const bucketIndex = segments.indexOf('photos');
+    if (bucketIndex >= 0) return segments.slice(bucketIndex + 1).join('/');
+    return segments.slice(-1)[0];
+  } catch (e) {
+    return null;
+  }
 }
-function dbSave(blob) {
-  return new Promise((resolve, reject) => {
-    const req = db.transaction(STORE,'readwrite').objectStore(STORE).add({ blob, ts: Date.now() });
-    req.onsuccess = () => resolve(req.result);
-    req.onerror  = () => reject(req.error);
-  });
-}
-function dbDelete(id) {
-  return new Promise((resolve, reject) => {
-    const req = db.transaction(STORE,'readwrite').objectStore(STORE).delete(id);
-    req.onsuccess = () => resolve();
-    req.onerror  = () => reject(req.error);
-  });
-}
-function dbGetAll() {
-  return new Promise((resolve, reject) => {
-    const req = db.transaction(STORE,'readonly').objectStore(STORE).getAll();
-    req.onsuccess = () => resolve(req.result);
-    req.onerror  = () => reject(req.error);
-  });
+
+function renderEmptyGrid() {
+  const empty = document.createElement('div');
+  empty.className = 'empty-grid';
+  empty.innerHTML = '<i class="ti ti-photo-heart"></i>Toca "Agregar foto" para llenar<br>este álbum con nuestros recuerdos 💜';
+  photoGrid.appendChild(empty);
 }
 
 function addPhotoCell(id, url) {
-  const grid = document.getElementById('photoGrid');
-  const empty = grid.querySelector('.empty-grid');
+  const empty = photoGrid.querySelector('.empty-grid');
   if (empty) empty.remove();
+
   const cell = document.createElement('div');
-  cell.className = 'photo-cell'; cell.dataset.id = id; cell.dataset.url = url;
+  cell.className = 'photo-cell';
+  cell.dataset.id = id;
+
   const img = document.createElement('img');
-  img.src = url; img.alt = 'recuerdo'; img.style.cursor = 'pointer';
+  img.src = url;
+  img.alt = 'recuerdo';
+  img.style.cursor = 'pointer';
   img.onclick = () => openLightbox(url);
+
   const del = document.createElement('button');
-  del.className = 'del-btn'; del.innerHTML = '<i class="ti ti-x"></i>';
+  del.className = 'del-btn';
+  del.innerHTML = '<i class="ti ti-x"></i>';
   del.onclick = async () => {
-    try {
-      await dbDelete(id); cell.remove();
-      if (!document.getElementById('photoGrid').querySelector('.photo-cell')) {
-        const e2 = document.createElement('div');
-        e2.className = 'empty-grid';
-        e2.innerHTML = '<i class="ti ti-photo-heart"></i>Toca "Agregar foto" para llenar<br>este álbum con nuestros recuerdos 💜';
-        document.getElementById('photoGrid').appendChild(e2);
-      }
-      showToast('Foto eliminada');
-    } catch(e) { showToast('Error al eliminar'); }
+    await deletePhoto(id, url, cell);
   };
-  cell.appendChild(img); cell.appendChild(del);
-  grid.appendChild(cell);
+
+  cell.appendChild(img);
+  cell.appendChild(del);
+  photoGrid.appendChild(cell);
+}
+
+async function deletePhoto(id, url, cell) {
+  try {
+    const storagePath = extractStoragePath(url);
+    if (storagePath) {
+      const { error: removeError } = await sb.storage.from('photos').remove([storagePath]);
+      if (removeError) throw removeError;
+    }
+
+    const { error: deleteError } = await sb.from('photos').delete().eq('id', id);
+    if (deleteError) throw deleteError;
+
+    cell.remove();
+    if (!photoGrid.querySelector('.photo-cell')) renderEmptyGrid();
+    showToast('Foto eliminada');
+  } catch (e) {
+    console.error('Error eliminando foto', e);
+    showToast('Error al eliminar');
+  }
 }
 
 async function addPhotos(e) {
-  const files = Array.from(e.target.files); e.target.value = '';
+  const files = Array.from(e.target.files);
+  e.target.value = '';
   for (const file of files) {
-    try { const id = await dbSave(file); addPhotoCell(id, URL.createObjectURL(file)); }
-    catch(err) { showToast('Error al guardar foto'); }
+    try {
+      const filePath = `${crypto.randomUUID()}-${file.name}`;
+      const { error: uploadError } = await sb.storage.from('photos').upload(filePath, file);
+      if (uploadError) throw uploadError;
+
+      const { data: publicData, error: publicError } = sb.storage.from('photos').getPublicUrl(filePath);
+      if (publicError) throw publicError;
+      const publicUrl = publicData?.publicUrl;
+      if (!publicUrl) throw new Error('No public URL');
+
+      const { data: insertData, error: insertError } = await sb.from('photos').insert({ image_url: publicUrl }).select('id').single();
+      if (insertError) throw insertError;
+
+      addPhotoCell(insertData.id, publicUrl);
+    } catch (err) {
+      console.error('Error al subir foto', err);
+      showToast('Error al subir foto');
+    }
   }
 }
 
 async function loadPhotos() {
   try {
-    const photos = await dbGetAll();
-    photos.forEach(p => addPhotoCell(p.id, URL.createObjectURL(p.blob)));
-  } catch(e) { console.error('Error cargando fotos', e); }
+    photoGrid.innerHTML = '';
+    const { data, error } = await sb.from('photos').select('id,image_url').order('created_at', { ascending: true });
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      renderEmptyGrid();
+      return;
+    }
+    data.forEach(photo => addPhotoCell(photo.id, photo.image_url));
+  } catch (e) {
+    console.error('Error cargando fotos', e);
+    photoGrid.innerHTML = '';
+    renderEmptyGrid();
+  }
+}
+
+function handlePhotoChange(payload) {
+  if (payload.eventType === 'INSERT' || payload.eventType === 'DELETE') {
+    loadPhotos();
+  }
+}
+
+function handleNoteChange(payload) {
+  if (payload.eventType === 'INSERT' || payload.eventType === 'DELETE') {
+    loadNotes();
+  }
+}
+
+function setupRealtime() {
+  try {
+    photoChannel = sb.channel('photos-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'photos' }, handlePhotoChange)
+      .subscribe();
+
+    noteChannel = sb.channel('notes-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notes' }, handleNoteChange)
+      .subscribe();
+  } catch (e) {
+    console.error('Realtime subscription error', e);
+  }
 }
 
 const start = new Date('2026-03-07');
@@ -623,7 +731,9 @@ document.addEventListener('keydown', e => {
 });
 
 renderNote();
-openDB().then(() => loadPhotos()).catch(e => console.error('IndexedDB error:', e));
+loadNotes();
+loadPhotos();
+setupRealtime();
 </script>
 </body>
 </html>
