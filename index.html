@@ -336,6 +336,8 @@
 
 <script>
 const STORAGE_KEY = 'madeNoel_notes';
+const NOTES_VERSION = 2; // bump this whenever default notes change
+const VERSION_KEY = 'madeNoel_notesVersion';
 const DEFAULT_NOTES = [
   { text: "Cada día me despierto agradecido de poder llamarte mía, Made.", attr: "— Noel 💜", label: "nota para ti" },
   { text: "Haces que los días ordinarios se sientan como la más grande aventura.", attr: "— Noel 💜", label: "nota para ti" },
@@ -351,11 +353,23 @@ const DEFAULT_NOTES = [
 ];
 
 function loadNotes() {
-  try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : DEFAULT_NOTES; }
-  catch(e) { return DEFAULT_NOTES; }
+  try {
+    const savedVersion = parseInt(localStorage.getItem(VERSION_KEY) || '0');
+    if (savedVersion < NOTES_VERSION) {
+      // Old or missing version — wipe and reload defaults
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.setItem(VERSION_KEY, NOTES_VERSION);
+      return DEFAULT_NOTES;
+    }
+    const s = localStorage.getItem(STORAGE_KEY);
+    return s ? JSON.parse(s) : DEFAULT_NOTES;
+  } catch(e) { return DEFAULT_NOTES; }
 }
 function saveNotes() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); } catch(e) {}
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+    localStorage.setItem(VERSION_KEY, NOTES_VERSION);
+  } catch(e) {}
 }
 
 let notes = loadNotes();
