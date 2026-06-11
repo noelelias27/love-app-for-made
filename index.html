@@ -113,9 +113,98 @@
     .install-banner p { font-size: 13px; color: #6b21a8; flex: 1; line-height: 1.4; }
     .install-banner button { background: linear-gradient(135deg,#a855f7,#7c3aed); color: #fff; border: none; border-radius: 18px; padding: 7px 14px; font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap; }
     .install-banner .dismiss { background: none; border: none; color: #c084fc; font-size: 20px; cursor: pointer; padding: 0 4px; }
+
+    /* ── SPLASH SCREEN ─────────────────────────────────────────────────── */
+    .splash {
+      position: fixed; inset: 0; z-index: 9999;
+      background: linear-gradient(160deg, #fdf2f8 0%, #f3e8ff 40%, #ede9fe 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .splash.hide { opacity: 0; transform: scale(1.04); pointer-events: none; }
+    .splash-hearts { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    .sh {
+      position: absolute; font-size: 22px;
+      animation: splashFloat linear infinite;
+      opacity: 0;
+    }
+    @keyframes splashFloat {
+      0%   { transform: translateY(100vh) rotate(0deg) scale(0.6); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { transform: translateY(-12vh) rotate(20deg) scale(1); opacity: 0; }
+    }
+    .splash-logo { font-size: 56px; margin-bottom: 14px; animation: pulse 1.8s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+    .splash-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px; color: #6b21a8; font-weight: 400;
+      letter-spacing: 0.5px; margin-bottom: 8px;
+    }
+    .splash-sub { font-size: 15px; color: #a855f7; font-style: italic; font-family: 'Playfair Display', serif; }
+    .splash-tap { font-size: 13px; color: #c084fc; margin-top: 48px; animation: blink 2s ease-in-out infinite; }
+    @keyframes blink { 0%,100% { opacity: .4; } 50% { opacity: 1; } }
+
+    /* ── LIGHTBOX ──────────────────────────────────────────────────────── */
+    .lightbox {
+      position: fixed; inset: 0; z-index: 8888;
+      background: rgba(15, 0, 30, 0.96);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s ease;
+    }
+    .lightbox.open { opacity: 1; pointer-events: all; }
+    .lightbox img {
+      max-width: 96vw; max-height: 88vh;
+      border-radius: 14px;
+      object-fit: contain;
+      box-shadow: 0 8px 48px rgba(124,58,237,.4);
+      transform: scale(0.92);
+      transition: transform .25s ease;
+    }
+    .lightbox.open img { transform: scale(1); }
+    .lb-close {
+      position: absolute; top: 18px; right: 18px;
+      background: rgba(124,58,237,.7); border: none;
+      border-radius: 50%; width: 38px; height: 38px;
+      color: #fff; font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lb-prev, .lb-next {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(124,58,237,.5); border: none;
+      border-radius: 50%; width: 40px; height: 40px;
+      color: #fff; font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lb-prev { left: 12px; }
+    .lb-next { right: 12px; }
+    .lb-counter { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); color: #d8b4fe; font-size: 13px; }
   </style>
 </head>
 <body>
+
+<!-- SPLASH -->
+<div class="splash" id="splash" onclick="dismissSplash()">
+  <div class="splash-hearts" id="splashHearts"></div>
+  <div class="splash-logo">💜</div>
+  <div class="splash-title">Made & Noel</div>
+  <div class="splash-sub">solo para ti, mi amor</div>
+  <div class="splash-tap">toca para continuar</div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="lbBgClick(event)">
+  <button class="lb-close" onclick="closeLightbox()"><i class="ti ti-x"></i></button>
+  <button class="lb-prev" onclick="lbNav(-1,event)"><i class="ti ti-chevron-left"></i></button>
+  <img id="lbImg" src="" alt="foto" />
+  <button class="lb-next" onclick="lbNav(1,event)"><i class="ti ti-chevron-right"></i></button>
+  <div class="lb-counter" id="lbCounter"></div>
+</div>
+
 <div class="app">
 
   <div class="hdr">
@@ -377,9 +466,10 @@ function addPhotoCell(id, url) {
   const empty = grid.querySelector('.empty-grid');
   if (empty) empty.remove();
   const cell = document.createElement('div');
-  cell.className = 'photo-cell'; cell.dataset.id = id;
+  cell.className = 'photo-cell'; cell.dataset.id = id; cell.dataset.url = url;
   const img = document.createElement('img');
-  img.src = url; img.alt = 'recuerdo';
+  img.src = url; img.alt = 'recuerdo'; img.style.cursor = 'pointer';
+  img.onclick = () => openLightbox(url);
   const del = document.createElement('button');
   del.className = 'del-btn'; del.innerHTML = '<i class="ti ti-x"></i>';
   del.onclick = async () => {
@@ -449,6 +539,74 @@ function dismissInstall() { document.getElementById('installBanner').classList.r
 window.addEventListener('appinstalled', () => dismissInstall());
 
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
+
+// ── Splash screen ──────────────────────────────────────────────────────────
+(function() {
+  const container = document.getElementById('splashHearts');
+  const colors = ['💗','💜','🩷','💜','💗','💜','🩷','💗','💜','💗','💜','🩷','💜','💗'];
+  colors.forEach((h, i) => {
+    const el = document.createElement('div');
+    el.className = 'sh'; el.textContent = h;
+    el.style.left = (3 + (i * 7) % 94) + '%';
+    el.style.animationDuration = (5 + (i * 1.3) % 6) + 's';
+    el.style.animationDelay = (i * 0.35) + 's';
+    el.style.fontSize = (16 + (i * 5) % 22) + 'px';
+    container.appendChild(el);
+  });
+})();
+
+function dismissSplash() {
+  const s = document.getElementById('splash');
+  s.classList.add('hide');
+  setTimeout(() => s.remove(), 750);
+}
+setTimeout(dismissSplash, 3200); // auto-dismiss after 3.2s
+
+// ── Lightbox ───────────────────────────────────────────────────────────────
+let lbUrls = [], lbCurrent = 0;
+
+function openLightbox(url) {
+  // Collect all current photo URLs from grid
+  lbUrls = Array.from(document.querySelectorAll('.photo-cell img')).map(i => i.src);
+  lbCurrent = lbUrls.indexOf(url);
+  if (lbCurrent === -1) lbCurrent = 0;
+  renderLightbox();
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderLightbox() {
+  document.getElementById('lbImg').src = lbUrls[lbCurrent];
+  document.getElementById('lbCounter').textContent = lbUrls.length > 1 ? (lbCurrent + 1) + ' / ' + lbUrls.length : '';
+  // Show/hide arrows
+  const lb = document.getElementById('lightbox');
+  lb.querySelector('.lb-prev').style.display = lbUrls.length > 1 ? '' : 'none';
+  lb.querySelector('.lb-next').style.display = lbUrls.length > 1 ? '' : 'none';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function lbNav(dir, e) {
+  e.stopPropagation();
+  lbCurrent = (lbCurrent + dir + lbUrls.length) % lbUrls.length;
+  const img = document.getElementById('lbImg');
+  img.style.opacity = '0';
+  setTimeout(() => { renderLightbox(); img.style.transition = 'opacity .2s'; img.style.opacity = '1'; }, 150);
+}
+
+function lbBgClick(e) {
+  if (e.target === document.getElementById('lightbox')) closeLightbox();
+}
+
+// Close lightbox on Escape key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') { if (document.getElementById('lightbox').classList.contains('open')) lbNav(-1, e); }
+  if (e.key === 'ArrowRight') { if (document.getElementById('lightbox').classList.contains('open')) lbNav(1, e); }
+});
 
 renderNote();
 openDB().then(() => loadPhotos()).catch(e => console.error('IndexedDB error:', e));
