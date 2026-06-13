@@ -184,7 +184,6 @@
     .lb-next { right: 12px; }
     .lb-counter { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); color: #d8b4fe; font-size: 13px; }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 </head>
 <body>
 
@@ -335,7 +334,13 @@
 </div>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// ── Supabase ───────────────────────────────────────────────────────────────
+const SUPA_URL = 'https://imryixjhyaztwgpwwdnt.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltcnlpeGpoeWF6dHdncHd3ZG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNDk0MzIsImV4cCI6MjA5NjcyNTQzMn0.X5buAp74Kj1MPCX12DPWPQh9vz28qIEjc9MzaGx-XbI';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
 const DEFAULT_NOTES = [
   { text: "Cada día me despierto agradecido de poder llamarte mía, Made.", attr: "— Noel 💜", label: "nota para ti" },
   { text: "Haces que los días ordinarios se sientan como la más grande aventura.", attr: "— Noel 💜", label: "nota para ti" },
@@ -350,90 +355,42 @@ const DEFAULT_NOTES = [
   { text: "Llevo tu corazón conmigo. Lo llevo en mi corazón.", attr: "— E.E. Cummings", label: "poema para ti" }
 ];
 
+// ── Notes state ────────────────────────────────────────────────────────────
 let notes = [];
 let idx = 0;
 
-async function loadNotes() {
-  try {
-    const { data, error } = await sb.from('notes').select('id,text,attr,label').order('created_at', { ascending: true });
-    if (error) throw error;
-
-    if (!data || data.length === 0) {
-      const { error: seedError } = await sb.from('notes').insert(DEFAULT_NOTES);
-      if (seedError) throw seedError;
-      return loadNotes();
-    }
-
-    notes = data;
-    idx = Math.max(0, Math.min(idx, notes.length - 1));
-    renderNote();
-  } catch (e) {
-    console.error('Error cargando notas', e);
-    notes = DEFAULT_NOTES.map(note => ({ ...note, id: null }));
-    idx = 0;
-    renderNote();
-  }
-}
-
-function renderNote() {
-  if (!notes || notes.length === 0) {
-    document.getElementById('noteText').textContent = '';
-    document.getElementById('noteAttr').textContent = '';
-    document.getElementById('noteLabel').textContent = 'nota para ti';
-    document.getElementById('notePos').textContent = '0 / 0';
-    return;
-  }
-
-  const n = notes[idx] || notes[0];
-  document.getElementById('noteText').textContent = '\u201c' + (n.text || '') + '\u201d';
-  document.getElementById('noteAttr').textContent = n.attr || '';
-  document.getElementById('noteLabel').textContent = n.label || 'nota para ti';
-  document.getElementById('notePos').textContent = (idx + 1) + ' / ' + notes.length;
-}
-
-function nextNote() {
-  if (!notes.length) return;
-  idx = (idx + 1) % notes.length;
-  animateNote();
-}
-
-function prevNote() {
-  if (!notes.length) return;
-  idx = (idx - 1 + notes.length) % notes.length;
-  animateNote();
-}
-
-function animateNote() {
-  const el = document.getElementById('noteText');
-  el.style.transition = 'opacity .25s';
-  el.style.opacity = '0';
-  setTimeout(() => { renderNote(); el.style.opacity = '1'; }, 230);
-}
-
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2200);
 }
 
+function renderNote() {
+  if (!notes.length) return;
+  const n = notes[idx];
+  document.getElementById('noteText').textContent = '\u201c' + n.text + '\u201d';
+  document.getElementById('noteAttr').textContent = n.attr;
+  document.getElementById('noteLabel').textContent = n.label;
+  document.getElementById('notePos').textContent = (idx + 1) + ' / ' + notes.length;
+}
+function nextNote() { idx = (idx + 1) % notes.length; animateNote(); }
+function prevNote() { idx = (idx - 1 + notes.length) % notes.length; animateNote(); }
+function animateNote() {
+  const el = document.getElementById('noteText');
+  el.style.transition = 'opacity .25s'; el.style.opacity = '0';
+  setTimeout(() => { renderNote(); el.style.opacity = '1'; }, 230);
+}
+
 async function deleteNote() {
-  if (!notes.length) { showToast('No hay notas para eliminar'); return; }
   if (notes.length === 1) { showToast('No puedes eliminar la última nota 💜'); return; }
   if (!confirm('¿Eliminar esta nota?')) return;
-
-  const noteId = notes[idx]?.id;
-  if (!noteId) { showToast('Error al eliminar'); return; }
-
-  try {
-    const { error } = await sb.from('notes').delete().eq('id', noteId);
-    if (error) throw error;
-    await loadNotes();
-    showToast('Nota eliminada');
-  } catch (e) {
-    console.error('Error eliminando nota', e);
-    showToast('Error al eliminar');
-  }
+  const note = notes[idx];
+  const { error } = await sb.from('notes').delete().eq('id', note.id);
+  if (error) { showToast('Error al eliminar'); return; }
+  notes.splice(idx, 1);
+  if (idx >= notes.length) idx = notes.length - 1;
+  animateNote();
+  showToast('Nota eliminada');
 }
 
 function toggleAdd() {
@@ -447,25 +404,17 @@ function toggleAdd() {
 async function addNote() {
   const txt = document.getElementById('newNoteText').value.trim();
   if (!txt) return;
-
   const attr = document.getElementById('newNoteAttr').value.trim() || '— Noel 💜';
-  const label = 'nota para ti';
-
-  try {
-    const { error } = await sb.from('notes').insert({ text: txt, attr, label });
-    if (error) throw error;
-
-    document.getElementById('newNoteText').value = '';
-    document.getElementById('newNoteAttr').value = '';
-    toggleAdd();
-    await loadNotes();
-    idx = notes.length - 1;
-    renderNote();
-    showToast('Nota agregada 💜');
-  } catch (e) {
-    console.error('Error agregando nota', e);
-    showToast('Error al agregar nota');
-  }
+  const newNote = { text: txt, attr, label: 'nota para ti', position: notes.length };
+  const { data, error } = await sb.from('notes').insert(newNote).select().single();
+  if (error) { showToast('Error al guardar nota'); return; }
+  notes.push(data);
+  document.getElementById('newNoteText').value = '';
+  document.getElementById('newNoteAttr').value = '';
+  toggleAdd();
+  idx = notes.length - 1;
+  animateNote();
+  showToast('Nota agregada 💜');
 }
 
 function revealSurprise() {
@@ -473,6 +422,21 @@ function revealSurprise() {
   document.getElementById('rvlTxt').style.display = 'block';
 }
 
+async function loadNotes() {
+  const { data, error } = await sb.from('notes').select('*').order('position', { ascending: true });
+  if (error || !data || data.length === 0) {
+    // First run — seed default notes
+    const toInsert = DEFAULT_NOTES.map((n, i) => ({ ...n, position: i }));
+    const { data: inserted } = await sb.from('notes').insert(toInsert).select();
+    notes = inserted || DEFAULT_NOTES;
+  } else {
+    notes = data;
+  }
+  idx = 0;
+  renderNote();
+}
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
 function switchTab(name, tabEl) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
@@ -483,148 +447,58 @@ function switchTab(name, tabEl) {
   else { const map={notes:0,us:1,moments:2}; document.querySelectorAll('.tab')[map[name]].classList.add('on'); }
 }
 
-const SUPABASE_URL = 'REPLACE_ME';
-const SUPABASE_ANON_KEY = 'REPLACE_ME';
+// ── Photos (Supabase Storage) ──────────────────────────────────────────────
+const BUCKET = 'photos';
 
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const photoGrid = document.getElementById('photoGrid');
-let photoChannel = null;
-let noteChannel = null;
-
-function extractStoragePath(url) {
-  try {
-    const parsed = new URL(url);
-    const segments = parsed.pathname.split('/');
-    const bucketIndex = segments.indexOf('photos');
-    if (bucketIndex >= 0) return segments.slice(bucketIndex + 1).join('/');
-    return segments.slice(-1)[0];
-  } catch (e) {
-    return null;
-  }
-}
-
-function renderEmptyGrid() {
-  const empty = document.createElement('div');
-  empty.className = 'empty-grid';
-  empty.innerHTML = '<i class="ti ti-photo-heart"></i>Toca "Agregar foto" para llenar<br>este álbum con nuestros recuerdos 💜';
-  photoGrid.appendChild(empty);
-}
-
-function addPhotoCell(id, url) {
-  const empty = photoGrid.querySelector('.empty-grid');
+function addPhotoCell(path, url) {
+  const grid = document.getElementById('photoGrid');
+  const empty = grid.querySelector('.empty-grid');
   if (empty) empty.remove();
-
   const cell = document.createElement('div');
-  cell.className = 'photo-cell';
-  cell.dataset.id = id;
-
+  cell.className = 'photo-cell'; cell.dataset.path = path;
   const img = document.createElement('img');
-  img.src = url;
-  img.alt = 'recuerdo';
-  img.style.cursor = 'pointer';
+  img.src = url; img.alt = 'recuerdo'; img.style.cursor = 'pointer';
   img.onclick = () => openLightbox(url);
-
   const del = document.createElement('button');
-  del.className = 'del-btn';
-  del.innerHTML = '<i class="ti ti-x"></i>';
+  del.className = 'del-btn'; del.innerHTML = '<i class="ti ti-x"></i>';
   del.onclick = async () => {
-    await deletePhoto(id, url, cell);
-  };
-
-  cell.appendChild(img);
-  cell.appendChild(del);
-  photoGrid.appendChild(cell);
-}
-
-async function deletePhoto(id, url, cell) {
-  try {
-    const storagePath = extractStoragePath(url);
-    if (storagePath) {
-      const { error: removeError } = await sb.storage.from('photos').remove([storagePath]);
-      if (removeError) throw removeError;
-    }
-
-    const { error: deleteError } = await sb.from('photos').delete().eq('id', id);
-    if (deleteError) throw deleteError;
-
+    const { error } = await sb.storage.from(BUCKET).remove([path]);
+    if (error) { showToast('Error al eliminar'); return; }
     cell.remove();
-    if (!photoGrid.querySelector('.photo-cell')) renderEmptyGrid();
+    if (!document.getElementById('photoGrid').querySelector('.photo-cell')) {
+      const e2 = document.createElement('div');
+      e2.className = 'empty-grid';
+      e2.innerHTML = '<i class="ti ti-photo-heart"></i>Toca "Agregar foto" para llenar<br>este álbum con nuestros recuerdos 💜';
+      document.getElementById('photoGrid').appendChild(e2);
+    }
     showToast('Foto eliminada');
-  } catch (e) {
-    console.error('Error eliminando foto', e);
-    showToast('Error al eliminar');
-  }
+  };
+  cell.appendChild(img); cell.appendChild(del);
+  grid.appendChild(cell);
 }
 
 async function addPhotos(e) {
-  const files = Array.from(e.target.files);
-  e.target.value = '';
+  const files = Array.from(e.target.files); e.target.value = '';
   for (const file of files) {
-    try {
-      const filePath = `${crypto.randomUUID()}-${file.name}`;
-      const { error: uploadError } = await sb.storage.from('photos').upload(filePath, file);
-      if (uploadError) throw uploadError;
-
-      const { data: publicData, error: publicError } = sb.storage.from('photos').getPublicUrl(filePath);
-      if (publicError) throw publicError;
-      const publicUrl = publicData?.publicUrl;
-      if (!publicUrl) throw new Error('No public URL');
-
-      const { data: insertData, error: insertError } = await sb.from('photos').insert({ image_url: publicUrl }).select('id').single();
-      if (insertError) throw insertError;
-
-      addPhotoCell(insertData.id, publicUrl);
-    } catch (err) {
-      console.error('Error al subir foto', err);
-      showToast('Error al subir foto');
-    }
+    const path = `photo_${Date.now()}_${Math.random().toString(36).slice(2)}.${file.name.split('.').pop()}`;
+    const { error } = await sb.storage.from(BUCKET).upload(path, file, { cacheControl: '3600', upsert: false });
+    if (error) { showToast('Error al subir foto'); continue; }
+    const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
+    addPhotoCell(path, data.publicUrl);
   }
 }
 
 async function loadPhotos() {
-  try {
-    photoGrid.innerHTML = '';
-    const { data, error } = await sb.from('photos').select('id,image_url').order('created_at', { ascending: true });
-    if (error) throw error;
-    if (!data || data.length === 0) {
-      renderEmptyGrid();
-      return;
-    }
-    data.forEach(photo => addPhotoCell(photo.id, photo.image_url));
-  } catch (e) {
-    console.error('Error cargando fotos', e);
-    photoGrid.innerHTML = '';
-    renderEmptyGrid();
+  const { data, error } = await sb.storage.from(BUCKET).list('', { sortBy: { column: 'created_at', order: 'asc' } });
+  if (error || !data) return;
+  const files = data.filter(f => f.name !== '.emptyFolderPlaceholder');
+  for (const f of files) {
+    const { data: urlData } = sb.storage.from(BUCKET).getPublicUrl(f.name);
+    addPhotoCell(f.name, urlData.publicUrl);
   }
 }
 
-function handlePhotoChange(payload) {
-  if (payload.eventType === 'INSERT' || payload.eventType === 'DELETE') {
-    loadPhotos();
-  }
-}
-
-function handleNoteChange(payload) {
-  if (payload.eventType === 'INSERT' || payload.eventType === 'DELETE') {
-    loadNotes();
-  }
-}
-
-function setupRealtime() {
-  try {
-    photoChannel = sb.channel('photos-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'photos' }, handlePhotoChange)
-      .subscribe();
-
-    noteChannel = sb.channel('notes-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'notes' }, handleNoteChange)
-      .subscribe();
-  } catch (e) {
-    console.error('Realtime subscription error', e);
-  }
-}
-
+// ── Days together ──────────────────────────────────────────────────────────
 const start = new Date('2026-03-07');
 const today = new Date();
 const days  = Math.max(0, Math.floor((today - start) / 86400000));
@@ -636,6 +510,7 @@ else if (days < 7)  document.getElementById('daysNote').textContent = 'Solo ' + 
 else if (days < 30) document.getElementById('daysNote').textContent = 'Cada uno de estos días ha sido un regalo.';
 else                document.getElementById('daysNote').textContent = days + ' días eligiéndonos. Por todos los que vienen.';
 
+// ── Floating hearts ────────────────────────────────────────────────────────
 const hc = document.getElementById('hc');
 ['♥','♡','♥','♡','♥','♡','♥'].forEach((s,i) => {
   const d = document.createElement('div');
@@ -647,6 +522,7 @@ const hc = document.getElementById('hc');
   hc.appendChild(d);
 });
 
+// ── PWA install ────────────────────────────────────────────────────────────
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault(); deferredPrompt = e;
@@ -659,10 +535,9 @@ function doInstall() {
 }
 function dismissInstall() { document.getElementById('installBanner').classList.remove('show'); }
 window.addEventListener('appinstalled', () => dismissInstall());
-
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
 
-// ── Splash screen ──────────────────────────────────────────────────────────
+// ── Splash ─────────────────────────────────────────────────────────────────
 (function() {
   const container = document.getElementById('splashHearts');
   const colors = ['💗','💜','🩷','💜','💗','💜','🩷','💗','💜','💗','💜','🩷','💜','💗'];
@@ -676,19 +551,16 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js');
     container.appendChild(el);
   });
 })();
-
 function dismissSplash() {
   const s = document.getElementById('splash');
   s.classList.add('hide');
   setTimeout(() => s.remove(), 750);
 }
-setTimeout(dismissSplash, 3200); // auto-dismiss after 3.2s
+setTimeout(dismissSplash, 3200);
 
 // ── Lightbox ───────────────────────────────────────────────────────────────
 let lbUrls = [], lbCurrent = 0;
-
 function openLightbox(url) {
-  // Collect all current photo URLs from grid
   lbUrls = Array.from(document.querySelectorAll('.photo-cell img')).map(i => i.src);
   lbCurrent = lbUrls.indexOf(url);
   if (lbCurrent === -1) lbCurrent = 0;
@@ -696,21 +568,17 @@ function openLightbox(url) {
   document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
-
 function renderLightbox() {
   document.getElementById('lbImg').src = lbUrls[lbCurrent];
   document.getElementById('lbCounter').textContent = lbUrls.length > 1 ? (lbCurrent + 1) + ' / ' + lbUrls.length : '';
-  // Show/hide arrows
   const lb = document.getElementById('lightbox');
   lb.querySelector('.lb-prev').style.display = lbUrls.length > 1 ? '' : 'none';
   lb.querySelector('.lb-next').style.display = lbUrls.length > 1 ? '' : 'none';
 }
-
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
   document.body.style.overflow = '';
 }
-
 function lbNav(dir, e) {
   e.stopPropagation();
   lbCurrent = (lbCurrent + dir + lbUrls.length) % lbUrls.length;
@@ -718,22 +586,18 @@ function lbNav(dir, e) {
   img.style.opacity = '0';
   setTimeout(() => { renderLightbox(); img.style.transition = 'opacity .2s'; img.style.opacity = '1'; }, 150);
 }
-
 function lbBgClick(e) {
   if (e.target === document.getElementById('lightbox')) closeLightbox();
 }
-
-// Close lightbox on Escape key
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeLightbox();
-  if (e.key === 'ArrowLeft') { if (document.getElementById('lightbox').classList.contains('open')) lbNav(-1, e); }
-  if (e.key === 'ArrowRight') { if (document.getElementById('lightbox').classList.contains('open')) lbNav(1, e); }
+  if (e.key === 'ArrowLeft'  && document.getElementById('lightbox').classList.contains('open')) lbNav(-1, e);
+  if (e.key === 'ArrowRight' && document.getElementById('lightbox').classList.contains('open')) lbNav(1, e);
 });
 
-renderNote();
+// ── Init ───────────────────────────────────────────────────────────────────
 loadNotes();
 loadPhotos();
-setupRealtime();
 </script>
 </body>
 </html>
