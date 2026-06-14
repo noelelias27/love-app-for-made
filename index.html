@@ -293,14 +293,43 @@
       </div>
     </div>
     <div class="reasons-card">
-      <h4>Razones por las cuales te amo</h4>
-      <div class="reason"><span>✦</span> La forma en la que me haces reír siempre me hace bien.</div>
-      <div class="reason"><span>✦</span> Tu perseverancia y actitud son una inspiración.</div>
-      <div class="reason"><span>✦</span> Tu amabilidad y forma de querer sin ataduras.</div>
-      <div class="reason"><span>✦</span> Haces que hasta lo más ordinario sea bonito.</div>
-      <div class="reason"><span>✦</span> La forma en la que me haces sentir visto y amado.</div>
-      <div class="reason"><span>✦</span> Simplemente siendo tú, no necesito más.</div>
-    </div>
+
+  <h4>Razones por las cuales te amo</h4>
+
+  <div id="reasonsList"></div>
+
+  <div id="reasonsToggle"
+       class="add-toggle"
+       onclick="toggleReasonsForm()">
+
+    <span>
+      <i class="ti ti-plus"></i>
+      &nbsp; agregar razón
+    </span>
+
+    <i class="ti ti-chevron-down chev"
+       id="reasonsChevron"></i>
+
+  </div>
+
+  <div class="add-form"
+       id="reasonsForm">
+
+    <textarea
+      id="newReasonText"
+      placeholder="Otra razón por la cual te amo..."></textarea>
+
+    <button
+      class="add-btn"
+      onclick="addReason()">
+
+      Agregar 💜
+
+    </button>
+
+  </div>
+
+</div>
   </div>
 
   <!-- MOMENTOS -->
@@ -435,7 +464,118 @@ async function loadNotes() {
   idx = 0;
   renderNote();
 }
+let reasons = [];
 
+const DEFAULT_REASONS = [
+  'La forma en la que me haces reír siempre me hace bien.',
+  'Tu perseverancia y actitud son una inspiración.',
+  'Tu amabilidad y forma de querer sin ataduras.',
+  'Haces que hasta lo más ordinario sea bonito.',
+  'La forma en la que me haces sentir visto y amado.',
+  'Simplemente siendo tú, no necesito más.'
+];
+
+function renderReasons() {
+
+  const container =
+    document.getElementById('reasonsList');
+
+  container.innerHTML = '';
+
+  reasons.forEach(reason => {
+
+    const div =
+      document.createElement('div');
+
+    div.className = 'reason';
+
+    div.innerHTML =
+      `<span>✦</span>${reason.text}`;
+
+    container.appendChild(div);
+
+  });
+
+}
+
+async function loadReasons() {
+
+  const { data } =
+    await sb
+      .from('reasons')
+      .select('*')
+      .order('created_at');
+
+  if (!data || data.length === 0) {
+
+    await sb
+      .from('reasons')
+      .insert(
+        DEFAULT_REASONS.map(r => ({
+          text: r
+        }))
+      );
+
+    return loadReasons();
+
+  }
+
+  reasons = data;
+
+  renderReasons();
+
+}
+
+function toggleReasonsForm() {
+
+  const form =
+    document.getElementById('reasonsForm');
+
+  const chev =
+    document.getElementById('reasonsChevron');
+
+  const open =
+    form.classList.toggle('open');
+
+  chev.style.transform =
+    open
+      ? 'rotate(180deg)'
+      : 'rotate(0deg)';
+
+}
+
+async function addReason() {
+
+  const text =
+    document
+      .getElementById('newReasonText')
+      .value
+      .trim();
+
+  if (!text) return;
+
+  const { error } =
+    await sb
+      .from('reasons')
+      .insert({ text });
+
+  if (error) {
+
+    showToast('Error');
+
+    return;
+
+  }
+
+  document.getElementById(
+    'newReasonText'
+  ).value = '';
+
+  await loadReasons();
+
+  showToast('Razón agregada 💜');
+
+}
 // ── Tabs ───────────────────────────────────────────────────────────────────
 function switchTab(name, tabEl) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
@@ -598,6 +738,7 @@ document.addEventListener('keydown', e => {
 // ── Init ───────────────────────────────────────────────────────────────────
 loadNotes();
 loadPhotos();
+loadReasons();
 </script>
 </body>
 </html>
