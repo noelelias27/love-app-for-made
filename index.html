@@ -609,7 +609,13 @@ del.onclick = async () => {
   }
 
   showToast('Foto eliminada');
-};
+  };
+  
+cell.appendChild(img);
+cell.appendChild(del);
+grid.appendChild(cell);
+}
+
 async function addPhotos(e) {
   const files = Array.from(e.target.files); e.target.value = '';
   for (const file of files) {
