@@ -114,72 +114,24 @@
     .install-banner button { background: linear-gradient(135deg,#a855f7,#7c3aed); color: #fff; border: none; border-radius: 18px; padding: 7px 14px; font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap; }
     .install-banner .dismiss { background: none; border: none; color: #c084fc; font-size: 20px; cursor: pointer; padding: 0 4px; }
 
-    /* ── SPLASH SCREEN ─────────────────────────────────────────────────── */
-    .splash {
-      position: fixed; inset: 0; z-index: 9999;
-      background: linear-gradient(160deg, #fdf2f8 0%, #f3e8ff 40%, #ede9fe 100%);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      transition: opacity .7s ease, transform .7s ease;
-    }
+    .splash { position: fixed; inset: 0; z-index: 9999; background: linear-gradient(160deg, #fdf2f8 0%, #f3e8ff 40%, #ede9fe 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity .7s ease, transform .7s ease; }
     .splash.hide { opacity: 0; transform: scale(1.04); pointer-events: none; }
     .splash-hearts { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-    .sh {
-      position: absolute; font-size: 22px;
-      animation: splashFloat linear infinite;
-      opacity: 0;
-    }
-    @keyframes splashFloat {
-      0%   { transform: translateY(100vh) rotate(0deg) scale(0.6); opacity: 0; }
-      10%  { opacity: 1; }
-      90%  { opacity: 1; }
-      100% { transform: translateY(-12vh) rotate(20deg) scale(1); opacity: 0; }
-    }
+    .sh { position: absolute; font-size: 22px; animation: splashFloat linear infinite; opacity: 0; }
+    @keyframes splashFloat { 0% { transform: translateY(100vh) rotate(0deg) scale(0.6); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-12vh) rotate(20deg) scale(1); opacity: 0; } }
     .splash-logo { font-size: 56px; margin-bottom: 14px; animation: pulse 1.8s ease-in-out infinite; }
     @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
-    .splash-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 32px; color: #6b21a8; font-weight: 400;
-      letter-spacing: 0.5px; margin-bottom: 8px;
-    }
+    .splash-title { font-family: 'Playfair Display', serif; font-size: 32px; color: #6b21a8; font-weight: 400; letter-spacing: 0.5px; margin-bottom: 8px; }
     .splash-sub { font-size: 15px; color: #a855f7; font-style: italic; font-family: 'Playfair Display', serif; }
     .splash-tap { font-size: 13px; color: #c084fc; margin-top: 48px; animation: blink 2s ease-in-out infinite; }
     @keyframes blink { 0%,100% { opacity: .4; } 50% { opacity: 1; } }
 
-    /* ── LIGHTBOX ──────────────────────────────────────────────────────── */
-    .lightbox {
-      position: fixed; inset: 0; z-index: 8888;
-      background: rgba(15, 0, 30, 0.96);
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none;
-      transition: opacity .25s ease;
-    }
+    .lightbox { position: fixed; inset: 0; z-index: 8888; background: rgba(15, 0, 30, 0.96); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
     .lightbox.open { opacity: 1; pointer-events: all; }
-    .lightbox img {
-      max-width: 96vw; max-height: 88vh;
-      border-radius: 14px;
-      object-fit: contain;
-      box-shadow: 0 8px 48px rgba(124,58,237,.4);
-      transform: scale(0.92);
-      transition: transform .25s ease;
-    }
+    .lightbox img { max-width: 96vw; max-height: 88vh; border-radius: 14px; object-fit: contain; box-shadow: 0 8px 48px rgba(124,58,237,.4); transform: scale(0.92); transition: transform .25s ease; }
     .lightbox.open img { transform: scale(1); }
-    .lb-close {
-      position: absolute; top: 18px; right: 18px;
-      background: rgba(124,58,237,.7); border: none;
-      border-radius: 50%; width: 38px; height: 38px;
-      color: #fff; font-size: 18px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .lb-prev, .lb-next {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      background: rgba(124,58,237,.5); border: none;
-      border-radius: 50%; width: 40px; height: 40px;
-      color: #fff; font-size: 20px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      -webkit-tap-highlight-color: transparent;
-    }
+    .lb-close { position: absolute; top: 18px; right: 18px; background: rgba(124,58,237,.7); border: none; border-radius: 50%; width: 38px; height: 38px; color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+    .lb-prev, .lb-next { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(124,58,237,.5); border: none; border-radius: 50%; width: 40px; height: 40px; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
     .lb-prev { left: 12px; }
     .lb-next { right: 12px; }
     .lb-counter { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); color: #d8b4fe; font-size: 13px; }
@@ -206,7 +158,6 @@
 </div>
 
 <div class="app">
-
   <div class="hdr">
     <div class="hdr-hearts" id="hc"></div>
     <div class="hdr-icon">💜</div>
@@ -336,11 +287,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ── Supabase ───────────────────────────────────────────────────────────────
-const SUPA_URL = 'https://imryixjhyaztwgpwwdnt.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltcnlpeGpoeWF6dHdncHd3ZG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNDk0MzIsImV4cCI6MjA5NjcyNTQzMn0.X5buAp74Kj1MPCX12DPWPQh9vz28qIEjc9MzaGx-XbI';
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+// ── Supabase — init first ──────────────────────────────────────────────────
+const sb = supabase.createClient(
+  'https://imryixjhyaztwgpwwdnt.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltcnlpeGpoeWF6dHdncHd3ZG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNDk0MzIsImV4cCI6MjA5NjcyNTQzMn0.X5buAp74Kj1MPCX12DPWPQh9vz28qIEjc9MzaGx-XbI'
+);
 
+// ── Default notes ──────────────────────────────────────────────────────────
 const DEFAULT_NOTES = [
   { text: "Cada día me despierto agradecido de poder llamarte mía, Made.", attr: "— Noel 💜", label: "nota para ti" },
   { text: "Haces que los días ordinarios se sientan como la más grande aventura.", attr: "— Noel 💜", label: "nota para ti" },
@@ -355,9 +308,8 @@ const DEFAULT_NOTES = [
   { text: "Llevo tu corazón conmigo. Lo llevo en mi corazón.", attr: "— E.E. Cummings", label: "poema para ti" }
 ];
 
-// ── Notes state ────────────────────────────────────────────────────────────
-let notes = [];
-let idx = 0;
+// ── Notes ──────────────────────────────────────────────────────────────────
+let notes = [], idx = 0;
 
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -381,10 +333,35 @@ function animateNote() {
   setTimeout(() => { renderNote(); el.style.opacity = '1'; }, 230);
 }
 
+async function loadNotes() {
+  try {
+    // Order by created_at — works regardless of whether position column exists
+    const { data, error } = await sb.from('notes').select('id,text,attr,label').order('created_at', { ascending: true });
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      // Seed default notes — no position field needed
+      const { data: inserted, error: seedErr } = await sb.from('notes').insert(DEFAULT_NOTES).select('id,text,attr,label');
+      if (seedErr) throw seedErr;
+      notes = inserted || DEFAULT_NOTES;
+    } else {
+      notes = data;
+    }
+    idx = 0;
+    renderNote();
+  } catch (e) {
+    console.error('Error cargando notas:', e);
+    // Fallback to defaults so app still works offline
+    notes = DEFAULT_NOTES.map(n => ({ ...n, id: null }));
+    idx = 0;
+    renderNote();
+  }
+}
+
 async function deleteNote() {
   if (notes.length === 1) { showToast('No puedes eliminar la última nota 💜'); return; }
   if (!confirm('¿Eliminar esta nota?')) return;
   const note = notes[idx];
+  if (!note.id) { showToast('Error al eliminar'); return; }
   const { error } = await sb.from('notes').delete().eq('id', note.id);
   if (error) { showToast('Error al eliminar'); return; }
   notes.splice(idx, 1);
@@ -405,8 +382,8 @@ async function addNote() {
   const txt = document.getElementById('newNoteText').value.trim();
   if (!txt) return;
   const attr = document.getElementById('newNoteAttr').value.trim() || '— Noel 💜';
-  const newNote = { text: txt, attr, label: 'nota para ti', position: notes.length };
-  const { data, error } = await sb.from('notes').insert(newNote).select().single();
+  // Only send columns that exist in the table
+  const { data, error } = await sb.from('notes').insert({ text: txt, attr, label: 'nota para ti' }).select('id,text,attr,label').single();
   if (error) { showToast('Error al guardar nota'); return; }
   notes.push(data);
   document.getElementById('newNoteText').value = '';
@@ -422,20 +399,6 @@ function revealSurprise() {
   document.getElementById('rvlTxt').style.display = 'block';
 }
 
-async function loadNotes() {
-  const { data, error } = await sb.from('notes').select('*').order('position', { ascending: true });
-  if (error || !data || data.length === 0) {
-    // First run — seed default notes
-    const toInsert = DEFAULT_NOTES.map((n, i) => ({ ...n, position: i }));
-    const { data: inserted } = await sb.from('notes').insert(toInsert).select();
-    notes = inserted || DEFAULT_NOTES;
-  } else {
-    notes = data;
-  }
-  idx = 0;
-  renderNote();
-}
-
 // ── Tabs ───────────────────────────────────────────────────────────────────
 function switchTab(name, tabEl) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
@@ -447,7 +410,7 @@ function switchTab(name, tabEl) {
   else { const map={notes:0,us:1,moments:2}; document.querySelectorAll('.tab')[map[name]].classList.add('on'); }
 }
 
-// ── Photos (Supabase Storage) ──────────────────────────────────────────────
+// ── Photos ─────────────────────────────────────────────────────────────────
 const BUCKET = 'photos';
 
 function addPhotoCell(path, url) {
@@ -465,11 +428,12 @@ function addPhotoCell(path, url) {
     const { error } = await sb.storage.from(BUCKET).remove([path]);
     if (error) { showToast('Error al eliminar'); return; }
     cell.remove();
-    if (!document.getElementById('photoGrid').querySelector('.photo-cell')) {
+    const grid = document.getElementById('photoGrid');
+    if (!grid.querySelector('.photo-cell')) {
       const e2 = document.createElement('div');
       e2.className = 'empty-grid';
       e2.innerHTML = '<i class="ti ti-photo-heart"></i>Toca "Agregar foto" para llenar<br>este álbum con nuestros recuerdos 💜';
-      document.getElementById('photoGrid').appendChild(e2);
+      grid.appendChild(e2);
     }
     showToast('Foto eliminada');
   };
@@ -492,6 +456,7 @@ async function loadPhotos() {
   const { data, error } = await sb.storage.from(BUCKET).list('', { sortBy: { column: 'created_at', order: 'asc' } });
   if (error || !data) return;
   const files = data.filter(f => f.name !== '.emptyFolderPlaceholder');
+  if (files.length === 0) return;
   for (const f of files) {
     const { data: urlData } = sb.storage.from(BUCKET).getPublicUrl(f.name);
     addPhotoCell(f.name, urlData.publicUrl);
@@ -522,7 +487,7 @@ const hc = document.getElementById('hc');
   hc.appendChild(d);
 });
 
-// ── PWA install ────────────────────────────────────────────────────────────
+// ── PWA ────────────────────────────────────────────────────────────────────
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault(); deferredPrompt = e;
