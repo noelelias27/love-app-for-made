@@ -428,19 +428,6 @@ function revealSurprise() {
   document.getElementById('rvlTxt').style.display = 'block';
 }
 
-async function loadNotes() {
-  const { data, error } = await sb.from('notes').select('*').order('position', { ascending: true });
-  if (error || !data || data.length === 0) {
-    // First run — seed default notes
-    const toInsert = DEFAULT_NOTES.map((n, i) => ({ ...n, position: i }));
-    const { data: inserted } = await sb.from('notes').insert(toInsert).select();
-    notes = inserted || DEFAULT_NOTES;
-  } else {
-    notes = data;
-  }
-  idx = 0;
-  renderNote();
-}
 let reasons = [];
 
 const DEFAULT_REASONS = [
@@ -571,49 +558,48 @@ function addPhotoCell(path, url) {
   const grid = document.getElementById('photoGrid');
   const empty = grid.querySelector('.empty-grid');
   if (empty) empty.remove();
+
   const cell = document.createElement('div');
-  cell.className = 'photo-cell'; cell.dataset.path = path;
+  cell.className = 'photo-cell';
+  cell.dataset.path = path;
+
   const img = document.createElement('img');
-  img.src = url; img.alt = 'recuerdo'; img.style.cursor = 'pointer';
+  img.src = url;
+  img.alt = 'recuerdo';
+  img.style.cursor = 'pointer';
   img.onclick = () => openLightbox(url);
+
   const del = document.createElement('button');
-  del.className = 'del-btn'; del.innerHTML = '<i class="ti ti-x"></i>';
-del.onclick = async () => {
+  del.className = 'del-btn';
+  del.innerHTML = '<i class="ti ti-x"></i>';
+  del.onclick = async () => {
+    const confirmDelete = confirm(
+      '💜 ¿Seguro que quieres eliminar esta foto de nuestros recuerdos?\n\nEsta acción no se puede deshacer.'
+    );
 
-  const confirmDelete = confirm(
-    '💜 ¿Seguro que quieres eliminar esta foto de nuestros recuerdos?\n\nEsta acción no se puede deshacer.'
-  );
+    if (!confirmDelete) return;
 
-  if (!confirmDelete) return;
+    const { error } = await sb.storage.from(BUCKET).remove([path]);
+    if (error) {
+      showToast('Error al eliminar');
+      return;
+    }
 
-  const { error } = await sb.storage
-    .from(BUCKET)
-    .remove([path]);
+    cell.remove();
+    if (!grid.querySelector('.photo-cell')) {
+      const emptyGrid = document.createElement('div');
+      emptyGrid.className = 'empty-grid';
+      emptyGrid.innerHTML =
+        '<i class="ti ti-photo-heart"></i>Toca "Agregar foto" para llenar<br>este álbum con nuestros recuerdos 💜';
+      grid.appendChild(emptyGrid);
+    }
 
-  if (error) {
-    showToast('Error al eliminar');
-    return;
-  }
-
-  cell.remove();
-
-  const grid = document.getElementById('photoGrid');
-
-  if (!grid.querySelector('.photo-cell')) {
-    const e2 = document.createElement('div');
-    e2.className = 'empty-grid';
-    e2.innerHTML =
-      '<i class="ti ti-photo-heart"></i>Toca "Agregar foto" para llenar<br>este álbum con nuestros recuerdos 💜';
-
-    grid.appendChild(e2);
-  }
-
-  showToast('Foto eliminada');
+    showToast('Foto eliminada');
   };
-  
-cell.appendChild(img);
-cell.appendChild(del);
-grid.appendChild(cell);
+
+  cell.appendChild(img);
+  cell.appendChild(del);
+  grid.appendChild(cell);
 }
 
 async function addPhotos(e) {
