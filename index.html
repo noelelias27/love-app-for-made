@@ -578,23 +578,38 @@ function addPhotoCell(path, url) {
   img.onclick = () => openLightbox(url);
   const del = document.createElement('button');
   del.className = 'del-btn'; del.innerHTML = '<i class="ti ti-x"></i>';
-  del.onclick = async () => {
-    const { error } = await sb.storage.from(BUCKET).remove([path]);
-    if (error) { showToast('Error al eliminar'); return; }
-    cell.remove();
-    const grid = document.getElementById('photoGrid');
-    if (!grid.querySelector('.photo-cell')) {
-      const e2 = document.createElement('div');
-      e2.className = 'empty-grid';
-      e2.innerHTML = '<i class="ti ti-photo-heart"></i>Toca "Agregar foto" para llenar<br>este álbum con nuestros recuerdos 💜';
-      grid.appendChild(e2);
-    }
-    showToast('Foto eliminada');
-  };
-  cell.appendChild(img); cell.appendChild(del);
-  grid.appendChild(cell);
-}
+del.onclick = async () => {
 
+  const confirmDelete = confirm(
+    '💜 ¿Seguro que quieres eliminar esta foto de nuestros recuerdos?\n\nEsta acción no se puede deshacer.'
+  );
+
+  if (!confirmDelete) return;
+
+  const { error } = await sb.storage
+    .from(BUCKET)
+    .remove([path]);
+
+  if (error) {
+    showToast('Error al eliminar');
+    return;
+  }
+
+  cell.remove();
+
+  const grid = document.getElementById('photoGrid');
+
+  if (!grid.querySelector('.photo-cell')) {
+    const e2 = document.createElement('div');
+    e2.className = 'empty-grid';
+    e2.innerHTML =
+      '<i class="ti ti-photo-heart"></i>Toca "Agregar foto" para llenar<br>este álbum con nuestros recuerdos 💜';
+
+    grid.appendChild(e2);
+  }
+
+  showToast('Foto eliminada');
+};
 async function addPhotos(e) {
   const files = Array.from(e.target.files); e.target.value = '';
   for (const file of files) {
