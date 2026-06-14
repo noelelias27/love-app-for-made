@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Made & Noel</title>
+  <title>Togethr</title>
 
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#7c3aed" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Made & Noel" />
+  <meta name="apple-mobile-web-app-title" content="Togethr" />
   <link rel="apple-touch-icon" href="icon-192.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -91,6 +91,14 @@
     .reason { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid #f3e8ff; font-size: 14px; color: #4c1d95; line-height: 1.5; }
     .reason:last-child { border-bottom: none; }
     .reason span { color: #c084fc; flex-shrink: 0; }
+    .reason-content { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    .reason-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .reason-button { background: none; border: 0.5px solid #d8b4fe; border-radius: 14px; padding: 6px 10px; font-size: 12px; color: #7c3aed; cursor: pointer; font-family: inherit; }
+    .reason-input { width: 100%; min-height: 72px; border: 0.5px solid #ede9fe; border-radius: 12px; padding: 10px; font-size: 14px; font-family: inherit; color: #4c1d95; background: rgba(255,255,255,0.9); resize: vertical; outline: none; }
+    .surprise-box { position: relative; }
+    .rvl-txt { font-family: 'Playfair Display', serif; font-size: 15px; color: #6b21a8; font-style: italic; line-height: 1.7; display: none; animation: fadeIn .5s ease; margin-top: 12px; }
+    .pop-heart { position: absolute; font-size: 18px; pointer-events: none; opacity: 0; animation: popHeart 0.8s ease forwards; }
+    @keyframes popHeart { 0% { transform: translateY(0) scale(0.6); opacity: 1; } 50% { transform: translateY(-12px) scale(1.1); opacity: 1; } 100% { transform: translateY(-30px) scale(0.8); opacity: 0; } }
 
     .moments-header { display: flex; justify-content: space-between; align-items: center; }
     .moments-header h4 { font-size: 14px; font-weight: 500; color: #6b21a8; }
@@ -143,8 +151,7 @@
 <div class="splash" id="splash" onclick="dismissSplash()">
   <div class="splash-hearts" id="splashHearts"></div>
   <div class="splash-logo">💜</div>
-  <div class="splash-title">Made & Noel</div>
-  <div class="splash-sub">solo para ti, mi amor</div>
+  <div class="splash-title">Togethr</div>
   <div class="splash-tap">toca para continuar</div>
 </div>
 
@@ -161,8 +168,7 @@
   <div class="hdr">
     <div class="hdr-hearts" id="hc"></div>
     <div class="hdr-icon">💜</div>
-    <div class="hdr-title">Made & Noel</div>
-    <div class="hdr-sub">solo para ti, mi amor</div>
+    <div class="hdr-title">Togethr</div>
   </div>
 
   <div class="install-banner" id="installBanner">
@@ -205,13 +211,10 @@
 
     <div class="surprise-box">
       <div class="s-icon">🎁</div>
-      <h3>Una pequeña sorpresa te espera…</h3>
-      <p>Ábrela cuando estés lista, Made</p>
+      <h3>Toca aquí</h3>
+      <p>Ábrela cuando estés lista</p>
       <button class="rvl-btn" id="rvlBtn" onclick="revealSurprise()">Ábrela 💜</button>
-      <div class="rvl-txt" id="rvlTxt">
-        "Algo mágico nos espera.<br>No puedo esperar para vivirlo contigo.<br>
-        Eres la mejor parte de cada aventura, y cada día a tu lado es mi favorito."
-      </div>
+      <div class="rvl-txt" id="rvlTxt"></div>
     </div>
   </div>
 
@@ -424,70 +427,182 @@ async function addNote() {
 }
 
 function revealSurprise() {
-  document.getElementById('rvlBtn').style.display = 'none';
-  document.getElementById('rvlTxt').style.display = 'block';
+  const txt = document.getElementById('rvlTxt');
+  txt.textContent = SURPRISE_MESSAGES[Math.floor(Math.random() * SURPRISE_MESSAGES.length)];
+  txt.style.display = 'block';
+  emitSurpriseHearts();
+}
+
+function emitSurpriseHearts() {
+  const box = document.querySelector('.surprise-box');
+  if (!box) return;
+
+  for (let i = 0; i < 6; i++) {
+    const heart = document.createElement('div');
+    heart.className = 'pop-heart';
+    heart.textContent = '💜';
+    heart.style.left = `${18 + Math.random() * 64}%`;
+    heart.style.bottom = '18px';
+    heart.style.animationDelay = `${i * 0.06}s`;
+    box.appendChild(heart);
+    setTimeout(() => heart.remove(), 900);
+  }
 }
 
 let reasons = [];
 
 const DEFAULT_REASONS = [
-  'La forma en la que me haces reír siempre me hace bien.',
-  'Tu perseverancia y actitud son una inspiración.',
-  'Tu amabilidad y forma de querer sin ataduras.',
-  'Haces que hasta lo más ordinario sea bonito.',
-  'La forma en la que me haces sentir visto y amado.',
-  'Simplemente siendo tú, no necesito más.'
+  'La primera vez que nos vimos y empezó algo bonito entre nosotros.',
+  'Cuando hablamos de ser un equipo y cuidarnos en nuestras tormentas.',
+  'Cuando imaginé despertar contigo, tomar café y ver esa vista bonita.',
+  'Cuando compartimos con tu familia y sentí que estaba saliendo de mi zona de confort por ti.',
+  'Cuando te ayudé a aprender a manejar y sentí que estábamos creciendo juntos.',
+  'Cuando caminamos juntos y paseamos a Hera.',
+  'Cuando me tomaste fotos mientras hacía trabajo de fontanería y lo convertiste en un recuerdo.',
+  'Cuando dijimos que podíamos ser imparables si ambos damos nuestro 100%.',
+  'Cuando me dijiste que te gusta aprender de mí y seguir creciendo conmigo.',
+  'Cuando me agregaste a tus planes, tu música, tu día y tus pequeñas cosas.',
+  'Cuando me hiciste sentir que contigo puedo construir algo bonito.',
+  'Cuando simplemente estar a tu lado se sintió como paz.'
+];
+
+const SURPRISE_MESSAGES = [
+  'Un día a la vez. Hoy también puede tener algo bonito.',
+  'Respira. Suelta un poco el peso. Lo estás haciendo mejor de lo que crees.',
+  'A veces lo simple también cuenta: una pausa, una sonrisa, un momento en calma.',
+  'Que hoy nos encuentre más ligeros, más presentes y con ganas de seguir.',
+  'No todo tiene que resolverse hoy. Paso a paso también se avanza.',
+  'Un recordatorio pequeño: todavía hay cosas buenas esperando por nosotros.',
+  'Que este momento te regale un poquito de calma.',
+  'Hoy merece al menos una razón para sonreír.',
+  'Pausa. Respira. Sigue. Lo bonito también se construye despacio.',
+  'Que lo bueno del día no pase desapercibido.'
 ];
 
 function renderReasons() {
-
-  const container =
-    document.getElementById('reasonsList');
-
+  const container = document.getElementById('reasonsList');
   container.innerHTML = '';
 
+  if (!reasons.length) {
+    const empty = document.createElement('div');
+    empty.className = 'empty-grid';
+    empty.innerHTML = '<i class="ti ti-heart"></i>Aún no hay razones guardadas.';
+    container.appendChild(empty);
+    return;
+  }
+
   reasons.forEach(reason => {
+    const item = document.createElement('div');
+    item.className = 'reason';
 
-    const div =
-      document.createElement('div');
+    const icon = document.createElement('span');
+    icon.textContent = '✦';
 
-    div.className = 'reason';
+    const content = document.createElement('div');
+    content.className = 'reason-content';
 
-    div.innerHTML =
-      `<span>✦</span>${reason.text}`;
+    const textEl = document.createElement('div');
+    textEl.className = 'reason-text';
+    textEl.textContent = reason.text;
 
-    container.appendChild(div);
+    const actions = document.createElement('div');
+    actions.className = 'reason-actions';
 
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'reason-button';
+    editBtn.textContent = 'Editar';
+    editBtn.onclick = () => startEditReason(reason.id, reason.text, item);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'reason-button';
+    deleteBtn.textContent = 'Eliminar';
+    deleteBtn.onclick = () => deleteReason(reason.id);
+
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+    content.appendChild(textEl);
+    content.appendChild(actions);
+    item.appendChild(icon);
+    item.appendChild(content);
+    container.appendChild(item);
   });
-
 }
 
 async function loadReasons() {
+  const { data, error } = await sb.from('reasons').select('*').order('created_at');
 
-  const { data } =
-    await sb
-      .from('reasons')
-      .select('*')
-      .order('created_at');
+  if (error) {
+    console.error('Error cargando razones:', error);
+    reasons = [];
+    renderReasons();
+    return;
+  }
 
   if (!data || data.length === 0) {
-
-    await sb
-      .from('reasons')
-      .insert(
-        DEFAULT_REASONS.map(r => ({
-          text: r
-        }))
-      );
-
+    await sb.from('reasons').insert(DEFAULT_REASONS.map(text => ({ text })));
     return loadReasons();
-
   }
 
   reasons = data;
-
   renderReasons();
+}
 
+function startEditReason(id, text, item) {
+  const content = item.querySelector('.reason-content');
+  content.innerHTML = '';
+
+  const textarea = document.createElement('textarea');
+  textarea.className = 'reason-input';
+  textarea.value = text;
+
+  const actions = document.createElement('div');
+  actions.className = 'reason-actions';
+
+  const saveBtn = document.createElement('button');
+  saveBtn.type = 'button';
+  saveBtn.className = 'reason-button';
+  saveBtn.textContent = 'Guardar';
+  saveBtn.onclick = async () => { await saveReason(id, textarea.value.trim()); };
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.className = 'reason-button';
+  cancelBtn.textContent = 'Cancelar';
+  cancelBtn.onclick = () => loadReasons();
+
+  actions.appendChild(saveBtn);
+  actions.appendChild(cancelBtn);
+  content.appendChild(textarea);
+  content.appendChild(actions);
+  textarea.focus();
+}
+
+async function saveReason(id, text) {
+  if (!text) return;
+  const { error } = await sb.from('reasons').update({ text }).eq('id', id);
+  if (error) { showToast('Error al actualizar'); return; }
+  await loadReasons();
+  showToast('Razón actualizada');
+}
+
+async function deleteReason(id) {
+  if (!confirm('¿Eliminar esta razón?')) return;
+  const { error } = await sb.from('reasons').delete().eq('id', id);
+  if (error) { showToast('Error al eliminar'); return; }
+  await loadReasons();
+  showToast('Razón eliminada');
+}
+
+async function addReason() {
+  const text = document.getElementById('newReasonText').value.trim();
+  if (!text) return;
+  const { error } = await sb.from('reasons').insert({ text });
+  if (error) { showToast('Error'); return; }
+  document.getElementById('newReasonText').value = '';
+  await loadReasons();
+  showToast('Razón agregada 💜');
 }
 
 function toggleReasonsForm() {
@@ -508,38 +623,6 @@ function toggleReasonsForm() {
 
 }
 
-async function addReason() {
-
-  const text =
-    document
-      .getElementById('newReasonText')
-      .value
-      .trim();
-
-  if (!text) return;
-
-  const { error } =
-    await sb
-      .from('reasons')
-      .insert({ text });
-
-  if (error) {
-
-    showToast('Error');
-
-    return;
-
-  }
-
-  document.getElementById(
-    'newReasonText'
-  ).value = '';
-
-  await loadReasons();
-
-  showToast('Razón agregada 💜');
-
-}
 // ── Tabs ───────────────────────────────────────────────────────────────────
 function switchTab(name, tabEl) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
@@ -573,9 +656,7 @@ function addPhotoCell(path, url) {
   del.className = 'del-btn';
   del.innerHTML = '<i class="ti ti-x"></i>';
   del.onclick = async () => {
-    const confirmDelete = confirm(
-      '💜 ¿Seguro que quieres eliminar esta foto de nuestros recuerdos?\n\nEsta acción no se puede deshacer.'
-    );
+    const confirmDelete = confirm('¿Eliminar esta foto? Esta acción no se puede deshacer.');
 
     if (!confirmDelete) return;
 
@@ -679,6 +760,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js');
 })();
 function dismissSplash() {
   const s = document.getElementById('splash');
+  if (!s) return;
   s.classList.add('hide');
   setTimeout(() => s.remove(), 750);
 }
