@@ -253,6 +253,21 @@
     .lb-prev { left: 12px; }
     .lb-next { right: 12px; }
     .lb-counter { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); color: #d8b4fe; font-size: 13px; z-index: 9000; }
+
+
+    /* Static layout update: fixed header feel + only bottom icons/nav */
+    html, body { height: 100%; overflow: hidden; }
+    body { align-items: stretch; }
+    .app { height: 100dvh; max-height: 100dvh; overflow: hidden; }
+    .hdr { flex-shrink: 0; z-index: 20; padding: 34px 20px 18px; position: relative; overflow: hidden; }
+    .hdr-hearts { display: block !important; position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+    .hdr-title { position: relative; z-index: 1; }
+    .hdr-icon { display: none !important; }
+    .hf { display: block !important; }
+    .tabs { display: none !important; }
+    .page { min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px; }
+    .nav { flex-shrink: 0; z-index: 30; }
+    .nav-it i { font-size: 26px; }
   </style>
 </head>
 <body>
@@ -653,6 +668,7 @@ async function deleteNote() {
   if (!confirm('¿Eliminar esta nota?')) return;
   const note = notes[idx];
   if (!note.id) { showToast('Error al eliminar'); return; }
+  window.lastLocalNoteDeleteAt = Date.now();
   const { error } = await sb.from('notes').delete().eq('id', note.id);
   if (error) { showToast('Error al eliminar'); return; }
   notes.splice(idx, 1);
@@ -1052,9 +1068,7 @@ function renderSelectedDayPanel() {
   panel.innerHTML = '';
 
   const title = document.createElement('h4');
-  title.textContent = selectedCalendarDate
-    ? 'Fechas del ' + formatDisplayDate(selectedCalendarDate)
-    : 'Próximas fechas';
+  title.textContent = 'Fechas próximas';
   panel.appendChild(title);
 
   const list = selectedEvents.length ? selectedEvents : upcomingEvents;
@@ -1238,6 +1252,7 @@ function editCalendarEvent(id) {
 async function deleteCalendarEvent(id) {
   if (!confirm('¿Eliminar esta fecha?')) return;
 
+  window.lastLocalCalendarDeleteAt = Date.now();
   const { error } = await sb.from('calendar_events').delete().eq('id', id);
   if (error) {
     console.error('Error al eliminar fecha:', error);
@@ -1368,17 +1383,24 @@ else if (days < 7)  document.getElementById('daysNote').textContent = 'Solo ' + 
 else if (days < 30) document.getElementById('daysNote').textContent = 'Cada uno de estos días ha sido un regalo.';
 else                document.getElementById('daysNote').textContent = days + ' días eligiéndonos. Por todos los que vienen.';
 
-// ── Floating hearts ────────────────────────────────────────────────────────
-const hc = document.getElementById('hc');
-['♥','♡','♥','♡','♥','♡','♥'].forEach((s,i) => {
-  const d = document.createElement('div');
-  d.className = 'hf'; d.textContent = s;
-  d.style.left = (8 + i * 13) + '%';
-  d.style.bottom = '-10px';
-  d.style.animationDelay = (i * 0.8) + 's';
-  d.style.animationDuration = (4 + i % 3) + 's';
-  hc.appendChild(d);
-});
+// ── Floating header hearts ─────────────────────────────────────────────────
+function renderHeaderHearts() {
+  const hc = document.getElementById('hc');
+  if (!hc || hc.children.length > 0) return;
+
+  ['♥','♡','♥','♡','♥','♡','♥'].forEach((s,i) => {
+    const d = document.createElement('div');
+    d.className = 'hf';
+    d.textContent = s;
+    d.style.left = (8 + i * 13) + '%';
+    d.style.bottom = '-10px';
+    d.style.animationDelay = (i * 0.8) + 's';
+    d.style.animationDuration = (4 + i % 3) + 's';
+    hc.appendChild(d);
+  });
+}
+
+renderHeaderHearts();
 
 // ── PWA ────────────────────────────────────────────────────────────────────
 let deferredPrompt = null;
@@ -1469,7 +1491,15 @@ sb.channel('notes_channel')
         sendPhoneNotification('Togethr', msg);
       }
       loadNotes();
-    } else if (payload.eventType === 'UPDATE' || payload.eventType === 'DELETE') {
+    } else if (payload.eventType === 'DELETE') {
+      const isLocal = (Date.now() - window.lastLocalNoteDeleteAt) < 1500;
+      if (!isLocal) {
+        const msg = 'Una nota fue eliminada';
+        showToast(msg);
+        sendPhoneNotification('Togethr', msg);
+      }
+      loadNotes();
+    } else if (payload.eventType === 'UPDATE') {
       loadNotes();
     }
   })
@@ -1481,6 +1511,13 @@ sb.channel('calendar_channel')
       const isLocal = (Date.now() - window.lastLocalCalendarInsertAt) < 1500;
       if (!isLocal) {
         const msg = 'Nueva fecha agregada 💜';
+        showToast(msg);
+        sendPhoneNotification('Togethr', msg);
+      }
+    } else if (payload.eventType === 'DELETE') {
+      const isLocal = (Date.now() - window.lastLocalCalendarDeleteAt) < 1500;
+      if (!isLocal) {
+        const msg = 'Una fecha fue eliminada';
         showToast(msg);
         sendPhoneNotification('Togethr', msg);
       }
