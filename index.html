@@ -153,7 +153,9 @@
     .activity-head strong { display: block; font-size: 13px; color: #6b21a8; margin-bottom: 3px; }
     .activity-head span { display: block; font-size: 12px; color: #a78bfa; line-height: 1.35; }
     .activity-head button { background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; border: none; border-radius: 18px; padding: 8px 12px; font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap; }
-    .activity-list { display: flex; flex-direction: column; gap: 8px; }
+    .activity-list { display: flex; flex-direction: column; gap: 8px; max-height: 330px; overflow-y: auto; padding-right: 4px; overscroll-behavior: contain; }
+    .activity-list::-webkit-scrollbar { width: 6px; }
+    .activity-list::-webkit-scrollbar-thumb { background: #d8b4fe; border-radius: 999px; }
     .activity-item { border: 0.5px solid #f3e8ff; border-radius: 12px; padding: 9px 10px; background: #fdf4ff; }
     .activity-item strong { display: block; font-size: 12px; color: #6b21a8; margin-bottom: 2px; }
     .activity-item span { display: block; font-size: 11px; color: #a78bfa; line-height: 1.35; }
@@ -275,6 +277,19 @@
     .page { min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px; }
     .nav { flex-shrink: 0; z-index: 30; }
     .nav-it i { font-size: 26px; }
+
+
+    /* Update: colored bottom icons + reason authors */
+    .reason-author { font-size: 12px; color: #a78bfa; margin-top: -4px; }
+    .reason-add-row select { flex: 1 1 140px !important; min-width: 0; }
+    .reason-add-row .add-btn { flex: 1 1 120px; min-width: 0; }
+    #nav-notes i { color: #ec4899; }
+    #nav-us i { color: #8b5cf6; }
+    #nav-moments i { color: #f59e0b; }
+    #nav-calendar i { color: #06b6d4; }
+    .nav-it { opacity: .7; }
+    .nav-it.on { opacity: 1; font-weight: 600; }
+    .nav-it.on i { filter: drop-shadow(0 2px 5px rgba(124,58,237,.28)); }
   </style>
 </head>
 <body>
@@ -422,13 +437,20 @@
       id="newReasonText"
       placeholder="Otra razón por la cual te amo..."></textarea>
 
-    <button
-      class="add-btn"
-      onclick="addReason()">
+    <div class="add-form-row reason-add-row">
+      <select id="newReasonAuthor" aria-label="Quién agrega la razón">
+        <option value="Noel">Noel 💜</option>
+        <option value="Made">Made 💜</option>
+      </select>
 
-      Agregar 💜
+      <button
+        class="add-btn"
+        onclick="addReason()">
 
-    </button>
+        Agregar 💜
+
+      </button>
+    </div>
 
   </div>
 
@@ -506,6 +528,11 @@
           <option value="7">Recordar 7 días antes</option>
           <option value="14">Recordar 14 días antes</option>
         </select>
+        <select id="calendarRecurrence" aria-label="Repetición de la fecha">
+          <option value="none" selected>No repetir</option>
+          <option value="monthly">Repetir cada mes</option>
+          <option value="yearly">Repetir cada año</option>
+        </select>
       </div>
 
       <div class="calendar-actions-row">
@@ -582,6 +609,9 @@ function getActivityText(change) {
 
   if (change.entity === 'note' && change.action === 'added') return 'Nota agregada' + who + title;
   if (change.entity === 'note' && change.action === 'deleted') return 'Nota eliminada' + who + title;
+  if (change.entity === 'reason' && change.action === 'added') return 'Razón agregada' + who + title;
+  if (change.entity === 'reason' && change.action === 'updated') return 'Razón actualizada' + who + title;
+  if (change.entity === 'reason' && change.action === 'deleted') return 'Razón eliminada' + who + title;
   if (change.entity === 'calendar' && change.action === 'added') return 'Fecha agregada' + who + title;
   if (change.entity === 'calendar' && change.action === 'updated') return 'Fecha actualizada' + who + title;
   if (change.entity === 'calendar' && change.action === 'deleted') return 'Fecha eliminada' + who + title;
@@ -596,7 +626,7 @@ function formatActivityTime(value) {
 }
 
 function saveRecentChangesLocal() {
-  localStorage.setItem(RECENT_CHANGES_KEY, JSON.stringify(recentChanges.slice(0, 10)));
+  localStorage.setItem(RECENT_CHANGES_KEY, JSON.stringify(recentChanges.slice(0, 20)));
 }
 
 function loadRecentChangesLocal() {
@@ -612,7 +642,7 @@ function renderRecentChanges() {
   if (!list) return;
 
   list.innerHTML = '';
-  const changes = recentChanges.slice(0, 8);
+  const changes = recentChanges.slice(0, 20);
 
   if (!changes.length) {
     const empty = document.createElement('div');
@@ -648,7 +678,7 @@ function addRecentChangeLocal(change) {
     created_at: change.created_at || new Date().toISOString()
   };
 
-  recentChanges = [entry, ...recentChanges.filter(c => c.id !== entry.id)].slice(0, 10);
+  recentChanges = [entry, ...recentChanges.filter(c => c.id !== entry.id)].slice(0, 20);
   saveRecentChangesLocal();
   renderRecentChanges();
 }
@@ -659,7 +689,7 @@ async function loadRecentChanges() {
       .from('activity_log')
       .select('id,entity,action,title,author,created_at')
       .order('created_at', { ascending: false })
-      .limit(10);
+      .limit(20);
 
     if (error) throw error;
     recentChanges = data || [];
@@ -791,6 +821,7 @@ async function loadNotes() {
       notes = data;
     }
     idx = 0;
+    await ensureNote15Made();
     renderNote();
   } catch (e) {
     console.error('Error cargando notas:', e);
@@ -798,6 +829,23 @@ async function loadNotes() {
     notes = DEFAULT_NOTES.map(n => ({ ...n, id: null, author: 'Noel' }));
     idx = 0;
     renderNote();
+  }
+}
+
+async function ensureNote15Made() {
+  // One-time correction requested: note #15 was written by Made.
+  if (!notes || notes.length < 15) return;
+
+  const note15 = notes[14];
+  if (!note15 || !note15.id || note15.author === 'Made') return;
+
+  note15.author = 'Made';
+
+  try {
+    const { error } = await sb.from('notes').update({ author: 'Made' }).eq('id', note15.id);
+    if (error) throw error;
+  } catch (e) {
+    console.warn('No se pudo actualizar la nota #15 a Made:', e);
   }
 }
 
@@ -906,6 +954,38 @@ const SURPRISE_MESSAGES = [
   'Que lo bueno del día no pase desapercibido.'
 ];
 
+
+function isMadeReasonText(text) {
+  const normalized = String(text || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+  return normalized.includes('me amas como a nadie') ||
+         normalized.includes('tus brazos son mi refugio') ||
+         normalized.includes('me ensenaste cosas que no conocia');
+}
+
+async function ensureSpecificReasonMade() {
+  const target = reasons.find(reason => isMadeReasonText(reason.text));
+  if (!target || !target.id || target.author === 'Made') return;
+
+  target.author = 'Made';
+  window.lastLocalReasonUpdateAt = Date.now();
+
+  try {
+    const { error } = await sb.from('reasons').update({ author: 'Made' }).eq('id', target.id);
+    if (error) throw error;
+  } catch (e) {
+    console.warn('No se pudo actualizar esa razón a Made:', e);
+  }
+}
+
+function getReasonAuthor(reason) {
+  if (isMadeReasonText(reason.text)) return 'Made';
+  return reason.author || 'Noel';
+}
+
 function renderReasons() {
   const container = document.getElementById('reasonsList');
   container.innerHTML = '';
@@ -932,6 +1012,10 @@ function renderReasons() {
     textEl.className = 'reason-text';
     textEl.textContent = reason.text;
 
+    const authorEl = document.createElement('div');
+    authorEl.className = 'reason-author';
+    authorEl.textContent = 'Agregada por ' + getReasonAuthor(reason) + (reason.created_at ? ' · ' + formatActivityTime(reason.created_at) : '');
+
     const actions = document.createElement('div');
     actions.className = 'reason-actions';
 
@@ -950,6 +1034,7 @@ function renderReasons() {
     actions.appendChild(editBtn);
     actions.appendChild(deleteBtn);
     content.appendChild(textEl);
+    content.appendChild(authorEl);
     content.appendChild(actions);
     item.appendChild(icon);
     item.appendChild(content);
@@ -968,11 +1053,12 @@ async function loadReasons() {
   }
 
   if (!data || data.length === 0) {
-    await sb.from('reasons').insert(DEFAULT_REASONS.map(text => ({ text })));
+    await sb.from('reasons').insert(DEFAULT_REASONS.map(text => ({ text, author: 'Noel' })));
     return loadReasons();
   }
 
   reasons = data;
+  await ensureSpecificReasonMade();
   renderReasons();
 }
 
@@ -1008,28 +1094,52 @@ function startEditReason(id, text, item) {
 
 async function saveReason(id, text) {
   if (!text) return;
+  const current = reasons.find(reason => reason.id === id);
+  const author = current ? getReasonAuthor(current) : 'Noel';
+  window.lastLocalReasonUpdateAt = Date.now();
   const { error } = await sb.from('reasons').update({ text }).eq('id', id);
   if (error) { showToast('Error al actualizar'); return; }
   await loadReasons();
   showToast('Razón actualizada');
+  logRecentChange({ entity: 'reason', action: 'updated', title: text.slice(0, 40), author });
 }
 
 async function deleteReason(id) {
   if (!confirm('¿Eliminar esta razón?')) return;
+  const deletedReason = reasons.find(reason => reason.id === id);
+  window.lastLocalReasonDeleteAt = Date.now();
   const { error } = await sb.from('reasons').delete().eq('id', id);
   if (error) { showToast('Error al eliminar'); return; }
   await loadReasons();
   showToast('Razón eliminada');
+  logRecentChange({
+    entity: 'reason',
+    action: 'deleted',
+    title: deletedReason ? deletedReason.text.slice(0, 40) : 'Razón eliminada',
+    author: deletedReason ? getReasonAuthor(deletedReason) : ''
+  });
 }
 
 async function addReason() {
   const text = document.getElementById('newReasonText').value.trim();
   if (!text) return;
-  const { error } = await sb.from('reasons').insert({ text });
-  if (error) { showToast('Error'); return; }
+
+  const authorEl = document.getElementById('newReasonAuthor');
+  const author = authorEl ? authorEl.value : 'Noel';
+
+  window.lastLocalReasonInsertAt = Date.now();
+  const { error } = await sb.from('reasons').insert({ text, author });
+  if (error) {
+    console.error('Error agregando razón:', error);
+    showToast('Error');
+    return;
+  }
+
   document.getElementById('newReasonText').value = '';
+  if (authorEl) authorEl.value = 'Noel';
   await loadReasons();
-  showToast('Razón agregada 💜');
+  showToast('Razón agregada por ' + author + ' 💜');
+  logRecentChange({ entity: 'reason', action: 'added', title: text.slice(0, 40), author });
 }
 
 function toggleReasonsForm() {
@@ -1111,6 +1221,65 @@ function getCategoryLabel(category) {
   return info.icon + ' ' + info.label;
 }
 
+
+function getRecurrenceLabel(recurrence) {
+  if (recurrence === 'monthly') return 'Se repite cada mes';
+  if (recurrence === 'yearly') return 'Se repite cada año';
+  return 'No se repite';
+}
+
+function eventOccursOnDate(evt, dateString) {
+  if (!evt || !evt.event_date) return false;
+  if (evt.event_date === dateString) return true;
+
+  const recurrence = evt.recurrence || 'none';
+  if (recurrence === 'none') return false;
+
+  const base = parseLocalDate(evt.event_date);
+  const current = parseLocalDate(dateString);
+  if (current < base) return false;
+
+  if (recurrence === 'monthly') {
+    return current.getDate() === base.getDate();
+  }
+
+  if (recurrence === 'yearly') {
+    return current.getMonth() === base.getMonth() && current.getDate() === base.getDate();
+  }
+
+  return false;
+}
+
+function withOccurrenceDate(evt, dateString) {
+  return {
+    ...evt,
+    occurrence_date: dateString,
+    is_recurring_occurrence: (evt.recurrence || 'none') !== 'none' && evt.event_date !== dateString
+  };
+}
+
+function getCalendarEventsForDate(dateString) {
+  return calendarEvents
+    .filter(evt => eventOccursOnDate(evt, dateString))
+    .map(evt => withOccurrenceDate(evt, dateString));
+}
+
+function getUpcomingCalendarEvents(limit = 5) {
+  const today = parseLocalDate(toISODate(new Date()));
+  const upcoming = [];
+
+  for (let offset = 0; offset <= 370 && upcoming.length < limit * 2; offset++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + offset);
+    const dateString = toISODate(d);
+    getCalendarEventsForDate(dateString).forEach(evt => upcoming.push(evt));
+  }
+
+  return upcoming
+    .sort((a, b) => parseLocalDate(a.occurrence_date || a.event_date) - parseLocalDate(b.occurrence_date || b.event_date))
+    .slice(0, limit);
+}
+
 function getDateBadge(eventDate) {
   const event = parseLocalDate(eventDate);
   const today = new Date();
@@ -1180,7 +1349,7 @@ function renderMonthCalendar() {
     cellDate.setDate(startDate.getDate() + i);
 
     const dateString = toISODate(cellDate);
-    const dayEvents = calendarEvents.filter(evt => evt.event_date === dateString);
+    const dayEvents = getCalendarEventsForDate(dateString);
 
     const cell = document.createElement('button');
     cell.type = 'button';
@@ -1219,10 +1388,8 @@ function renderSelectedDayPanel() {
   const panel = document.getElementById('selectedDayPanel');
   if (!panel) return;
 
-  const selectedEvents = calendarEvents.filter(evt => evt.event_date === selectedCalendarDate);
-  const upcomingEvents = calendarEvents
-    .filter(evt => evt.event_date >= toISODate(new Date()))
-    .slice(0, 4);
+  const selectedEvents = getCalendarEventsForDate(selectedCalendarDate);
+  const upcomingEvents = getUpcomingCalendarEvents(5);
 
   panel.innerHTML = '';
 
@@ -1230,19 +1397,13 @@ function renderSelectedDayPanel() {
   title.textContent = 'Fechas próximas';
   panel.appendChild(title);
 
-  const addBtn = document.createElement('button');
-  addBtn.type = 'button';
-  addBtn.className = 'upload-btn calendar-add-main';
-  addBtn.innerHTML = '<i class="ti ti-plus"></i> Agregar evento';
-  addBtn.onclick = () => openCalendarForm(selectedCalendarDate);
-  panel.appendChild(addBtn);
 
   const list = selectedEvents.length ? selectedEvents : upcomingEvents;
 
   if (!list.length) {
     const empty = document.createElement('div');
     empty.className = 'selected-day-empty';
-    empty.innerHTML = 'No hay fechas guardadas todavía.<br>Selecciona una fecha y toca "Agregar evento".';
+    empty.innerHTML = 'No hay fechas guardadas todavía.<br>Selecciona una fecha y usa el botón "Agregar evento" de arriba.';
     panel.appendChild(empty);
     return;
   }
@@ -1256,7 +1417,8 @@ function createCalendarEventCard(evt) {
 
   const badge = document.createElement('div');
   badge.className = 'cal-event-badge';
-  badge.textContent = getDateBadge(evt.event_date);
+  const displayDate = evt.occurrence_date || evt.event_date;
+  badge.textContent = getDateBadge(displayDate);
 
   const importance = document.createElement('div');
   importance.className = 'cal-event-importance';
@@ -1268,7 +1430,7 @@ function createCalendarEventCard(evt) {
 
   const dateEl = document.createElement('div');
   dateEl.className = 'cal-event-date';
-  dateEl.textContent = formatDisplayDate(evt.event_date);
+  dateEl.textContent = formatDisplayDate(displayDate);
 
   const category = document.createElement('div');
   category.className = 'cal-event-category';
@@ -1279,6 +1441,13 @@ function createCalendarEventCard(evt) {
   el.appendChild(importance);
   el.appendChild(title);
   el.appendChild(dateEl);
+
+  if ((evt.recurrence || 'none') !== 'none') {
+    const recurrenceEl = document.createElement('div');
+    recurrenceEl.className = 'cal-event-date';
+    recurrenceEl.textContent = getRecurrenceLabel(evt.recurrence);
+    el.appendChild(recurrenceEl);
+  }
 
   if (evt.note) {
     const note = document.createElement('div');
@@ -1346,6 +1515,7 @@ function clearCalendarForm(resetDate = true) {
   document.getElementById('calendarCategory').value = 'cita';
   document.getElementById('calendarImportance').value = 'media';
   document.getElementById('calendarReminder').value = '3';
+  document.getElementById('calendarRecurrence').value = 'none';
   editingEventId = null;
 }
 
@@ -1357,6 +1527,7 @@ async function saveCalendarEvent() {
   const category = document.getElementById('calendarCategory').value;
   const importance = document.getElementById('calendarImportance').value;
   const reminderDays = parseInt(document.getElementById('calendarReminder').value, 10);
+  const recurrence = document.getElementById('calendarRecurrence').value;
 
   if (!eventDate) {
     showToast('Selecciona una fecha');
@@ -1372,7 +1543,8 @@ async function saveCalendarEvent() {
     author,
     category,
     importance,
-    reminder_days: reminderDays
+    reminder_days: reminderDays,
+    recurrence
   };
 
   if (editingEventId) {
@@ -1417,6 +1589,7 @@ function editCalendarEvent(id) {
   document.getElementById('calendarCategory').value = evt.category || 'cita';
   document.getElementById('calendarImportance').value = evt.importance || 'media';
   document.getElementById('calendarReminder').value = evt.reminder_days || 3;
+  document.getElementById('calendarRecurrence').value = evt.recurrence || 'none';
 
   document.getElementById('calendarForm').classList.add('open');
   renderMonthCalendar();
@@ -1446,26 +1619,9 @@ async function deleteCalendarEvent(id) {
 }
 
 function checkCalendarReminders() {
-  const today = toISODate(new Date());
-  const todayDate = parseLocalDate(today);
-
-  calendarEvents.forEach(evt => {
-    const reminderDays = Number(evt.reminder_days || 3);
-    const eventDate = parseLocalDate(evt.event_date);
-    const daysUntil = Math.floor((eventDate - todayDate) / 86400000);
-
-    if (daysUntil < 0 || daysUntil > reminderDays) return;
-
-    const reminderKey = 'togethr_calendar_reminder_' + evt.id + '_' + today;
-    if (localStorage.getItem(reminderKey)) return;
-
-    let msg = '';
-    if (daysUntil === 0) msg = 'Hoy: ' + evt.title;
-    else if (daysUntil === 1) msg = 'Mañana: ' + evt.title;
-    else msg = 'En ' + daysUntil + ' días: ' + evt.title;
-
-    localStorage.setItem(reminderKey, '1');
-  });
+  // Calendar reminders are kept quiet on app open. The dates still appear in the
+  // Fechas próximas panel and in the Notificaciones / cambios recientes list.
+  return;
 }
 
 // ── Tabs ───────────────────────────────────────────────────────────────────
@@ -1662,7 +1818,12 @@ document.addEventListener('keydown', e => {
 
 // ── Init ───────────────────────────────────────────────────────────────────
 window.lastLocalNoteInsertAt = 0;
+window.lastLocalNoteDeleteAt = 0;
 window.lastLocalCalendarInsertAt = 0;
+window.lastLocalCalendarDeleteAt = 0;
+window.lastLocalReasonInsertAt = 0;
+window.lastLocalReasonUpdateAt = 0;
+window.lastLocalReasonDeleteAt = 0;
 
 // Realtime subscriptions
 sb.channel('notes_channel')
@@ -1699,6 +1860,48 @@ sb.channel('calendar_channel')
       }
     }
     loadCalendarEvents();
+  })
+  .subscribe();
+
+
+sb.channel('reasons_channel')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'reasons' }, (payload) => {
+    if (payload.eventType === 'INSERT') {
+      const isLocal = (Date.now() - window.lastLocalReasonInsertAt) < 1500;
+      if (!isLocal) {
+        addRecentChangeLocal({
+          entity: 'reason',
+          action: 'added',
+          title: (payload.new.text || '').slice(0, 40),
+          author: payload.new.author || 'Noel',
+          created_at: payload.new.created_at || new Date().toISOString()
+        });
+      }
+      loadReasons();
+    } else if (payload.eventType === 'UPDATE') {
+      const isLocal = (Date.now() - window.lastLocalReasonUpdateAt) < 1500;
+      if (!isLocal) {
+        addRecentChangeLocal({
+          entity: 'reason',
+          action: 'updated',
+          title: (payload.new.text || '').slice(0, 40),
+          author: payload.new.author || 'Noel',
+          created_at: new Date().toISOString()
+        });
+      }
+      loadReasons();
+    } else if (payload.eventType === 'DELETE') {
+      const isLocal = (Date.now() - window.lastLocalReasonDeleteAt) < 1500;
+      if (!isLocal) {
+        addRecentChangeLocal({
+          entity: 'reason',
+          action: 'deleted',
+          title: 'Razón eliminada',
+          created_at: new Date().toISOString()
+        });
+      }
+      loadReasons();
+    }
   })
   .subscribe();
 
