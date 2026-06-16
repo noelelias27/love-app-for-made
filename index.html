@@ -148,10 +148,16 @@
     .cal-event-actions .del-btn:active { background: #fff1f1; }
 
 
-    .notify-card { background: #fff; border-radius: 16px; border: 0.5px solid #ede9fe; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .notify-card strong { display: block; font-size: 13px; color: #6b21a8; margin-bottom: 3px; }
-    .notify-card span { display: block; font-size: 12px; color: #a78bfa; line-height: 1.35; }
-    .notify-card button { background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; border: none; border-radius: 18px; padding: 8px 12px; font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+    .activity-card { background: #fff; border-radius: 16px; border: 0.5px solid #ede9fe; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .activity-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .activity-head strong { display: block; font-size: 13px; color: #6b21a8; margin-bottom: 3px; }
+    .activity-head span { display: block; font-size: 12px; color: #a78bfa; line-height: 1.35; }
+    .activity-head button { background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; border: none; border-radius: 18px; padding: 8px 12px; font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+    .activity-list { display: flex; flex-direction: column; gap: 8px; }
+    .activity-item { border: 0.5px solid #f3e8ff; border-radius: 12px; padding: 9px 10px; background: #fdf4ff; }
+    .activity-item strong { display: block; font-size: 12px; color: #6b21a8; margin-bottom: 2px; }
+    .activity-item span { display: block; font-size: 11px; color: #a78bfa; line-height: 1.35; }
+    .activity-empty { color: #c4b5fd; font-size: 13px; line-height: 1.45; text-align: center; padding: 10px 4px; }
 
     .add-form-row { flex-wrap: wrap; }
     .note-add-row select { flex: 1 1 140px !important; min-width: 0; }
@@ -200,6 +206,7 @@
     .cal-event.imp-alta { border-left-color: #ec4899; background: #fff; }
     .cal-event.imp-muy_alta { border-left-color: #6d28d9; background: #fff; }
     .cal-event-importance { display: inline-block; font-size: 11px; color: #7c3aed; background: #f3e8ff; border-radius: 10px; padding: 3px 8px; margin-bottom: 8px; }
+    .cal-event-category { display: inline-block; font-size: 11px; color: #6b21a8; background: #ede9fe; border-radius: 10px; padding: 3px 8px; margin: 0 6px 8px 0; }
     .cal-event-actions { flex-wrap: wrap; }
     .cal-event-actions button { flex: 1 1 90px; }
 
@@ -214,8 +221,8 @@
       .add-btn,
       .calendar-form-row select,
       .calendar-actions-row .add-btn { width: 100%; flex: 1 1 auto !important; }
-      .notify-card { flex-direction: column; align-items: stretch; }
-      .notify-card button { width: 100%; }
+      .activity-head { flex-direction: column; align-items: stretch; }
+      .activity-head button { width: 100%; }
       .calendar-day { min-height: 58px; padding: 5px 3px; border-radius: 10px; }
       .event-pill { font-size: 8px; padding: 2px 3px; }
     }
@@ -303,7 +310,7 @@
   </div>
 
   <div class="tabs">
-    <button class="tab on" onclick="switchTab('notes',this)">💌 Notas</button>
+    <button class="tab on" onclick="switchTab('notes',this)">💌 Inicio</button>
     <button class="tab" onclick="switchTab('us',this)">💜 Nosotros</button>
     <button class="tab" onclick="switchTab('moments',this)">📸 Momentos</button>
     <button class="tab" onclick="switchTab('calendar',this)">🗓️ Calendario</button>
@@ -338,12 +345,17 @@
       </div>
     </div>
 
-    <div class="notify-card" id="notifyCard">
-      <div>
-        <strong>Notificaciones</strong>
-        <span id="notifyStatus">Recibe avisos cuando llegue una nota o una fecha importante.</span>
+    <div class="activity-card" id="activityCard">
+      <div class="activity-head">
+        <div>
+          <strong>Notificaciones</strong>
+          <span>Lista de cambios recientes</span>
+        </div>
+        <button type="button" onclick="loadRecentChanges()">Actualizar</button>
       </div>
-      <button onclick="requestNotificationPermission()">Activar</button>
+      <div class="activity-list" id="recentChangesList">
+        <div class="activity-empty">Aún no hay cambios recientes.</div>
+      </div>
     </div>
 
     <div class="surprise-box">
@@ -448,7 +460,7 @@
       </button>
       <div>
         <h4 id="calendarMonthLabel">Calendario</h4>
-        <p>Toca un día para agregar una fecha especial</p>
+        <p>Selecciona una fecha para ver sus detalles</p>
       </div>
       <button class="cal-nav-btn" onclick="changeCalendarMonth(1)" aria-label="Mes siguiente">
         <i class="ti ti-chevron-right"></i>
@@ -456,7 +468,7 @@
     </div>
 
     <button class="upload-btn calendar-add-main" onclick="openCalendarForm()">
-      <i class="ti ti-plus"></i> Agregar fecha
+      <i class="ti ti-plus"></i> Agregar evento
     </button>
 
     <div class="calendar-form" id="calendarForm">
@@ -465,6 +477,16 @@
       <textarea id="calendarNote" placeholder="Nota o descripción (opcional)"></textarea>
 
       <div class="calendar-form-row">
+        <select id="calendarCategory" aria-label="Etiqueta de la fecha">
+          <option value="cita" selected>🌙 Cita</option>
+          <option value="cumpleanos">🎂 Cumpleaños</option>
+          <option value="cumple_mes">💜 Cumple mes</option>
+          <option value="sexo">🔥 Sexo</option>
+          <option value="viaje">✈️ Viaje</option>
+          <option value="familia">🏡 Familia</option>
+          <option value="recordatorio">🔔 Recordatorio</option>
+          <option value="otro">🗓️ Otro</option>
+        </select>
         <select id="calendarAuthor">
           <option value="Noel">Noel 💜</option>
           <option value="Made">Made 💜</option>
@@ -503,7 +525,7 @@
 
   <div class="nav">
     <button class="nav-it on" id="nav-notes" onclick="switchTab('notes',null,this)">
-      <i class="ti ti-heart"></i>Notas
+      <i class="ti ti-heart"></i>Inicio
     </button>
     <button class="nav-it" id="nav-us" onclick="switchTab('us',null,this)">
       <i class="ti ti-users"></i>Nosotros
@@ -548,6 +570,122 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+
+const RECENT_CHANGES_KEY = 'togethr_recent_changes';
+let recentChanges = [];
+
+function getActivityText(change) {
+  const who = change.author ? ' por ' + change.author : '';
+  const title = change.title ? ': ' + change.title : '';
+
+  if (change.entity === 'note' && change.action === 'added') return 'Nota agregada' + who + title;
+  if (change.entity === 'note' && change.action === 'deleted') return 'Nota eliminada' + who + title;
+  if (change.entity === 'calendar' && change.action === 'added') return 'Fecha agregada' + who + title;
+  if (change.entity === 'calendar' && change.action === 'updated') return 'Fecha actualizada' + who + title;
+  if (change.entity === 'calendar' && change.action === 'deleted') return 'Fecha eliminada' + who + title;
+  return (change.title || 'Cambio reciente');
+}
+
+function formatActivityTime(value) {
+  const d = value ? new Date(value) : new Date();
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) + ' · ' +
+         d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+}
+
+function saveRecentChangesLocal() {
+  localStorage.setItem(RECENT_CHANGES_KEY, JSON.stringify(recentChanges.slice(0, 10)));
+}
+
+function loadRecentChangesLocal() {
+  try {
+    recentChanges = JSON.parse(localStorage.getItem(RECENT_CHANGES_KEY) || '[]');
+  } catch (e) {
+    recentChanges = [];
+  }
+}
+
+function renderRecentChanges() {
+  const list = document.getElementById('recentChangesList');
+  if (!list) return;
+
+  list.innerHTML = '';
+  const changes = recentChanges.slice(0, 8);
+
+  if (!changes.length) {
+    const empty = document.createElement('div');
+    empty.className = 'activity-empty';
+    empty.textContent = 'Aún no hay cambios recientes.';
+    list.appendChild(empty);
+    return;
+  }
+
+  changes.forEach(change => {
+    const item = document.createElement('div');
+    item.className = 'activity-item';
+
+    const title = document.createElement('strong');
+    title.textContent = getActivityText(change);
+
+    const meta = document.createElement('span');
+    meta.textContent = formatActivityTime(change.created_at);
+
+    item.appendChild(title);
+    item.appendChild(meta);
+    list.appendChild(item);
+  });
+}
+
+function addRecentChangeLocal(change) {
+  const entry = {
+    id: change.id || ('local_' + Date.now() + '_' + Math.random().toString(36).slice(2)),
+    entity: change.entity || 'app',
+    action: change.action || 'updated',
+    title: change.title || '',
+    author: change.author || '',
+    created_at: change.created_at || new Date().toISOString()
+  };
+
+  recentChanges = [entry, ...recentChanges.filter(c => c.id !== entry.id)].slice(0, 10);
+  saveRecentChangesLocal();
+  renderRecentChanges();
+}
+
+async function loadRecentChanges() {
+  try {
+    const { data, error } = await sb
+      .from('activity_log')
+      .select('id,entity,action,title,author,created_at')
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (error) throw error;
+    recentChanges = data || [];
+    saveRecentChangesLocal();
+  } catch (e) {
+    loadRecentChangesLocal();
+  }
+
+  renderRecentChanges();
+}
+
+async function logRecentChange(change) {
+  const entry = {
+    entity: change.entity,
+    action: change.action,
+    title: change.title || null,
+    author: change.author || null
+  };
+
+  addRecentChangeLocal({ ...entry, created_at: new Date().toISOString() });
+
+  try {
+    await sb.from('activity_log').insert(entry);
+  } catch (e) {
+    console.warn('No se pudo guardar el cambio reciente en Supabase:', e);
+  }
 }
 
 function updateNotificationButton() {
@@ -675,6 +813,7 @@ async function deleteNote() {
   if (idx >= notes.length) idx = notes.length - 1;
   animateNote();
   showToast('Nota eliminada');
+  logRecentChange({ entity: 'note', action: 'deleted', title: note.text.slice(0, 40), author: note.author || 'Noel' });
 }
 
 function toggleAdd() {
@@ -711,6 +850,7 @@ async function addNote() {
   idx = notes.length - 1;
   animateNote();
   showToast('Nota agregada por ' + author + ' 💜');
+  logRecentChange({ entity: 'note', action: 'added', title: txt.slice(0, 40), author });
 }
 
 function revealSurprise() {
@@ -950,6 +1090,27 @@ function getImportanceLabel(importance) {
   return 'Media';
 }
 
+
+const CALENDAR_CATEGORIES = {
+  cumpleanos: { label: 'Cumpleaños', icon: '🎂' },
+  cumple_mes: { label: 'Cumple mes', icon: '💜' },
+  sexo: { label: 'Sexo', icon: '🔥' },
+  cita: { label: 'Cita', icon: '🌙' },
+  viaje: { label: 'Viaje', icon: '✈️' },
+  familia: { label: 'Familia', icon: '🏡' },
+  recordatorio: { label: 'Recordatorio', icon: '🔔' },
+  otro: { label: 'Otro', icon: '🗓️' }
+};
+
+function getCategoryInfo(category) {
+  return CALENDAR_CATEGORIES[category] || CALENDAR_CATEGORIES.otro;
+}
+
+function getCategoryLabel(category) {
+  const info = getCategoryInfo(category);
+  return info.icon + ' ' + info.label;
+}
+
 function getDateBadge(eventDate) {
   const event = parseLocalDate(eventDate);
   const today = new Date();
@@ -975,7 +1136,6 @@ async function loadCalendarEvents() {
     calendarEvents = data || [];
     renderMonthCalendar();
     renderSelectedDayPanel();
-    checkCalendarReminders();
   } catch (e) {
     console.error('Error cargando fechas:', e);
     calendarEvents = [];
@@ -1030,7 +1190,6 @@ function renderMonthCalendar() {
     if (dateString === selectedCalendarDate) cell.classList.add('selected');
     cell.onclick = () => {
       selectCalendarDate(dateString);
-      openCalendarForm(dateString);
     };
 
     const number = document.createElement('div');
@@ -1041,7 +1200,7 @@ function renderMonthCalendar() {
     dayEvents.slice(0, 2).forEach(evt => {
       const pill = document.createElement('div');
       pill.className = 'event-pill ' + getImportanceClass(evt.importance);
-      pill.textContent = evt.title;
+      pill.textContent = getCategoryInfo(evt.category).icon + ' ' + evt.title;
       cell.appendChild(pill);
     });
 
@@ -1071,12 +1230,19 @@ function renderSelectedDayPanel() {
   title.textContent = 'Fechas próximas';
   panel.appendChild(title);
 
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.className = 'upload-btn calendar-add-main';
+  addBtn.innerHTML = '<i class="ti ti-plus"></i> Agregar evento';
+  addBtn.onclick = () => openCalendarForm(selectedCalendarDate);
+  panel.appendChild(addBtn);
+
   const list = selectedEvents.length ? selectedEvents : upcomingEvents;
 
   if (!list.length) {
     const empty = document.createElement('div');
     empty.className = 'selected-day-empty';
-    empty.innerHTML = 'No hay fechas guardadas todavía.<br>Toca un día del calendario para agregar una.';
+    empty.innerHTML = 'No hay fechas guardadas todavía.<br>Selecciona una fecha y toca "Agregar evento".';
     panel.appendChild(empty);
     return;
   }
@@ -1104,7 +1270,12 @@ function createCalendarEventCard(evt) {
   dateEl.className = 'cal-event-date';
   dateEl.textContent = formatDisplayDate(evt.event_date);
 
+  const category = document.createElement('div');
+  category.className = 'cal-event-category';
+  category.textContent = getCategoryLabel(evt.category);
+
   el.appendChild(badge);
+  el.appendChild(category);
   el.appendChild(importance);
   el.appendChild(title);
   el.appendChild(dateEl);
@@ -1172,29 +1343,34 @@ function clearCalendarForm(resetDate = true) {
   if (resetDate) document.getElementById('calendarDate').value = selectedCalendarDate || toISODate(new Date());
   document.getElementById('calendarNote').value = '';
   document.getElementById('calendarAuthor').value = 'Noel';
+  document.getElementById('calendarCategory').value = 'cita';
   document.getElementById('calendarImportance').value = 'media';
   document.getElementById('calendarReminder').value = '3';
   editingEventId = null;
 }
 
 async function saveCalendarEvent() {
-  const title = document.getElementById('calendarTitle').value.trim();
+  let title = document.getElementById('calendarTitle').value.trim();
   const eventDate = document.getElementById('calendarDate').value;
   const note = document.getElementById('calendarNote').value.trim();
   const author = document.getElementById('calendarAuthor').value;
+  const category = document.getElementById('calendarCategory').value;
   const importance = document.getElementById('calendarImportance').value;
   const reminderDays = parseInt(document.getElementById('calendarReminder').value, 10);
 
-  if (!title || !eventDate) {
-    showToast('Completa título y fecha');
+  if (!eventDate) {
+    showToast('Selecciona una fecha');
     return;
   }
+
+  if (!title) title = getCategoryInfo(category).label;
 
   const payload = {
     title,
     event_date: eventDate,
     note: note || null,
     author,
+    category,
     importance,
     reminder_days: reminderDays
   };
@@ -1207,6 +1383,7 @@ async function saveCalendarEvent() {
       return;
     }
     showToast('Fecha actualizada 💜');
+    logRecentChange({ entity: 'calendar', action: 'updated', title, author });
   } else {
     window.lastLocalCalendarInsertAt = Date.now();
     const { error } = await sb.from('calendar_events').insert(payload);
@@ -1216,6 +1393,7 @@ async function saveCalendarEvent() {
       return;
     }
     showToast('Fecha agregada por ' + author + ' 💜');
+    logRecentChange({ entity: 'calendar', action: 'added', title, author });
   }
 
   selectedCalendarDate = eventDate;
@@ -1236,6 +1414,7 @@ function editCalendarEvent(id) {
   document.getElementById('calendarDate').value = evt.event_date;
   document.getElementById('calendarNote').value = evt.note || '';
   document.getElementById('calendarAuthor').value = evt.author || 'Noel';
+  document.getElementById('calendarCategory').value = evt.category || 'cita';
   document.getElementById('calendarImportance').value = evt.importance || 'media';
   document.getElementById('calendarReminder').value = evt.reminder_days || 3;
 
@@ -1260,8 +1439,10 @@ async function deleteCalendarEvent(id) {
     return;
   }
 
+  const deletedEvent = calendarEvents.find(e => e.id === id);
   await loadCalendarEvents();
   showToast('Fecha eliminada');
+  logRecentChange({ entity: 'calendar', action: 'deleted', title: deletedEvent ? deletedEvent.title : '', author: deletedEvent ? deletedEvent.author : '' });
 }
 
 function checkCalendarReminders() {
@@ -1283,8 +1464,6 @@ function checkCalendarReminders() {
     else if (daysUntil === 1) msg = 'Mañana: ' + evt.title;
     else msg = 'En ' + daysUntil + ' días: ' + evt.title;
 
-    showToast(msg);
-    sendPhoneNotification('Togethr', msg);
     localStorage.setItem(reminderKey, '1');
   });
 }
@@ -1415,7 +1594,12 @@ function doInstall() {
 }
 function dismissInstall() { document.getElementById('installBanner').classList.remove('show'); }
 window.addEventListener('appinstalled', () => dismissInstall());
-if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
+if (
+  'serviceWorker' in navigator &&
+  (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+) {
+  navigator.serviceWorker.register('./sw.js').catch(err => console.warn('Service worker registration failed:', err));
+}
 
 // ── Splash ─────────────────────────────────────────────────────────────────
 (function() {
@@ -1486,17 +1670,13 @@ sb.channel('notes_channel')
     if (payload.eventType === 'INSERT') {
       const isLocal = (Date.now() - window.lastLocalNoteInsertAt) < 1500;
       if (!isLocal) {
-        const msg = 'Nueva nota de ' + (payload.new.author || 'Noel') + ' 💜';
-        showToast(msg);
-        sendPhoneNotification('Togethr', msg);
+        addRecentChangeLocal({ entity: 'note', action: 'added', title: (payload.new.text || '').slice(0, 40), author: payload.new.author || 'Noel' });
       }
       loadNotes();
     } else if (payload.eventType === 'DELETE') {
       const isLocal = (Date.now() - window.lastLocalNoteDeleteAt) < 1500;
       if (!isLocal) {
-        const msg = 'Una nota fue eliminada';
-        showToast(msg);
-        sendPhoneNotification('Togethr', msg);
+        addRecentChangeLocal({ entity: 'note', action: 'deleted', title: 'Nota eliminada' });
       }
       loadNotes();
     } else if (payload.eventType === 'UPDATE') {
@@ -1510,23 +1690,25 @@ sb.channel('calendar_channel')
     if (payload.eventType === 'INSERT') {
       const isLocal = (Date.now() - window.lastLocalCalendarInsertAt) < 1500;
       if (!isLocal) {
-        const msg = 'Nueva fecha agregada 💜';
-        showToast(msg);
-        sendPhoneNotification('Togethr', msg);
+        addRecentChangeLocal({ entity: 'calendar', action: 'added', title: payload.new.title || '', author: payload.new.author || '' });
       }
     } else if (payload.eventType === 'DELETE') {
       const isLocal = (Date.now() - window.lastLocalCalendarDeleteAt) < 1500;
       if (!isLocal) {
-        const msg = 'Una fecha fue eliminada';
-        showToast(msg);
-        sendPhoneNotification('Togethr', msg);
+        addRecentChangeLocal({ entity: 'calendar', action: 'deleted', title: 'Fecha eliminada' });
       }
     }
     loadCalendarEvents();
   })
   .subscribe();
 
-updateNotificationButton();
+sb.channel('activity_channel')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'activity_log' }, () => {
+    loadRecentChanges();
+  })
+  .subscribe();
+
+loadRecentChanges();
 loadNotes();
 loadPhotos();
 loadReasons();
