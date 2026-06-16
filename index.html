@@ -78,6 +78,351 @@
     .rvl-txt { font-family: 'Playfair Display', serif; font-size: 15px; color: #6b21a8; font-style: italic; line-height: 1.7; display: none; animation: fadeIn .5s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
+
+    .pet-card {
+      position: relative;
+      background: linear-gradient(180deg, #fff 0%, #fdf4ff 100%);
+      border: 0.5px solid #d8b4fe;
+      border-radius: 24px;
+      padding: 16px;
+      overflow: hidden;
+      box-shadow: 0 18px 44px rgba(124,58,237,.12);
+    }
+    .pet-card-glow {
+      position: absolute;
+      top: -80px;
+      right: -60px;
+      width: 190px;
+      height: 190px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(244,114,182,.18), rgba(168,85,247,.10) 55%, transparent 70%);
+      pointer-events: none;
+    }
+    .pet-top { position: relative; z-index: 1; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .pet-kicker { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: #a855f7; font-weight: 600; margin-bottom: 4px; }
+    .pet-top h3 { font-family: 'Playfair Display', serif; font-size: 28px; color: #581c87; font-weight: 600; line-height: 1.1; }
+    .pet-top p { font-size: 12px; color: #a78bfa; margin-top: 4px; line-height: 1.35; }
+    .pet-top select {
+      border: 0.5px solid #d8b4fe;
+      border-radius: 18px;
+      padding: 8px 11px;
+      font-size: 12px;
+      font-family: inherit;
+      color: #7c3aed;
+      background: rgba(255,255,255,.88);
+      outline: none;
+      min-width: 90px;
+    }
+    .pet-page-intro-simple { padding: 14px 16px; text-align: center; }
+    .pet-page-intro-simple span { margin: 0; color: #7c3aed; font-size: 12px; letter-spacing: 1.6px; }
+    .pet-name-editor { display: flex; gap: 8px; margin-top: 12px; position: relative; z-index: 1; }
+    .pet-name-editor input {
+      flex: 1;
+      border: 0.5px solid #e9d5ff;
+      border-radius: 16px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: #4c1d95;
+      background: rgba(255,255,255,.9);
+      outline: none;
+    }
+    .pet-name-editor input:focus { border-color: #a855f7; box-shadow: 0 0 0 3px rgba(168,85,247,.12); }
+    .pet-name-editor button {
+      border: none;
+      border-radius: 16px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      background: linear-gradient(135deg, #c084fc, #7c3aed);
+    }
+    .pet-stage {
+      position: relative;
+      z-index: 1;
+      margin: 14px 0 10px;
+      min-height: 215px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      background: linear-gradient(180deg, #ece8ff 0%, #f7e8ff 100%);
+      border: 0.5px solid #d8b4fe;
+      border-radius: 24px;
+      padding: 12px 10px 12px;
+      overflow: hidden;
+    }
+    .pet-stage::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 18% 22%, rgba(255,255,255,.55) 0 4px, transparent 5px),
+        radial-gradient(circle at 80% 18%, rgba(255,255,255,.45) 0 3px, transparent 4px),
+        radial-gradient(circle at 62% 72%, rgba(255,255,255,.35) 0 3px, transparent 4px);
+      pointer-events: none;
+    }
+    .pet-aura { position: absolute; width: 175px; height: 135px; border-radius: 50%; background: radial-gradient(circle, rgba(216,180,254,.72), rgba(244,114,182,.10) 55%, rgba(255,255,255,0) 72%); animation: petPulse 2.4s ease-in-out infinite; top: 52px; }
+    .pet-scene { position: relative; width: 220px; height: 138px; display: flex; align-items: flex-end; justify-content: center; }
+    .pet-ground { position: absolute; bottom: 8px; width: 132px; height: 12px; border-radius: 50%; background: rgba(76,29,149,.17); filter: blur(2px); }
+    .pet-prop { position: absolute; left: 18px; bottom: 24px; font-size: 28px; z-index: 6; opacity: 0; transform: translateY(8px) scale(.9); transition: opacity .25s ease, transform .25s ease; }
+    .pet-prop.show { opacity: 1; transform: translateY(0) scale(1); animation: propPop .65s ease; }
+    .pet-prop.right { left: auto; right: 18px; }
+
+    .toon-husky {
+      position: relative;
+      width: 160px;
+      height: 128px;
+      z-index: 3;
+      transform-origin: center bottom;
+      animation: petFloat 3s ease-in-out infinite;
+      filter: drop-shadow(0 8px 0 rgba(76,29,149,.10));
+    }
+    .toon-husky.pet-bounce { animation: petBounce .55s ease; }
+    .toon-husky .bubble {
+      position: absolute;
+      right: 8px;
+      top: -2px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 2px solid #44308e;
+      background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      box-shadow: 0 5px 14px rgba(124,58,237,.12);
+      transform: scale(.9);
+      opacity: 0;
+    }
+    .toon-husky .bubble::after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      bottom: -4px;
+      width: 10px;
+      height: 10px;
+      background: #fff;
+      border-left: 2px solid #44308e;
+      border-bottom: 2px solid #44308e;
+      transform: rotate(-15deg);
+      border-bottom-left-radius: 8px;
+    }
+    .toon-husky .tail {
+      position: absolute;
+      right: 17px;
+      bottom: 49px;
+      width: 38px;
+      height: 12px;
+      background: #7873d8;
+      border: 3px solid #44308e;
+      border-left: none;
+      border-radius: 0 12px 16px 0;
+      transform-origin: left center;
+      transform: rotate(18deg);
+      animation: tailWag .95s ease-in-out infinite;
+      z-index: 1;
+    }
+    .toon-husky .body {
+      position: absolute;
+      left: 42px;
+      bottom: 26px;
+      width: 78px;
+      height: 58px;
+      background: linear-gradient(180deg, #8580e0 0%, #6e69d0 100%);
+      border: 3px solid #44308e;
+      border-radius: 28px 28px 20px 20px;
+      z-index: 2;
+    }
+    .toon-husky .body::before {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 12px;
+      width: 38px;
+      height: 39px;
+      background: #fbfbff;
+      border-radius: 18px 18px 16px 16px;
+      border: 3px solid #44308e;
+    }
+    .toon-husky .leg, .toon-husky .backleg {
+      position: absolute;
+      bottom: -4px;
+      width: 17px;
+      height: 28px;
+      background: #fdfdff;
+      border: 3px solid #44308e;
+      border-radius: 11px;
+    }
+    .toon-husky .leg.left { left: 17px; }
+    .toon-husky .leg.right { right: 17px; }
+    .toon-husky .backleg.left { left: 4px; z-index: -1; background: #dcdafc; }
+    .toon-husky .backleg.right { right: 4px; z-index: -1; background: #dcdafc; }
+    .toon-husky .paw {
+      position: absolute;
+      bottom: -6px;
+      width: 21px;
+      height: 12px;
+      background: #fff;
+      border: 3px solid #44308e;
+      border-radius: 9px;
+    }
+    .toon-husky .paw.one { left: 15px; }
+    .toon-husky .paw.two { left: 42px; }
+    .toon-husky .paw.three { left: 94px; }
+    .toon-husky .paw.four { left: 118px; }
+    .toon-husky .head {
+      position: absolute;
+      left: 30px;
+      top: 10px;
+      width: 88px;
+      height: 78px;
+      background: linear-gradient(180deg, #8580e0 0%, #736ed5 100%);
+      border: 3px solid #44308e;
+      border-radius: 36px;
+      z-index: 4;
+    }
+    .toon-husky .ear {
+      position: absolute;
+      top: -18px;
+      width: 24px;
+      height: 34px;
+      background: #7c78dd;
+      border: 3px solid #44308e;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    }
+    .toon-husky .ear.left { left: 10px; transform: rotate(-12deg); }
+    .toon-husky .ear.right { right: 10px; transform: rotate(12deg); }
+    .toon-husky .ear::after {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 8px;
+      width: 10px;
+      height: 18px;
+      background: #f4a0c3;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    }
+    .toon-husky .face {
+      position: absolute;
+      left: 12px;
+      top: 16px;
+      width: 58px;
+      height: 52px;
+      background: #fff;
+      border: 3px solid #44308e;
+      border-radius: 26px;
+    }
+    .toon-husky .mask {
+      position: absolute;
+      top: 14px;
+      width: 24px;
+      height: 24px;
+      background: #5853b8;
+      border-radius: 50%;
+      z-index: 0;
+    }
+    .toon-husky .mask.left { left: 10px; }
+    .toon-husky .mask.right { right: 10px; }
+    .toon-husky .eye {
+      position: absolute;
+      top: 17px;
+      width: 10px;
+      height: 14px;
+      background: #23175e;
+      border-radius: 50%;
+      z-index: 2;
+      animation: blinkDog 5s infinite;
+    }
+    .toon-husky .eye.left { left: 16px; }
+    .toon-husky .eye.right { right: 16px; }
+    .toon-husky .eye::after {
+      content: '';
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      width: 4px; height: 4px; border-radius: 50%; background: #fff;
+    }
+    .toon-husky .nose {
+      position: absolute;
+      left: 50%; top: 25px;
+      width: 12px; height: 9px;
+      background: #23175e;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+    }
+    .toon-husky .mouth {
+      position: absolute;
+      left: 50%; top: 35px;
+      width: 30px; height: 16px;
+      transform: translateX(-50%);
+      z-index: 2;
+    }
+    .toon-husky .mouth::before, .toon-husky .mouth::after {
+      content: '';
+      position: absolute;
+      top: 0; width: 14px; height: 10px;
+      border-bottom: 3px solid #23175e;
+      border-radius: 0 0 12px 12px;
+    }
+    .toon-husky .mouth::before { left: 1px; transform: rotate(10deg); }
+    .toon-husky .mouth::after { right: 1px; transform: rotate(-10deg); }
+    .toon-husky .tongue {
+      position: absolute;
+      left: 50%; top: 42px;
+      width: 10px; height: 12px;
+      border-radius: 0 0 8px 8px;
+      background: #fb7185;
+      transform: translateX(-50%);
+      z-index: 2;
+    }
+    .toon-husky.happy .bubble,
+    .toon-husky.playing .bubble { opacity: 1; animation: bubblePop 1.5s ease infinite; }
+    .toon-husky.eating .head { animation: nibble .42s ease-in-out infinite; }
+    .toon-husky.playing { animation: petPlay .8s ease-in-out infinite; }
+    .toon-husky.playing .tail { animation-duration: .42s; }
+    .toon-husky.resting .eye, .toon-husky.sleepy .eye { height: 3px; top: 22px; border-radius: 999px; animation: none; }
+    .toon-husky.resting .tongue, .toon-husky.sleepy .tongue { opacity: 0; }
+    .toon-husky.resting { transform: translateY(6px) rotate(-2deg); }
+    .toon-husky.hungry .tongue { opacity: 0; }
+    .toon-husky.hungry .mouth::before, .toon-husky.hungry .mouth::after { border-bottom-color: #ec4899; }
+
+    .pet-mood-badge { margin-top: 6px; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #6b21a8; background: rgba(255,255,255,.86); border: 0.5px solid #e9d5ff; border-radius: 999px; padding: 7px 12px; }
+    .pet-speech { position: relative; margin-top: 8px; color: #6b21a8; font-size: 12px; max-width: 92%; text-align: center; line-height: 1.38; min-height: 34px; }
+
+    @keyframes petPulse { 0%,100% { transform: scale(.96); opacity: .75; } 50% { transform: scale(1.08); opacity: 1; } }
+    @keyframes petFloat { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-6px) rotate(2deg); } }
+    @keyframes petBounce { 0% { transform: translateY(0) scale(1); } 40% { transform: translateY(-12px) scale(1.05); } 100% { transform: translateY(0) scale(1); } }
+    @keyframes petPlay { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-8px) rotate(3deg); } }
+    @keyframes tailWag { 0%,100% { transform: rotate(18deg); } 50% { transform: rotate(-10deg); } }
+    @keyframes nibble { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(3px) rotate(2deg); } }
+    @keyframes propPop { 0% { transform: translateY(8px) scale(.75); } 60% { transform: translateY(-4px) scale(1.18); } 100% { transform: translateY(0) scale(1); } }
+    @keyframes bubblePop { 0%,100% { transform: scale(.86) translateY(0); opacity: .9; } 50% { transform: scale(1.08) translateY(-4px); opacity: 1; } }
+    @keyframes blinkDog { 0%,92%,100% { transform: scaleY(1); } 95% { transform: scaleY(.15); } }
+
+    .pet-actions { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    .pet-actions button {
+      border: none;
+      border-radius: 16px;
+      padding: 11px 8px;
+      font-size: 12px;
+      color: #fff;
+      font-family: inherit;
+      cursor: pointer;
+      background: linear-gradient(135deg, #c084fc, #7c3aed);
+      box-shadow: 0 8px 18px rgba(124,58,237,.18);
+    }
+    .pet-actions button:active { transform: scale(.98); }
+    .pet-stats { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .pet-stat { background: rgba(255,255,255,.78); border: 0.5px solid #f3e8ff; border-radius: 14px; padding: 9px; }
+    .pet-stat span { display: block; color: #6b21a8; font-size: 12px; font-weight: 600; margin-bottom: 7px; }
+    .pet-stat small { display: block; color: #a78bfa; font-size: 11px; margin-top: 5px; text-align: right; }
+    .pet-bar { height: 8px; border-radius: 999px; background: #f3e8ff; overflow: hidden; }
+    .pet-bar div { height: 100%; width: 0%; border-radius: inherit; background: linear-gradient(90deg, #c084fc, #7c3aed); transition: width .35s ease; }
+    .pet-last { position: relative; z-index: 1; margin-top: 11px; color: #a78bfa; font-size: 12px; text-align: center; line-height: 1.35; }
+
     .us-intro { background: #fff; border-radius: 18px; border: 0.5px solid #ede9fe; padding: 18px; }
     .us-origin { font-family: 'Playfair Display', serif; font-size: 15px; color: #7c3aed; font-style: italic; text-align: center; line-height: 1.6; margin-bottom: 14px; }
     .days-hero { text-align: center; padding: 4px 0; }
@@ -186,14 +531,15 @@
 
     .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 11px; color: #a855f7; font-weight: 600; padding: 0 2px; }
     .calendar-grid-month { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-    .calendar-day { min-height: 66px; background: #fff; border: 0.5px solid #ede9fe; border-radius: 12px; padding: 6px 4px; cursor: pointer; display: flex; flex-direction: column; gap: 3px; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+    .calendar-day { min-height: 70px; background: #fff; border: 0.5px solid #ede9fe; border-radius: 12px; padding: 6px 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; overflow: hidden; -webkit-tap-highlight-color: transparent; }
     .calendar-day:active { background: #f3e8ff; }
     .calendar-day.outside { opacity: 0.38; }
     .calendar-day.today { border-color: #a855f7; box-shadow: 0 0 0 1px rgba(168,85,247,.18); }
     .calendar-day.selected { background: #f3e8ff; border-color: #7c3aed; }
-    .cal-day-number { font-size: 12px; color: #6b21a8; font-weight: 600; line-height: 1; }
-    .event-pill { font-size: 9px; line-height: 1.1; color: #fff; padding: 3px 4px; border-radius: 7px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-    .event-more { font-size: 9px; color: #7c3aed; padding-left: 2px; }
+    .cal-day-number { font-size: 12px; color: #6b21a8; font-weight: 700; line-height: 1; align-self: flex-start; margin-left: 2px; }
+    .event-pill { width: 24px; height: 19px; color: #fff; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; line-height: 1; box-shadow: 0 2px 5px rgba(76,29,149,.18); flex: 0 0 auto; }
+    .event-pill:active { transform: scale(.96); }
+    .event-more { font-size: 10px; color: #7c3aed; font-weight: 700; line-height: 1; }
     .imp-baja { background: #c4b5fd; }
     .imp-media { background: #8b5cf6; }
     .imp-alta { background: #ec4899; }
@@ -225,8 +571,8 @@
       .calendar-actions-row .add-btn { width: 100%; flex: 1 1 auto !important; }
       .activity-head { flex-direction: column; align-items: stretch; }
       .activity-head button { width: 100%; }
-      .calendar-day { min-height: 58px; padding: 5px 3px; border-radius: 10px; }
-      .event-pill { font-size: 8px; padding: 2px 3px; }
+      .calendar-day { min-height: 62px; padding: 5px 3px; border-radius: 10px; }
+      .event-pill { width: 22px; height: 18px; font-size: 10px; }
     }
 
 
@@ -264,6 +610,34 @@
     .lb-counter { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); color: #d8b4fe; font-size: 13px; z-index: 9000; }
 
 
+
+    /* Update: stronger note display + Nosotros memory slideshow */
+    .note-card { overflow: hidden !important; min-height: 190px; }
+    .note-body { display: block !important; min-height: 74px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 280px; overflow-y: auto; padding-right: 4px; }
+    .note-body.compact { font-size: 15px; line-height: 1.6; }
+    .note-body.long { font-size: 14px; line-height: 1.5; }
+    .note-body::-webkit-scrollbar { width: 6px; }
+    .note-body::-webkit-scrollbar-thumb { background: #d8b4fe; border-radius: 999px; }
+    .note-attr { display: block !important; }
+    .note-nav { flex-wrap: wrap; }
+    .note-pos { min-width: 46px; text-align: center; }
+    .memory-slideshow { background: linear-gradient(135deg, #fdf4ff, #ede9fe); border: 0.5px solid #d8b4fe; border-radius: 20px; padding: 10px; margin-bottom: 16px; box-shadow: 0 12px 35px rgba(124,58,237,.10); }
+    .memory-slide-frame { position: relative; min-height: 230px; border-radius: 17px; overflow: hidden; background: radial-gradient(circle at top left, #f5d0fe, #a78bfa 55%, #7c3aed); cursor: pointer; }
+    .memory-slide-frame img { width: 100%; height: 230px; object-fit: cover; display: block; opacity: 0; transform: scale(1.02); transition: opacity .55s ease, transform .55s ease; }
+    .memory-slide-frame.has-photo img { opacity: 1; transform: scale(1); }
+    .memory-slide-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #fff; gap: 6px; padding: 22px; }
+    .memory-slide-placeholder span { font-size: 42px; filter: drop-shadow(0 5px 12px rgba(76,29,149,.25)); }
+    .memory-slide-placeholder strong { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 500; }
+    .memory-slide-placeholder small { color: #f3e8ff; font-size: 13px; line-height: 1.4; }
+    .memory-slide-frame.has-photo .memory-slide-placeholder { display: none; }
+    .memory-slide-glow { position: absolute; inset: 0; background: linear-gradient(to top, rgba(59,7,100,.78), rgba(59,7,100,.05) 55%, rgba(255,255,255,.05)); pointer-events: none; }
+    .memory-slide-caption { position: absolute; left: 16px; right: 16px; bottom: 14px; color: #fff; z-index: 2; }
+    .memory-slide-caption span { display: inline-block; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: #e9d5ff; margin-bottom: 4px; }
+    .memory-slide-caption strong { display: block; font-family: 'Playfair Display', serif; font-size: 23px; line-height: 1.2; font-weight: 500; text-shadow: 0 2px 14px rgba(59,7,100,.5); }
+    .memory-dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+    .memory-dot { width: 7px; height: 7px; border-radius: 999px; border: none; background: #d8b4fe; opacity: .7; cursor: pointer; padding: 0; }
+    .memory-dot.on { width: 20px; background: #7c3aed; opacity: 1; }
+
     /* Static layout update: fixed header feel + only bottom icons/nav */
     html, body { height: 100%; overflow: hidden; }
     body { align-items: stretch; }
@@ -290,6 +664,280 @@
     .nav-it { opacity: .7; }
     .nav-it.on { opacity: 1; font-weight: 600; }
     .nav-it.on i { filter: drop-shadow(0 2px 5px rgba(124,58,237,.28)); }
+  
+
+    /* Update: Momentos edit mode + liked photos + smoother slideshow */
+    .moments-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+    .moment-author-select { border: 0.5px solid #d8b4fe; border-radius: 18px; padding: 8px 10px; font-size: 12px; font-family: inherit; color: #7c3aed; background: rgba(255,255,255,.86); outline: none; min-width: 96px; }
+    .moment-author-select:focus { border-color: #a855f7; box-shadow: 0 0 0 3px rgba(168,85,247,.12); }
+    .edit-photos-btn { background: linear-gradient(135deg, #f0abfc, #a855f7); }
+    .moments-editbar { display: none; align-items: center; justify-content: space-between; gap: 8px; background: #fff; border: 0.5px solid #ede9fe; border-radius: 16px; padding: 10px 12px; color: #7c3aed; font-size: 12px; }
+    .moments-editbar.show { display: flex; flex-wrap: wrap; }
+    .moments-editbar span { color: #a855f7; font-weight: 500; }
+    .bulk-delete-btn, .cancel-edit-btn { border: 0.5px solid #d8b4fe; border-radius: 18px; padding: 8px 12px; font-size: 12px; font-family: inherit; cursor: pointer; background: #fff; color: #7c3aed; }
+    .bulk-delete-btn { background: #fff1f2; border-color: #fda4af; color: #e11d48; }
+    .bulk-delete-btn:disabled { opacity: .45; cursor: not-allowed; }
+    .cancel-edit-btn { background: #f3e8ff; }
+    .photo-cell { cursor: pointer; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+    .photo-cell:active { transform: scale(.98); }
+    .photo-cell .del-btn { display: none !important; }
+    .photo-cell .like-btn { position: absolute; right: 6px; bottom: 6px; width: 30px; height: 30px; border-radius: 999px; border: none; background: rgba(255,255,255,.86); color: #c084fc; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 3; box-shadow: 0 4px 12px rgba(59,7,100,.18); -webkit-tap-highlight-color: transparent; }
+    .photo-cell .like-btn i { font-size: 18px; }
+    .photo-cell.liked .like-btn { background: linear-gradient(135deg, #fdf2f8, #fce7f3); color: #ec4899; }
+    .photo-cell.liked::after { content: ''; position: absolute; inset: 0; border: 2px solid rgba(236,72,153,.45); border-radius: 12px; pointer-events: none; }
+    .photo-check { position: absolute; top: 6px; left: 6px; width: 28px; height: 28px; border-radius: 999px; border: 2px solid rgba(255,255,255,.9); background: rgba(76,29,149,.35); color: #fff; display: none; align-items: center; justify-content: center; z-index: 4; box-shadow: 0 4px 14px rgba(59,7,100,.25); }
+    .photo-cell.editing .photo-check { display: flex; }
+    .photo-cell.selected { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,.22); }
+    .photo-cell.selected .photo-check { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+    .photo-cell.editing img { filter: saturate(.85); }
+    .memory-slide-frame img { transition: opacity .85s ease, transform 1.25s ease, filter .85s ease !important; will-change: opacity, transform, filter; }
+    .memory-slide-frame img.slide-fading { opacity: 0 !important; transform: scale(1.05) !important; filter: blur(4px); }
+    .memory-slide-glow, .memory-slide-caption { display: none !important; }
+
+
+    /* Update: dedicated virtual pet tab */
+    .pet-page-intro {
+      background: linear-gradient(135deg, #fdf4ff, #ede9fe);
+      border: 0.5px solid #d8b4fe;
+      border-radius: 20px;
+      padding: 16px;
+      color: #6b21a8;
+      box-shadow: 0 10px 28px rgba(124,58,237,.08);
+    }
+    .pet-page-intro span {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #a855f7;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    .pet-page-intro h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #581c87;
+    }
+    .pet-page-intro p {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #8b5cf6;
+    }
+    .pet-name-editor {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .pet-name-editor input {
+      flex: 1 1 170px;
+      min-width: 0;
+      border: 0.5px solid #d8b4fe;
+      border-radius: 14px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      color: #4c1d95;
+      background: rgba(255,255,255,.82);
+      outline: none;
+    }
+    .pet-name-editor input:focus {
+      border-color: #a855f7;
+      box-shadow: 0 0 0 3px rgba(168,85,247,.12);
+    }
+    .pet-name-editor button {
+      flex: 1 1 120px;
+      border: none;
+      border-radius: 14px;
+      padding: 9px 12px;
+      background: linear-gradient(135deg, #a855f7, #7c3aed);
+      color: #fff;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .nav { gap: 2px; }
+    .nav-it { flex: 1; min-width: 0; font-size: 10px; }
+    .nav-it i { font-size: 23px; }
+    #nav-pet i { color: #a855f7; }
+
+  
+    /* Realistic Zeus update */
+    .pet-card { padding: 14px; }
+    .pet-stage {
+      min-height: 245px !important;
+      background: radial-gradient(circle at 50% 35%, rgba(255,255,255,.9), rgba(237,233,254,.92) 48%, rgba(216,180,254,.35));
+    }
+    .pet-scene { width: 100%; height: 178px; display: flex; align-items: center; justify-content: center; }
+    .real-husky {
+      width: min(92%, 275px);
+      height: 185px;
+      position: relative;
+      z-index: 3;
+      overflow: visible;
+      transform-origin: center bottom;
+      animation: petFloat 3s ease-in-out infinite;
+      filter: drop-shadow(0 14px 18px rgba(76,29,149,.18));
+    }
+    .real-husky.pet-bounce { animation: petBounce .55s ease; }
+    .real-husky .dog-tail { transform-origin: 185px 130px; animation: tailWagReal 1.05s ease-in-out infinite; }
+    .real-husky .dog-bubble { opacity: 0; transform-origin: 204px 43px; }
+    .real-husky.happy .dog-bubble,
+    .real-husky.playing .dog-bubble { opacity: 1; animation: bubblePopReal 1.45s ease-in-out infinite; }
+    .real-husky.eating .dog-head { animation: realisticNibble .45s ease-in-out infinite; transform-origin: 130px 96px; }
+    .real-husky.playing { animation: realisticPlay .8s ease-in-out infinite; }
+    .real-husky.playing .dog-tail { animation-duration: .42s; }
+    .real-husky.resting .dog-eye,
+    .real-husky.sleepy .dog-eye { transform: scaleY(.22); transform-origin: center; }
+    .real-husky.resting .dog-tongue,
+    .real-husky.sleepy .dog-tongue { opacity: 0; }
+    .real-husky.resting { transform: translateY(8px) rotate(-2deg); }
+    .real-husky.hungry .dog-mouth { stroke: #ec4899; }
+    .pet-actions { grid-template-columns: repeat(3, 1fr) !important; margin-top: 12px !important; }
+    .pet-actions button { padding: 12px 8px !important; font-size: 12px !important; }
+    .pet-stats { grid-template-columns: 1fr 1fr !important; margin-top: 12px !important; }
+    .pet-stat { padding: 9px !important; }
+    .pet-mood-badge { margin-top: 4px !important; }
+    .pet-speech { min-height: 32px; }
+    @keyframes tailWagReal { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(-10deg); } }
+    @keyframes bubblePopReal { 0%,100% { transform: scale(.9) translateY(0); opacity: .88; } 50% { transform: scale(1.08) translateY(-5px); opacity: 1; } }
+    @keyframes realisticNibble { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(5px) rotate(2deg); } }
+    @keyframes realisticPlay { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
+
+  
+    /* Emoji Zeus update */
+    .pet-page-intro-simple { display: none !important; }
+    .pet-name-editor { display: none !important; }
+    .emoji-pet-stage {
+      min-height: 245px !important;
+      padding: 18px 10px 14px !important;
+      background: radial-gradient(circle at 50% 35%, rgba(255,255,255,.96), rgba(237,233,254,.95) 48%, rgba(216,180,254,.38)) !important;
+      overflow: hidden;
+    }
+    .emoji-pet-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 18% 24%, rgba(255,255,255,.55) 0 4px, transparent 5px),
+        radial-gradient(circle at 78% 20%, rgba(255,255,255,.48) 0 3px, transparent 4px),
+        radial-gradient(circle at 58% 76%, rgba(255,255,255,.36) 0 3px, transparent 4px);
+      pointer-events: none;
+    }
+    .emoji-pet-wrap {
+      position: relative;
+      width: 210px;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+    .emoji-pet {
+      position: relative;
+      z-index: 4;
+      font-size: 96px;
+      line-height: 1;
+      transform-origin: center bottom;
+      filter: drop-shadow(0 16px 16px rgba(76,29,149,.22));
+      animation: emojiPetIdle 2.7s ease-in-out infinite;
+      transition: transform .2s ease, filter .2s ease;
+    }
+    .emoji-pet.pet-bounce { animation: emojiPetBounce .55s ease; }
+    .emoji-pet.eating { animation: emojiPetEat .55s ease-in-out infinite; }
+    .emoji-pet.playing { animation: emojiPetPlay .65s ease-in-out infinite; }
+    .emoji-pet.resting, .emoji-pet.sleepy { animation: emojiPetRest 2s ease-in-out infinite; transform: rotate(-8deg) translateY(8px); }
+    .emoji-pet.resting::after, .emoji-pet.sleepy::after { content: 'zzz'; position: absolute; top: -8px; right: -16px; font-size: 26px; font-weight: 700; color: #60a5fa; letter-spacing: -2px; text-transform: lowercase; animation: emojiSleepFloat 1.8s ease-in-out infinite; text-shadow: 0 2px 8px rgba(96,165,250,.25); }
+    .emoji-pet.happy { filter: drop-shadow(0 16px 16px rgba(236,72,153,.25)); }
+    .emoji-pet-prop {
+      position: absolute;
+      z-index: 5;
+      right: 32px;
+      top: 66px;
+      font-size: 38px;
+      opacity: 0;
+      transform: translateY(8px) scale(.8);
+      transition: opacity .22s ease, transform .22s ease;
+      pointer-events: none;
+    }
+    .emoji-pet-prop.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      animation: emojiPropPop .7s ease;
+    }
+    .emoji-pet-prop.left { right: auto; left: 30px; }
+    .emoji-pet-effect {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      pointer-events: none;
+    }
+    .emoji-fx {
+      position: absolute;
+      font-size: 21px;
+      animation: emojiFloatUp .95s ease forwards;
+      filter: drop-shadow(0 3px 5px rgba(76,29,149,.18));
+    }
+    .emoji-pet-shadow {
+      position: absolute;
+      bottom: 18px;
+      width: 116px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(76,29,149,.18);
+      filter: blur(2px);
+      z-index: 1;
+    }
+    .emoji-pet-actions {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 9px !important;
+      margin-top: 12px !important;
+    }
+    .emoji-pet-actions button {
+      padding: 12px 10px !important;
+      font-size: 13px !important;
+      border-radius: 18px !important;
+    }
+    .pet-stats { grid-template-columns: 1fr 1fr !important; }
+    @keyframes emojiPetIdle {
+      0%, 100% { transform: translateY(0) rotate(-1deg); }
+      50% { transform: translateY(-7px) rotate(2deg); }
+    }
+    @keyframes emojiPetBounce {
+      0% { transform: translateY(0) scale(1); }
+      40% { transform: translateY(-18px) scale(1.08); }
+      100% { transform: translateY(0) scale(1); }
+    }
+    @keyframes emojiPetEat {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(4px) scale(1.04); }
+    }
+    @keyframes emojiPetPlay {
+      0%, 100% { transform: translateX(0) translateY(0) rotate(-5deg); }
+      50% { transform: translateX(10px) translateY(-13px) rotate(8deg); }
+    }
+    @keyframes emojiPetRest {
+      0%, 100% { transform: rotate(-8deg) translateY(8px); opacity: .86; }
+      50% { transform: rotate(-8deg) translateY(12px); opacity: 1; }
+    }
+    @keyframes emojiSleepFloat {
+      0%, 100% { transform: translateY(0) scale(1); opacity: .8; }
+      50% { transform: translateY(-6px) scale(1.08); opacity: 1; }
+    }
+    @keyframes emojiPropPop {
+      0% { transform: translateY(8px) scale(.6); }
+      60% { transform: translateY(-5px) scale(1.18); }
+      100% { transform: translateY(0) scale(1); }
+    }
+    @keyframes emojiFloatUp {
+      0% { transform: translateY(18px) scale(.7); opacity: 0; }
+      18% { opacity: 1; }
+      100% { transform: translateY(-58px) scale(1.25); opacity: 0; }
+    }
+
   </style>
 </head>
 <body>
@@ -326,6 +974,7 @@
 
   <div class="tabs">
     <button class="tab on" onclick="switchTab('notes',this)">💌 Inicio</button>
+    <button class="tab" onclick="switchTab('pet',this)">🐾 Mascota</button>
     <button class="tab" onclick="switchTab('us',this)">💜 Nosotros</button>
     <button class="tab" onclick="switchTab('moments',this)">📸 Momentos</button>
     <button class="tab" onclick="switchTab('calendar',this)">🗓️ Calendario</button>
@@ -373,19 +1022,89 @@
       </div>
     </div>
 
-    <div class="surprise-box">
-      <div class="s-icon">🎁</div>
-      <h3>Toca aquí</h3>
-      <p>Ábrela cuando estés lista</p>
-      <button class="rvl-btn" id="rvlBtn" onclick="revealSurprise()">Ábrela 💜</button>
-      <div class="rvl-txt" id="rvlTxt"></div>
+  </div>
+
+  <!-- MASCOTA -->
+  <div class="page" id="page-pet">
+<div class="pet-card" id="petCard">
+      <div class="pet-card-glow"></div>
+
+      <div class="pet-top">
+        <div>
+          <div class="pet-kicker">Mascota Virtual</div>
+          <h3 id="petName">Zeus</h3>
+          <p id="petMoodText">Cargando su estado...</p>
+        </div>
+        <select id="petActor" aria-label="Quién cuida a Zeus">
+          <option value="Noel">Noel</option>
+          <option value="Made">Made</option>
+        </select>
+      </div>
+<div class="pet-stage emoji-pet-stage" onclick="petBounce()">
+        <div class="emoji-pet-bg"></div>
+        <div class="emoji-pet-wrap" id="emojiPetWrap">
+          <div class="emoji-pet-effect" id="emojiPetEffect"></div>
+          <div class="emoji-pet-prop" id="petProp"></div>
+          <div class="emoji-pet" id="petDog" role="img" aria-label="Zeus">🐶</div>
+          <div class="emoji-pet-shadow"></div>
+        </div>
+        <div class="pet-mood-badge" id="petMoodBadge">🐶 Zeus listo</div>
+        <div class="pet-speech" id="petSpeech">Toca una acción para cuidar a Zeus juntos.</div>
+      </div>
+
+      <div class="pet-actions emoji-pet-actions">
+        <button type="button" onclick="careForPet('feed')">🦴 Alimentar</button>
+        <button type="button" onclick="careForPet('play')">🎾 Jugar</button>
+        <button type="button" onclick="careForPet('pet')">💖 Acariciar</button>
+        <button type="button" onclick="careForPet('rest')">💤 Dormir</button>
+      </div>
+
+      <div class="pet-stats">
+        <div class="pet-stat">
+          <span>Amor</span>
+          <div class="pet-bar"><div id="petLoveFill"></div></div>
+          <small id="petLoveValue">—</small>
+        </div>
+        <div class="pet-stat">
+          <span>Comida</span>
+          <div class="pet-bar"><div id="petFoodFill"></div></div>
+          <small id="petFoodValue">—</small>
+        </div>
+        <div class="pet-stat">
+          <span>Diversión</span>
+          <div class="pet-bar"><div id="petFunFill"></div></div>
+          <small id="petFunValue">—</small>
+        </div>
+        <div class="pet-stat">
+          <span>Energía</span>
+          <div class="pet-bar"><div id="petEnergyFill"></div></div>
+          <small id="petEnergyValue">—</small>
+        </div>
+      </div>
+
+      <div class="pet-last" id="petLastAction">Zeus está esperando cariño.</div>
     </div>
   </div>
 
   <!-- NOSOTROS -->
   <div class="page" id="page-us">
     <div class="us-intro">
-      <div class="us-origin">"El día después de que conquistaste tu tesis,<br>también conquistaste mi corazón."</div>
+      <div class="memory-slideshow" id="memorySlideshow">
+        <div class="memory-slide-frame" id="memorySlideFrame" onclick="openCurrentMemorySlide()">
+          <img id="memorySlideImg" alt="recuerdo" />
+          <div class="memory-slide-placeholder" id="memorySlidePlaceholder">
+            <span>💜</span>
+            <strong>Nuestros recuerdos</strong>
+            <small>Agrega fotos en Momentos para verlas aquí.</small>
+          </div>
+          <div class="memory-slide-glow"></div>
+          <div class="memory-slide-caption">
+            <span>Memorias</span>
+            <strong id="memorySlideTitle">Nuestros momentos favoritos</strong>
+          </div>
+        </div>
+        <div class="memory-dots" id="memoryDots"></div>
+      </div>
       <div class="days-hero">
         <div class="days-num" id="daysNum">—</div>
         <div class="days-lbl">días juntos desde el 7 de marzo, 2026</div>
@@ -461,9 +1180,21 @@
   <div class="page" id="page-moments">
     <div class="moments-header">
       <h4>Nuestros recuerdos</h4>
-      <button class="upload-btn" onclick="document.getElementById('photoInput').click()">
-        <i class="ti ti-upload"></i> Agregar foto
+      <div class="moments-actions">
+        <button class="upload-btn" onclick="document.getElementById('photoInput').click()">
+          <i class="ti ti-upload"></i> Agregar foto
+        </button>
+        <button class="upload-btn edit-photos-btn" id="editPhotosBtn" onclick="togglePhotoEditMode()">
+          <i class="ti ti-edit"></i> Editar
+        </button>
+      </div>
+    </div>
+    <div class="moments-editbar" id="momentsEditbar">
+      <span id="selectedPhotosCount">0 seleccionadas</span>
+      <button class="bulk-delete-btn" id="deleteSelectedPhotosBtn" onclick="deleteSelectedPhotos()" disabled>
+        <i class="ti ti-trash"></i> Eliminar seleccionadas
       </button>
+      <button class="cancel-edit-btn" onclick="togglePhotoEditMode(false)">Cancelar</button>
     </div>
     <input type="file" id="photoInput" accept="image/*" multiple onchange="addPhotos(event)" />
     <div class="photo-grid" id="photoGrid">
@@ -554,6 +1285,9 @@
     <button class="nav-it on" id="nav-notes" onclick="switchTab('notes',null,this)">
       <i class="ti ti-heart"></i>Inicio
     </button>
+    <button class="nav-it" id="nav-pet" onclick="switchTab('pet',null,this)">
+      <i class="ti ti-paw"></i>Mascota
+    </button>
     <button class="nav-it" id="nav-us" onclick="switchTab('us',null,this)">
       <i class="ti ti-users"></i>Nosotros
     </button>
@@ -603,6 +1337,14 @@ function showToast(msg) {
 const RECENT_CHANGES_KEY = 'togethr_recent_changes';
 let recentChanges = [];
 
+function shouldShowRecentChange(change) {
+  if (!change) return false;
+  // Photo like/delete activity was removed from the notifications list.
+  // The photo actions still work; they just don't create recent-change items.
+  if (change.entity === 'photo' && ['deleted', 'liked', 'unliked'].includes(change.action)) return false;
+  return true;
+}
+
 function getActivityText(change) {
   const who = change.author ? ' por ' + change.author : '';
   const title = change.title ? ': ' + change.title : '';
@@ -615,6 +1357,9 @@ function getActivityText(change) {
   if (change.entity === 'calendar' && change.action === 'added') return 'Fecha agregada' + who + title;
   if (change.entity === 'calendar' && change.action === 'updated') return 'Fecha actualizada' + who + title;
   if (change.entity === 'calendar' && change.action === 'deleted') return 'Fecha eliminada' + who + title;
+  if (change.entity === 'photo' && change.action === 'added') return 'Foto agregada' + who + title;
+  if (change.entity === 'pet' && change.action === 'care') return 'Mascota cuidada' + who + title;
+  if (change.entity === 'pet' && change.action === 'name') return 'Nombre de mascota cambiado' + who + title;
   return (change.title || 'Cambio reciente');
 }
 
@@ -631,7 +1376,7 @@ function saveRecentChangesLocal() {
 
 function loadRecentChangesLocal() {
   try {
-    recentChanges = JSON.parse(localStorage.getItem(RECENT_CHANGES_KEY) || '[]');
+    recentChanges = JSON.parse(localStorage.getItem(RECENT_CHANGES_KEY) || '[]').filter(shouldShowRecentChange);
   } catch (e) {
     recentChanges = [];
   }
@@ -642,7 +1387,7 @@ function renderRecentChanges() {
   if (!list) return;
 
   list.innerHTML = '';
-  const changes = recentChanges.slice(0, 20);
+  const changes = recentChanges.filter(shouldShowRecentChange).slice(0, 20);
 
   if (!changes.length) {
     const empty = document.createElement('div');
@@ -669,6 +1414,8 @@ function renderRecentChanges() {
 }
 
 function addRecentChangeLocal(change) {
+  if (!shouldShowRecentChange(change)) return;
+
   const entry = {
     id: change.id || ('local_' + Date.now() + '_' + Math.random().toString(36).slice(2)),
     entity: change.entity || 'app',
@@ -692,7 +1439,7 @@ async function loadRecentChanges() {
       .limit(20);
 
     if (error) throw error;
-    recentChanges = data || [];
+    recentChanges = (data || []).filter(shouldShowRecentChange);
     saveRecentChangesLocal();
   } catch (e) {
     loadRecentChangesLocal();
@@ -702,6 +1449,8 @@ async function loadRecentChanges() {
 }
 
 async function logRecentChange(change) {
+  if (!shouldShowRecentChange(change)) return;
+
   const entry = {
     entity: change.entity,
     action: change.action,
@@ -784,9 +1533,27 @@ function sendPhoneNotification(title, body) {
 }
 
 function renderNote() {
-  if (!notes.length) return;
-  const n = notes[idx];
-  document.getElementById('noteText').textContent = '\u201c' + n.text + '\u201d';
+  const textEl = document.getElementById('noteText');
+  const attrEl = document.getElementById('noteAttr');
+  const labelEl = document.getElementById('noteLabel');
+  const posEl = document.getElementById('notePos');
+
+  if (!notes.length) {
+    textEl.textContent = 'No hay notas todavía. Agrega una para empezar 💜';
+    textEl.classList.remove('compact', 'long');
+    attrEl.textContent = '';
+    labelEl.textContent = 'inicio';
+    posEl.textContent = '0 / 0';
+    return;
+  }
+
+  if (idx < 0 || idx >= notes.length) idx = 0;
+  const n = notes[idx] || {};
+  const noteText = (n.text || '').trim() || 'Esta nota está vacía.';
+  textEl.textContent = '“' + noteText + '”';
+  textEl.classList.remove('compact', 'long');
+  if (noteText.length > 220) textEl.classList.add('long');
+  else if (noteText.length > 130) textEl.classList.add('compact');
 
   const attrText = (n.attr || '').trim();
   const isSenderAttr = /noel|made/i.test(attrText);
@@ -794,9 +1561,9 @@ function renderNote() {
   if (attrText && !isSenderAttr) parts.push(attrText);
   if (n.author) parts.push('Agregada por ' + n.author);
 
-  document.getElementById('noteAttr').textContent = parts.join(' • ');
-  document.getElementById('noteLabel').textContent = n.label || 'nota para ti';
-  document.getElementById('notePos').textContent = (idx + 1) + ' / ' + notes.length;
+  attrEl.textContent = parts.join(' • ');
+  labelEl.textContent = n.label || 'nota para ti';
+  posEl.textContent = (idx + 1) + ' / ' + notes.length;
 }
 function nextNote() { idx = (idx + 1) % notes.length; animateNote(); }
 function prevNote() { idx = (idx - 1 + notes.length) % notes.length; animateNote(); }
@@ -901,6 +1668,394 @@ async function addNote() {
   logRecentChange({ entity: 'note', action: 'added', title: txt.slice(0, 40), author });
 }
 
+
+// ── Couple pet ─────────────────────────────────────────────────────────────
+const PET_ID = 'main';
+let petState = null;
+let petVisualTimer = null;
+
+const DEFAULT_PET_STATE = {
+  id: PET_ID,
+  name: 'Zeus',
+  type: 'pet',
+  love: 78,
+  food: 72,
+  fun: 76,
+  energy: 74,
+  mood: 'jugueton',
+  last_action: 'Zeus llegó a Togethr',
+  last_actor: '',
+  last_speech: 'Estoy listo para jugar, descansar o recibir cariño.',
+  last_visual: 'happy',
+  last_care_at: new Date().toISOString()
+};
+
+const PET_ACTIONS = {
+  feed: {
+    label: 'alimentó a Zeus',
+    toast: 'Zeus comió feliz 🦴',
+    speech: 'Ñam ñam... ese huesito estuvo perfecto.',
+    visual: 'eating',
+    emoji: '🐶',
+    prop: '🦴',
+    propSide: 'right',
+    fx: ['✨'],
+    delta: { food: 24, love: 4, fun: 1, energy: 2 }
+  },
+  play: {
+    label: 'jugó con Zeus',
+    toast: 'Zeus jugó un rato 🎾',
+    speech: '¡Eso estuvo divertido! Quiero seguir moviendo la cola.',
+    visual: 'playing',
+    emoji: '🐕',
+    prop: '🎾',
+    propSide: 'left',
+    fx: ['✨', '💫'],
+    delta: { fun: 25, love: 6, energy: -8, food: -4 }
+  },
+  pet: {
+    label: 'acarició a Zeus',
+    toast: 'Zeus recibió cariño 💖',
+    speech: 'Eso se sintió bonito. Me gusta cuando me cuidan así.',
+    visual: 'happy',
+    emoji: '🐶',
+    prop: '💖',
+    propSide: 'right',
+    fx: ['💖', '💜', '💕', '💗'],
+    delta: { love: 24, fun: 5, energy: 2, food: -1 }
+  },
+  rest: {
+    label: 'dejó descansar a Zeus',
+    toast: 'Zeus está descansando 💤',
+    speech: 'Zzz... una siestita para recuperar energía.',
+    visual: 'resting',
+    emoji: '🐶',
+    prop: '💤',
+    propSide: 'right',
+    fx: ['💤'],
+    delta: { energy: 25, love: 2, food: -3, fun: -1 }
+  }
+};
+
+function clampPetValue(value) {
+  return Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+}
+
+function normalizePetState(state) {
+  const normalizedName = state && state.name && state.name !== 'Toggy' ? state.name : 'Zeus';
+  return {
+    ...DEFAULT_PET_STATE,
+    ...(state || {}),
+    id: (state && state.id) || PET_ID,
+    name: normalizedName,
+    type: 'pet',
+    love: clampPetValue((state && state.love) ?? DEFAULT_PET_STATE.love),
+    food: clampPetValue((state && state.food) ?? DEFAULT_PET_STATE.food),
+    fun: clampPetValue((state && state.fun) ?? DEFAULT_PET_STATE.fun),
+    energy: clampPetValue((state && state.energy) ?? DEFAULT_PET_STATE.energy),
+    last_care_at: (state && state.last_care_at) || DEFAULT_PET_STATE.last_care_at,
+    last_speech: (state && state.last_speech) || DEFAULT_PET_STATE.last_speech,
+    last_visual: (state && state.last_visual) || DEFAULT_PET_STATE.last_visual
+  };
+}
+
+function getPetDisplayState(state) {
+  const normalized = normalizePetState(state);
+  const last = new Date(normalized.last_care_at);
+  const elapsedHours = Number.isNaN(last.getTime()) ? 0 : Math.max(0, (Date.now() - last.getTime()) / 3600000);
+  const decay = Math.min(28, Math.floor(elapsedHours / 6) * 3);
+
+  return normalizePetState({
+    ...normalized,
+    love: normalized.love - Math.floor(decay / 2),
+    food: normalized.food - decay,
+    fun: normalized.fun - decay,
+    energy: normalized.energy - Math.floor(decay * 0.85)
+  });
+}
+
+function getPetMood(state) {
+  const s = getPetDisplayState(state);
+  const low = Math.min(s.love, s.food, s.fun, s.energy);
+  const avg = (s.love + s.food + s.fun + s.energy) / 4;
+
+  if (s.food < 28) return { mood: 'con hambre', visual: 'hungry', badge: '🍖 Tiene hambre', text: 'Creo que necesito un snack urgentemente.' };
+  if (s.energy < 28) return { mood: 'con sueño', visual: 'sleepy', badge: '💤 Tiene sueño', text: 'Una siestita me vendría perfecto.' };
+  if (s.fun < 32) return { mood: 'aburrido', visual: 'playing', badge: '🎾 Quiere jugar', text: '¿Jugamos un ratito? Prometo correr muchísimo.' };
+  if (s.love < 32) return { mood: 'necesitando mimos', visual: 'happy', badge: '💜 Quiere cariño', text: 'Un abrazo me subiría el ánimo.' };
+  if (low >= 70 && avg >= 78) return { mood: 'feliz', visual: 'happy', badge: '🐺 Súper feliz', text: 'Estoy feliz de estar aquí con ustedes.' };
+  if (avg >= 60) return { mood: 'tranquilo', visual: 'idle', badge: '✨ Tranquilo', text: 'Estoy bien. Listo para lo que venga.' };
+  return { mood: 'atento', visual: 'idle', badge: '👀 Atento', text: 'Estoy observando todo, como buen perrito curioso.' };
+}
+
+function setPetFill(id, value) {
+  const fill = document.getElementById(id + 'Fill');
+  const label = document.getElementById(id + 'Value');
+  if (fill) fill.style.width = clampPetValue(value) + '%';
+  if (label) label.textContent = clampPetValue(value) + '%';
+}
+
+function setPetProp(content, side='left') {
+  const prop = document.getElementById('petProp');
+  if (!prop) return;
+  prop.className = 'emoji-pet-prop';
+  prop.textContent = content || '';
+  if (side === 'left') prop.classList.add('left');
+  if (content) {
+    prop.classList.add('show');
+    clearTimeout(petVisualTimer);
+    petVisualTimer = setTimeout(() => {
+      prop.classList.remove('show');
+      prop.textContent = '';
+    }, 1500);
+  }
+}
+
+function applyPetVisuals(visual, moodInfo) {
+  const pet = document.getElementById('petDog');
+  const badge = document.getElementById('petMoodBadge');
+  if (!pet) return;
+
+  pet.className = 'emoji-pet';
+  const finalVisual = visual || (moodInfo && moodInfo.visual) || 'idle';
+  if (finalVisual) pet.classList.add(finalVisual);
+  if (badge) badge.textContent = moodInfo?.badge || '🐶 Todo bien';
+}
+
+function renderPet() {
+  const card = document.getElementById('petCard');
+  if (!card) return;
+
+  const display = getPetDisplayState(petState || DEFAULT_PET_STATE);
+  const mood = getPetMood(display);
+  const visual = display.last_visual || mood.visual;
+
+  const nameEl = document.getElementById('petName');
+  const moodEl = document.getElementById('petMoodText');
+  const speechEl = document.getElementById('petSpeech');
+  const lastEl = document.getElementById('petLastAction');
+
+  if (nameEl) nameEl.textContent = display.name || 'Zeus';
+  const nameInput = document.getElementById('petNameInput');
+  if (nameInput && document.activeElement !== nameInput) nameInput.value = display.name || 'Zeus';
+  const actorSelect = document.getElementById('petActor');
+  if (actorSelect) actorSelect.setAttribute('aria-label', 'Quién cuida a ' + (display.name || 'Zeus'));
+  if (moodEl) moodEl.textContent = 'Estado: ' + mood.mood;
+  if (speechEl) speechEl.textContent = display.last_speech || mood.text;
+
+  applyPetVisuals(visual, mood);
+  const petEl = document.getElementById('petDog');
+  if (petEl) {
+    if (visual === 'playing') petEl.textContent = '🐕';
+    else petEl.textContent = '🐶';
+  }
+  setPetFill('petLove', display.love);
+  setPetFill('petFood', display.food);
+  setPetFill('petFun', display.fun);
+  setPetFill('petEnergy', display.energy);
+
+  if (lastEl) {
+    const actor = display.last_actor ? display.last_actor + ' · ' : '';
+    lastEl.textContent = actor + (display.last_action || ((display.name || 'Zeus') + ' está esperando cariño.'));
+  }
+}
+
+function emitPetEffects(items) {
+  const box = document.getElementById('emojiPetEffect');
+  if (!box || !items || !items.length) return;
+
+  items.forEach((symbol, i) => {
+    const el = document.createElement('span');
+    el.className = 'emoji-fx';
+    el.textContent = symbol;
+    el.style.left = (50 + (Math.random() * 70 - 35)) + '%';
+    el.style.top = (70 + (Math.random() * 34 - 17)) + 'px';
+    el.style.animationDelay = (i * 0.06) + 's';
+    box.appendChild(el);
+    setTimeout(() => el.remove(), 1050);
+  });
+}
+
+function petBounce() {
+  const pet = document.getElementById('petDog');
+  const display = getPetDisplayState(petState || DEFAULT_PET_STATE);
+  const petName = display.name || 'Zeus';
+  const mood = getPetMood(display);
+  const randomLines = {
+    hungry: ['¿Tienes un huesito para mí?', 'Creo que escuché comida...'],
+    sleepy: ['Solo cierro los ojos un momento.', 'Una siesta nunca cae mal.'],
+    playing: ['¡Vamos a jugar!', 'Tengo energía para correr.'],
+    happy: ['Estoy feliz contigo.', 'Hoy me siento querido.'],
+    idle: ['Estoy aquí con ustedes.', 'Muevo la colita cuando me saludan.']
+  };
+  const key = mood.visual || 'idle';
+  const lines = randomLines[key] || randomLines.idle;
+  const line = lines[Math.floor(Math.random() * lines.length)];
+
+  if (pet) {
+    pet.classList.remove('pet-bounce');
+    void pet.offsetWidth;
+    pet.classList.add('pet-bounce');
+  }
+
+  emitPetEffects(['✨']);
+  const speechEl = document.getElementById('petSpeech');
+  if (speechEl) speechEl.textContent = petName + ': ' + line;
+}
+
+async function loadPetState() {
+  let loaded = null;
+  try {
+    const { data, error } = await sb
+      .from('pet_state')
+      .select('*')
+      .eq('id', PET_ID)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data) {
+      const { data: created, error: createError } = await sb
+        .from('pet_state')
+        .upsert(DEFAULT_PET_STATE)
+        .select()
+        .single();
+      if (createError) throw createError;
+      loaded = created || DEFAULT_PET_STATE;
+    } else {
+      loaded = data;
+    }
+  } catch (e) {
+    console.warn('No se pudo cargar Zeus desde Supabase:', e);
+    loaded = JSON.parse(localStorage.getItem('togethr_pet_state') || 'null') || DEFAULT_PET_STATE;
+  }
+
+  petState = normalizePetState(loaded);
+
+  const needsAutoRename = !petState.name || petState.name === 'Toggy';
+  if (needsAutoRename) {
+    petState.name = 'Zeus';
+    petState.last_action = 'actualizó su identidad husky';
+    petState.last_speech = 'Ahora soy Zeus, su mascota virtual.';
+  }
+
+  localStorage.setItem('togethr_pet_state', JSON.stringify(petState));
+  renderPet();
+
+  if (needsAutoRename) {
+    try {
+      await sb.from('pet_state').upsert(petState);
+    } catch (e) {
+      console.warn('No se pudo guardar el nombre Zeus:', e);
+    }
+  }
+}
+
+async function careForPet(action) {
+  const config = PET_ACTIONS[action];
+  if (!config) return;
+
+  const actor = document.getElementById('petActor')?.value || 'Noel';
+  const base = getPetDisplayState(petState || DEFAULT_PET_STATE);
+  const petName = base.name || 'Zeus';
+  const actionLabel = config.label.replace('Zeus', petName);
+  const toastText = config.toast.replace('Zeus', petName);
+  const now = new Date().toISOString();
+
+  const next = normalizePetState({
+    ...base,
+    love: base.love + (config.delta.love || 0),
+    food: base.food + (config.delta.food || 0),
+    fun: base.fun + (config.delta.fun || 0),
+    energy: base.energy + (config.delta.energy || 0),
+    mood: getPetMood(base).mood,
+    last_action: actionLabel,
+    last_actor: actor,
+    last_speech: config.speech,
+    last_visual: config.visual,
+    last_care_at: now
+  });
+
+  petState = next;
+  localStorage.setItem('togethr_pet_state', JSON.stringify(next));
+  renderPet();
+
+  const petEl = document.getElementById('petDog');
+  if (petEl && config.emoji) petEl.textContent = config.emoji;
+
+  setPetProp(config.prop, config.propSide || 'left');
+  emitPetEffects(config.fx || []);
+  petBounce();
+  showToast(toastText);
+  logRecentChange({ entity: 'pet', action: 'care', title: actionLabel, author: actor });
+
+  try {
+    const { data, error } = await sb
+      .from('pet_state')
+      .upsert(next)
+      .select()
+      .single();
+    if (error) throw error;
+    petState = normalizePetState(data || next);
+    localStorage.setItem('togethr_pet_state', JSON.stringify(petState));
+    renderPet();
+  } catch (e) {
+    console.warn('No se pudo guardar Zeus en Supabase:', e);
+  }
+}
+
+async function savePetName() {
+  const input = document.getElementById('petNameInput');
+  if (!input) return;
+
+  const newName = input.value.trim().slice(0, 24);
+  if (!newName) {
+    showToast('Escribe un nombre para la mascota');
+    return;
+  }
+
+  const actor = document.getElementById('petActor')?.value || 'Noel';
+  const base = normalizePetState(petState || DEFAULT_PET_STATE);
+  const oldName = base.name || 'Zeus';
+
+  if (newName === oldName) {
+    showToast('Ese ya es su nombre 💜');
+    return;
+  }
+
+  const next = normalizePetState({
+    ...base,
+    name: newName,
+    last_action: 'cambió el nombre de la mascota',
+    last_actor: actor,
+    last_speech: 'Ahora me llamo ' + newName + '.',
+    last_visual: 'happy',
+    last_care_at: new Date().toISOString()
+  });
+
+  petState = next;
+  localStorage.setItem('togethr_pet_state', JSON.stringify(next));
+  renderPet();
+  setPetProp('✨', 'right');
+  petBounce();
+  showToast('Ahora se llama ' + newName + ' 💜');
+  logRecentChange({ entity: 'pet', action: 'name', title: oldName + ' → ' + newName, author: actor });
+
+  try {
+    const { data, error } = await sb
+      .from('pet_state')
+      .upsert(next)
+      .select()
+      .single();
+    if (error) throw error;
+    petState = normalizePetState(data || next);
+    localStorage.setItem('togethr_pet_state', JSON.stringify(petState));
+    renderPet();
+  } catch (e) {
+    console.warn('No se pudo guardar el nombre de la mascota en Supabase:', e);
+  }
+}
+
 function revealSurprise() {
   const txt = document.getElementById('rvlTxt');
   txt.textContent = SURPRISE_MESSAGES[Math.floor(Math.random() * SURPRISE_MESSAGES.length)];
@@ -971,7 +2126,6 @@ async function ensureSpecificReasonMade() {
   if (!target || !target.id || target.author === 'Made') return;
 
   target.author = 'Made';
-  window.lastLocalReasonUpdateAt = Date.now();
 
   try {
     const { error } = await sb.from('reasons').update({ author: 'Made' }).eq('id', target.id);
@@ -1264,11 +2418,11 @@ function getCalendarEventsForDate(dateString) {
     .map(evt => withOccurrenceDate(evt, dateString));
 }
 
-function getUpcomingCalendarEvents(limit = 5) {
+function getUpcomingCalendarEvents(limit = 5, startOffset = 0) {
   const today = parseLocalDate(toISODate(new Date()));
   const upcoming = [];
 
-  for (let offset = 0; offset <= 370 && upcoming.length < limit * 2; offset++) {
+  for (let offset = startOffset; offset <= 370 && upcoming.length < limit * 2; offset++) {
     const d = new Date(today);
     d.setDate(today.getDate() + offset);
     const dateString = toISODate(d);
@@ -1366,17 +2520,20 @@ function renderMonthCalendar() {
     number.textContent = cellDate.getDate();
     cell.appendChild(number);
 
-    dayEvents.slice(0, 2).forEach(evt => {
+    dayEvents.slice(0, 3).forEach(evt => {
+      const info = getCategoryInfo(evt.category);
       const pill = document.createElement('div');
       pill.className = 'event-pill ' + getImportanceClass(evt.importance);
-      pill.textContent = getCategoryInfo(evt.category).icon + ' ' + evt.title;
+      pill.textContent = info.icon;
+      pill.title = info.label + ': ' + evt.title;
+      pill.setAttribute('aria-label', info.label + ': ' + evt.title);
       cell.appendChild(pill);
     });
 
-    if (dayEvents.length > 2) {
+    if (dayEvents.length > 3) {
       const more = document.createElement('div');
       more.className = 'event-more';
-      more.textContent = '+' + (dayEvents.length - 2);
+      more.textContent = '+' + (dayEvents.length - 3);
       cell.appendChild(more);
     }
 
@@ -1384,31 +2541,70 @@ function renderMonthCalendar() {
   }
 }
 
-function renderSelectedDayPanel() {
-  const panel = document.getElementById('selectedDayPanel');
-  if (!panel) return;
-
-  const selectedEvents = getCalendarEventsForDate(selectedCalendarDate);
-  const upcomingEvents = getUpcomingCalendarEvents(5);
-
-  panel.innerHTML = '';
-
+function appendCalendarEventSection(panel, titleText, events, emptyText) {
   const title = document.createElement('h4');
-  title.textContent = 'Fechas próximas';
+  title.textContent = titleText;
   panel.appendChild(title);
 
-
-  const list = selectedEvents.length ? selectedEvents : upcomingEvents;
-
-  if (!list.length) {
+  if (!events.length) {
     const empty = document.createElement('div');
     empty.className = 'selected-day-empty';
-    empty.innerHTML = 'No hay fechas guardadas todavía.<br>Selecciona una fecha y usa el botón "Agregar evento" de arriba.';
+    empty.innerHTML = emptyText;
     panel.appendChild(empty);
     return;
   }
 
-  list.forEach(evt => panel.appendChild(createCalendarEventCard(evt)));
+  events.forEach(evt => panel.appendChild(createCalendarEventCard(evt)));
+}
+
+function renderSelectedDayPanel() {
+  const panel = document.getElementById('selectedDayPanel');
+  if (!panel) return;
+
+  const selectedDate = selectedCalendarDate || toISODate(new Date());
+  const selectedEvents = getCalendarEventsForDate(selectedDate);
+  const selected = parseLocalDate(selectedDate);
+  const today = parseLocalDate(toISODate(new Date()));
+  const diff = Math.floor((selected - today) / 86400000);
+
+  panel.innerHTML = '';
+
+  if (diff === 0) {
+    const nextEvents = getUpcomingCalendarEvents(5, 1);
+
+    appendCalendarEventSection(
+      panel,
+      'Hoy',
+      selectedEvents,
+      'No hay fechas guardadas para hoy.<br>Usa el botón "Agregar evento" de arriba si quieres guardar una.'
+    );
+
+    appendCalendarEventSection(
+      panel,
+      'Fechas próximas',
+      nextEvents,
+      'No hay próximas fechas guardadas todavía.'
+    );
+
+    return;
+  }
+
+  if (diff < 0) {
+    appendCalendarEventSection(
+      panel,
+      'Fechas pasadas',
+      selectedEvents,
+      'No hay fechas guardadas para este día.'
+    );
+    return;
+  }
+
+  appendCalendarEventSection(
+    panel,
+    'Fechas próximas',
+    selectedEvents.length ? selectedEvents : getUpcomingCalendarEvents(5, diff),
+    'No hay fechas guardadas para este día.<br>Selecciona una fecha y usa el botón "Agregar evento" de arriba.'
+  );
 }
 
 function createCalendarEventCard(evt) {
@@ -1629,81 +2825,282 @@ function switchTab(name, tabEl) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
   document.querySelectorAll('.nav-it').forEach(n => n.classList.remove('on'));
-  document.getElementById('page-' + name).classList.add('on');
-  document.getElementById('nav-' + name).classList.add('on');
-  if (tabEl) tabEl.classList.add('on');
-  else { const map={notes:0,us:1,moments:2,calendar:3}; document.querySelectorAll('.tab')[map[name]].classList.add('on'); }
+
+  const page = document.getElementById('page-' + name);
+  const nav = document.getElementById('nav-' + name);
+  if (page) page.classList.add('on');
+  if (nav) nav.classList.add('on');
+
+  if (tabEl) {
+    tabEl.classList.add('on');
+  } else {
+    const map = { notes: 0, pet: 1, us: 2, moments: 3, calendar: 4 };
+    const tab = document.querySelectorAll('.tab')[map[name]];
+    if (tab) tab.classList.add('on');
+  }
+
+  if (name === 'pet') renderPet();
 }
 
 // ── Photos ─────────────────────────────────────────────────────────────────
 const BUCKET = 'photos';
+let photoEditMode = false;
+let selectedPhotoPaths = new Set();
+let photoMeta = {};
 
-function addPhotoCell(path, url) {
+function getPhotoActionAuthor() {
+  // Momentos no uses a visible Noel/Made selector.
+  // Photo activity is logged without a person, so the history simply says
+  // that photos were added. Likes/deletes are no longer logged as notifications.
+  return null;
+}
+
+function getEmptyPhotoMarkup() {
+  return '<div class="empty-grid"><i class="ti ti-photo-heart"></i>Toca "Agregar foto" para llenar<br>este álbum con nuestros recuerdos 💜</div>';
+}
+
+function updatePhotoEmptyState() {
+  const grid = document.getElementById('photoGrid');
+  if (!grid) return;
+  const hasPhotos = !!grid.querySelector('.photo-cell');
+  const empty = grid.querySelector('.empty-grid');
+  if (!hasPhotos && !empty) grid.innerHTML = getEmptyPhotoMarkup();
+  if (hasPhotos && empty) empty.remove();
+}
+
+async function loadPhotoMeta() {
+  photoMeta = {};
+  try {
+    const { data, error } = await sb.from('photos').select('storage_path,liked').not('storage_path', 'is', null);
+    if (error) throw error;
+    (data || []).forEach(row => {
+      if (row.storage_path) photoMeta[row.storage_path] = { liked: !!row.liked };
+    });
+  } catch (e) {
+    console.warn('Photo metadata unavailable. Likes will work locally until SQL is updated.', e);
+  }
+}
+
+async function persistPhotoMeta(path, url, liked) {
+  if (!path) return;
+  try {
+    const { data: existing, error: findErr } = await sb.from('photos').select('id').eq('storage_path', path).limit(1);
+    if (findErr) throw findErr;
+
+    if (existing && existing.length) {
+      const { error } = await sb.from('photos').update({ image_url: url, liked: !!liked }).eq('id', existing[0].id);
+      if (error) throw error;
+    } else {
+      const { error } = await sb.from('photos').insert({ image_url: url, storage_path: path, liked: !!liked });
+      if (error) throw error;
+    }
+  } catch (e) {
+    console.warn('Could not save photo metadata:', e);
+  }
+}
+
+function addPhotoCell(path, url, liked = false) {
   const grid = document.getElementById('photoGrid');
   const empty = grid.querySelector('.empty-grid');
   if (empty) empty.remove();
+  if (grid.querySelector('[data-path="' + CSS.escape(path) + '"]')) return;
 
   const cell = document.createElement('div');
-  cell.className = 'photo-cell';
+  cell.className = 'photo-cell' + (liked ? ' liked' : '') + (photoEditMode ? ' editing' : '');
   cell.dataset.path = path;
+  cell.dataset.url = url;
 
   const img = document.createElement('img');
   img.src = url;
   img.alt = 'recuerdo';
-  img.style.cursor = 'pointer';
-  img.onclick = () => openLightbox(url);
+  img.onclick = () => {
+    if (photoEditMode) togglePhotoSelection(path);
+    else openLightbox(url);
+  };
 
-  const del = document.createElement('button');
-  del.className = 'del-btn';
-  del.innerHTML = '<i class="ti ti-x"></i>';
-  del.onclick = async () => {
-    const confirmDelete = confirm('¿Eliminar esta foto? Esta acción no se puede deshacer.');
+  const check = document.createElement('div');
+  check.className = 'photo-check';
+  check.innerHTML = '<i class="ti ti-check"></i>';
 
-    if (!confirmDelete) return;
-
-    const { error } = await sb.storage.from(BUCKET).remove([path]);
-    if (error) {
-      showToast('Error al eliminar');
-      return;
-    }
-
-    cell.remove();
-    if (!grid.querySelector('.photo-cell')) {
-      const emptyGrid = document.createElement('div');
-      emptyGrid.className = 'empty-grid';
-      emptyGrid.innerHTML =
-        '<i class="ti ti-photo-heart"></i>Toca "Agregar foto" para llenar<br>este álbum con nuestros recuerdos 💜';
-      grid.appendChild(emptyGrid);
-    }
-
-    showToast('Foto eliminada');
+  const like = document.createElement('button');
+  like.type = 'button';
+  like.className = 'like-btn';
+  like.setAttribute('aria-label', liked ? 'Quitar de favoritas' : 'Marcar como favorita');
+  like.innerHTML = liked ? '<i class="ti ti-heart-filled"></i>' : '<i class="ti ti-heart"></i>';
+  like.onclick = (e) => {
+    e.stopPropagation();
+    togglePhotoLike(path, url);
   };
 
   cell.appendChild(img);
-  cell.appendChild(del);
+  cell.appendChild(check);
+  cell.appendChild(like);
   grid.appendChild(cell);
+  registerMemoryPhoto(path, url, liked);
+  updatePhotoSelectionUI();
+}
+
+function togglePhotoEditMode(force) {
+  photoEditMode = typeof force === 'boolean' ? force : !photoEditMode;
+  if (!photoEditMode) selectedPhotoPaths.clear();
+  updatePhotoSelectionUI();
+}
+
+function updatePhotoSelectionUI() {
+  const editbar = document.getElementById('momentsEditbar');
+  const editBtn = document.getElementById('editPhotosBtn');
+  const count = document.getElementById('selectedPhotosCount');
+  const deleteBtn = document.getElementById('deleteSelectedPhotosBtn');
+
+  document.querySelectorAll('.photo-cell').forEach(cell => {
+    const path = cell.dataset.path;
+    cell.classList.toggle('editing', photoEditMode);
+    cell.classList.toggle('selected', selectedPhotoPaths.has(path));
+  });
+
+  if (editbar) editbar.classList.toggle('show', photoEditMode);
+  if (editBtn) editBtn.innerHTML = photoEditMode ? '<i class="ti ti-x"></i> Listo' : '<i class="ti ti-edit"></i> Editar';
+  if (count) count.textContent = selectedPhotoPaths.size + (selectedPhotoPaths.size === 1 ? ' seleccionada' : ' seleccionadas');
+  if (deleteBtn) deleteBtn.disabled = selectedPhotoPaths.size === 0;
+}
+
+function togglePhotoSelection(path) {
+  if (!photoEditMode || !path) return;
+  if (selectedPhotoPaths.has(path)) selectedPhotoPaths.delete(path);
+  else selectedPhotoPaths.add(path);
+  updatePhotoSelectionUI();
+}
+
+async function togglePhotoLike(path, url) {
+  const cell = document.querySelector('[data-path="' + CSS.escape(path) + '"]');
+  if (!cell) return;
+
+  const liked = !cell.classList.contains('liked');
+
+  cell.classList.toggle('liked', liked);
+
+  const btn = cell.querySelector('.like-btn');
+  if (btn) {
+    btn.innerHTML = liked ? '<i class="ti ti-heart-filled"></i>' : '<i class="ti ti-heart"></i>';
+    btn.setAttribute('aria-label', liked ? 'Quitar de favoritas' : 'Marcar como favorita');
+  }
+
+  photoMeta[path] = { liked };
+
+  const memoryPhoto = memoryPhotos.find(photo => photo.path === path || photo.url === url);
+  if (memoryPhoto) memoryPhoto.liked = liked;
+
+  reorderMemoryPhotos();
+  renderMemorySlideshow();
+
+  await persistPhotoMeta(path, url, liked);
+
+  showToast(liked ? 'Foto marcada como favorita 💜' : 'Foto quitada de favoritas');
+}
+
+async function deleteSelectedPhotos() {
+  const paths = Array.from(selectedPhotoPaths);
+  if (!paths.length) return;
+
+  const msg = paths.length === 1 ? '¿Eliminar esta foto?' : '¿Eliminar estas ' + paths.length + ' fotos?';
+  if (!confirm(msg + ' Esta acción no se puede deshacer.')) return;
+
+  const { error } = await sb.storage.from(BUCKET).remove(paths);
+  if (error) {
+    showToast('Error al eliminar fotos');
+    return;
+  }
+
+  try {
+    await sb.from('photos').delete().in('storage_path', paths);
+  } catch (e) {
+    console.warn('Could not delete photo metadata:', e);
+  }
+
+  paths.forEach(path => {
+    const cell = document.querySelector('[data-path="' + CSS.escape(path) + '"]');
+    if (cell) cell.remove();
+    delete photoMeta[path];
+  });
+
+  memoryPhotos = memoryPhotos.filter(photo => !paths.includes(photo.path));
+  if (memorySlideIndex >= memoryPhotos.length) memorySlideIndex = 0;
+
+  reorderMemoryPhotos();
+  selectedPhotoPaths.clear();
+  togglePhotoEditMode(false);
+  updatePhotoEmptyState();
+  renderMemorySlideshow();
+
+  showToast(paths.length === 1 ? 'Foto eliminada' : 'Fotos eliminadas');
 }
 
 async function addPhotos(e) {
-  const files = Array.from(e.target.files); e.target.value = '';
+  const files = Array.from(e.target.files);
+  e.target.value = '';
+  if (!files.length) return;
+
+  const author = getPhotoActionAuthor();
+  let addedCount = 0;
+
   for (const file of files) {
-    const path = `photo_${Date.now()}_${Math.random().toString(36).slice(2)}.${file.name.split('.').pop()}`;
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `photo_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
     const { error } = await sb.storage.from(BUCKET).upload(path, file, { cacheControl: '3600', upsert: false });
     if (error) { showToast('Error al subir foto'); continue; }
+
     const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
-    addPhotoCell(path, data.publicUrl);
+    await persistPhotoMeta(path, data.publicUrl, false);
+    addPhotoCell(path, data.publicUrl, false);
+    addedCount += 1;
+  }
+
+  updatePhotoEmptyState();
+  reorderMemoryPhotos();
+  renderMemorySlideshow();
+
+  if (addedCount > 0) {
+    await logRecentChange({
+      entity: 'photo',
+      action: 'added',
+      title: addedCount === 1 ? '1 foto' : addedCount + ' fotos',
+      author
+    });
+
+    showToast(addedCount === 1 ? 'Foto agregada 💜' : 'Fotos agregadas 💜');
   }
 }
 
 async function loadPhotos() {
+  const grid = document.getElementById('photoGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  memoryPhotos = [];
+  selectedPhotoPaths.clear();
+  photoEditMode = false;
+  updatePhotoSelectionUI();
+
+  await loadPhotoMeta();
   const { data, error } = await sb.storage.from(BUCKET).list('', { sortBy: { column: 'created_at', order: 'asc' } });
-  if (error || !data) return;
+  if (error || !data) {
+    grid.innerHTML = getEmptyPhotoMarkup();
+    renderMemorySlideshow();
+    return;
+  }
+
   const files = data.filter(f => f.name !== '.emptyFolderPlaceholder');
-  if (files.length === 0) return;
+  if (files.length === 0) {
+    grid.innerHTML = getEmptyPhotoMarkup();
+    renderMemorySlideshow();
+    return;
+  }
+
   for (const f of files) {
     const { data: urlData } = sb.storage.from(BUCKET).getPublicUrl(f.name);
-    addPhotoCell(f.name, urlData.publicUrl);
+    addPhotoCell(f.name, urlData.publicUrl, !!(photoMeta[f.name] && photoMeta[f.name].liked));
   }
+  reorderMemoryPhotos();
+  renderMemorySlideshow();
 }
 
 // ── Days together ──────────────────────────────────────────────────────────
@@ -1717,6 +3114,132 @@ if      (days === 0) document.getElementById('daysNote').textContent = 'Hoy empi
 else if (days < 7)  document.getElementById('daysNote').textContent = 'Solo ' + days + ' días, y ya todo se siente diferente.';
 else if (days < 30) document.getElementById('daysNote').textContent = 'Cada uno de estos días ha sido un regalo.';
 else                document.getElementById('daysNote').textContent = days + ' días eligiéndonos. Por todos los que vienen.';
+
+
+// ── Nosotros memory slideshow ─────────────────────────────────────────────
+let memoryPhotos = [];
+let memorySlideIndex = 0;
+let memorySlideTimer = null;
+let memorySlideFadeTimer = null;
+
+function registerMemoryPhoto(path, url, liked = false) {
+  if (!url) return;
+  const existing = memoryPhotos.find(photo => photo.url === url || photo.path === path);
+  if (existing) {
+    existing.liked = !!liked;
+    return;
+  }
+  memoryPhotos.push({ path, url, liked: !!liked });
+}
+
+function shuffleArrayCopy(items) {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function reorderMemoryPhotos() {
+  const liked = shuffleArrayCopy(memoryPhotos.filter(photo => photo.liked));
+  const others = shuffleArrayCopy(memoryPhotos.filter(photo => !photo.liked));
+  memoryPhotos = [...liked, ...others];
+  memorySlideIndex = 0;
+}
+
+function renderMemoryDots() {
+  const dots = document.getElementById('memoryDots');
+  if (!dots) return;
+  dots.innerHTML = '';
+
+  memoryPhotos.slice(0, 8).forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.type = 'button';
+    dot.className = 'memory-dot' + (i === memorySlideIndex ? ' on' : '');
+    dot.setAttribute('aria-label', 'Ver recuerdo ' + (i + 1));
+    dot.onclick = () => {
+      memorySlideIndex = i;
+      showMemorySlide(i, false);
+      startMemorySlideshow();
+    };
+    dots.appendChild(dot);
+  });
+}
+
+function showMemorySlide(index, instant = false) {
+  const frame = document.getElementById('memorySlideFrame');
+  const img = document.getElementById('memorySlideImg');
+  const title = document.getElementById('memorySlideTitle');
+  if (!frame || !img || !title || !memoryPhotos.length) return;
+
+  if (index >= memoryPhotos.length) index = 0;
+  if (index < 0) index = memoryPhotos.length - 1;
+  memorySlideIndex = index;
+  const current = memoryPhotos[memorySlideIndex];
+
+  const applySlide = () => {
+    frame.classList.add('has-photo');
+    img.src = current.url;
+    title.textContent = 'Recuerdo ' + (memorySlideIndex + 1) + ' de ' + memoryPhotos.length;
+    renderMemoryDots();
+    requestAnimationFrame(() => img.classList.remove('slide-fading'));
+  };
+
+  if (memorySlideFadeTimer) clearTimeout(memorySlideFadeTimer);
+
+  if (instant || !img.getAttribute('src')) {
+    img.classList.remove('slide-fading');
+    applySlide();
+    return;
+  }
+
+  img.classList.add('slide-fading');
+  memorySlideFadeTimer = setTimeout(applySlide, 280);
+}
+
+function renderMemorySlideshow() {
+  const frame = document.getElementById('memorySlideFrame');
+  const img = document.getElementById('memorySlideImg');
+  const title = document.getElementById('memorySlideTitle');
+  const dots = document.getElementById('memoryDots');
+  if (!frame || !img || !title || !dots) return;
+
+  if (!memoryPhotos.length) {
+    frame.classList.remove('has-photo');
+    img.removeAttribute('src');
+    img.classList.remove('slide-fading');
+    title.textContent = 'Nuestros momentos favoritos';
+    dots.innerHTML = '';
+    stopMemorySlideshow();
+    return;
+  }
+
+  if (memorySlideIndex >= memoryPhotos.length) memorySlideIndex = 0;
+  showMemorySlide(memorySlideIndex, true);
+  startMemorySlideshow();
+}
+
+function startMemorySlideshow() {
+  stopMemorySlideshow();
+  if (memoryPhotos.length <= 1) return;
+  memorySlideTimer = setTimeout(() => {
+    memorySlideIndex = (memorySlideIndex + 1) % Math.min(memoryPhotos.length, 8);
+    showMemorySlide(memorySlideIndex, false);
+    startMemorySlideshow();
+  }, 4300);
+}
+
+function stopMemorySlideshow() {
+  if (memorySlideTimer) clearTimeout(memorySlideTimer);
+  memorySlideTimer = null;
+}
+
+function openCurrentMemorySlide() {
+  if (!memoryPhotos.length) return;
+  const current = memoryPhotos[memorySlideIndex];
+  if (current && current.url) openLightbox(current.url);
+}
 
 // ── Floating header hearts ─────────────────────────────────────────────────
 function renderHeaderHearts() {
@@ -1905,13 +3428,25 @@ sb.channel('reasons_channel')
   })
   .subscribe();
 
+sb.channel('pet_channel')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'pet_state' }, (payload) => {
+    if (payload.new && payload.new.id === PET_ID) {
+      petState = normalizePetState(payload.new);
+      localStorage.setItem('togethr_pet_state', JSON.stringify(petState));
+      renderPet();
+    }
+  })
+  .subscribe();
+
 sb.channel('activity_channel')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'activity_log' }, () => {
     loadRecentChanges();
   })
   .subscribe();
 
+renderMemorySlideshow();
 loadRecentChanges();
+loadPetState();
 loadNotes();
 loadPhotos();
 loadReasons();
