@@ -938,6 +938,49 @@
       100% { transform: translateY(-58px) scale(1.25); opacity: 0; }
     }
 
+  
+    /* Bottom navigation spacing fix */
+    .nav {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 0 calc(22px + env(safe-area-inset-bottom)) !important;
+      border-top: 0.5px solid #ede9fe;
+      background: #fff;
+      flex-shrink: 0;
+      position: sticky;
+      bottom: 0;
+      z-index: 50;
+    }
+
+    .nav-it {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      opacity: .4;
+      transition: opacity .15s;
+      font-size: 11px;
+      color: #7c3aed;
+      border: none;
+      background: none;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+      min-width: 60px;
+      padding-bottom: 2px;
+    }
+
+    .nav-it.on {
+      opacity: 1;
+    }
+
+    .nav-it i {
+      font-size: 24px;
+      line-height: 1;
+    }
+
   </style>
 </head>
 <body>
