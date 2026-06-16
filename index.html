@@ -147,6 +147,80 @@
     .cal-event-actions .del-btn { border-color: #fca5a5; color: #ef4444; }
     .cal-event-actions .del-btn:active { background: #fff1f1; }
 
+
+    .notify-card { background: #fff; border-radius: 16px; border: 0.5px solid #ede9fe; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .notify-card strong { display: block; font-size: 13px; color: #6b21a8; margin-bottom: 3px; }
+    .notify-card span { display: block; font-size: 12px; color: #a78bfa; line-height: 1.35; }
+    .notify-card button { background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; border: none; border-radius: 18px; padding: 8px 12px; font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+
+    .add-form-row { flex-wrap: wrap; }
+    .note-add-row select { flex: 1 1 140px !important; min-width: 0; }
+    .note-add-row .add-btn { flex: 1 1 120px; min-width: 0; }
+
+    .calendar-top { background: #fff; border-radius: 18px; border: 0.5px solid #ede9fe; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: center; }
+    .calendar-top h4 { font-family: 'Playfair Display', serif; font-size: 20px; color: #6b21a8; font-weight: 600; text-transform: capitalize; }
+    .calendar-top p { font-size: 12px; color: #a78bfa; margin-top: 3px; }
+    .cal-nav-btn { width: 36px; height: 36px; flex: 0 0 36px; border-radius: 50%; border: 0.5px solid #d8b4fe; background: #fff; color: #7c3aed; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; -webkit-tap-highlight-color: transparent; }
+    .calendar-add-main { width: 100%; justify-content: center; }
+    .calendar-form { background: #fff; border: 0.5px solid #ede9fe; border-radius: 18px; padding: 14px; }
+    .calendar-form input,
+    .calendar-form select,
+    .calendar-form textarea { width: 100%; border: 0.5px solid #ede9fe; border-radius: 12px; padding: 10px 12px; font-size: 13px; font-family: inherit; color: #4c1d95; background: rgba(255,255,255,0.9); outline: none; }
+    .calendar-form input:focus,
+    .calendar-form select:focus,
+    .calendar-form textarea:focus { border-color: #c084fc; }
+    .calendar-form textarea { min-height: 72px; resize: vertical; }
+    .calendar-form-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .calendar-form-row select { flex: 1 1 145px; min-width: 0; }
+    .calendar-actions-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .calendar-actions-row .add-btn { flex: 1 1 120px; min-width: 0; }
+    .secondary-btn { background: #d8b4fe !important; color: #6b21a8 !important; }
+
+    .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 11px; color: #a855f7; font-weight: 600; padding: 0 2px; }
+    .calendar-grid-month { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .calendar-day { min-height: 66px; background: #fff; border: 0.5px solid #ede9fe; border-radius: 12px; padding: 6px 4px; cursor: pointer; display: flex; flex-direction: column; gap: 3px; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+    .calendar-day:active { background: #f3e8ff; }
+    .calendar-day.outside { opacity: 0.38; }
+    .calendar-day.today { border-color: #a855f7; box-shadow: 0 0 0 1px rgba(168,85,247,.18); }
+    .calendar-day.selected { background: #f3e8ff; border-color: #7c3aed; }
+    .cal-day-number { font-size: 12px; color: #6b21a8; font-weight: 600; line-height: 1; }
+    .event-pill { font-size: 9px; line-height: 1.1; color: #fff; padding: 3px 4px; border-radius: 7px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .event-more { font-size: 9px; color: #7c3aed; padding-left: 2px; }
+    .imp-baja { background: #c4b5fd; }
+    .imp-media { background: #8b5cf6; }
+    .imp-alta { background: #ec4899; }
+    .imp-muy_alta { background: #6d28d9; }
+
+    .selected-day-panel { background: #fff; border-radius: 18px; border: 0.5px solid #ede9fe; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .selected-day-panel h4 { font-size: 14px; color: #6b21a8; font-weight: 600; }
+    .selected-day-empty { color: #c4b5fd; font-size: 13px; line-height: 1.5; text-align: center; padding: 18px 8px; }
+    .cal-event { border-left: 4px solid #8b5cf6; }
+    .cal-event.imp-baja { border-left-color: #c4b5fd; background: #fff; }
+    .cal-event.imp-media { border-left-color: #8b5cf6; background: #fff; }
+    .cal-event.imp-alta { border-left-color: #ec4899; background: #fff; }
+    .cal-event.imp-muy_alta { border-left-color: #6d28d9; background: #fff; }
+    .cal-event-importance { display: inline-block; font-size: 11px; color: #7c3aed; background: #f3e8ff; border-radius: 10px; padding: 3px 8px; margin-bottom: 8px; }
+    .cal-event-actions { flex-wrap: wrap; }
+    .cal-event-actions button { flex: 1 1 90px; }
+
+    @media (max-width: 430px) {
+      .tabs .tab { font-size: 11px; padding: 12px 2px; }
+      .add-form-row,
+      .calendar-form-row,
+      .calendar-actions-row { flex-direction: column; }
+      .add-form-row input,
+      .add-form-row select,
+      .note-add-row select,
+      .add-btn,
+      .calendar-form-row select,
+      .calendar-actions-row .add-btn { width: 100%; flex: 1 1 auto !important; }
+      .notify-card { flex-direction: column; align-items: stretch; }
+      .notify-card button { width: 100%; }
+      .calendar-day { min-height: 58px; padding: 5px 3px; border-radius: 10px; }
+      .event-pill { font-size: 8px; padding: 2px 3px; }
+    }
+
+
     .nav { display: flex; justify-content: space-around; padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); border-top: 0.5px solid #ede9fe; background: #fff; flex-shrink: 0; }
     .nav-it { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; opacity: .4; transition: opacity .15s; font-size: 11px; color: #7c3aed; border: none; background: none; font-family: inherit; -webkit-tap-highlight-color: transparent; }
     .nav-it.on { opacity: 1; }
@@ -240,14 +314,21 @@
     </div>
     <div class="add-form" id="addForm">
       <textarea id="newNoteText" placeholder="Escribe algo desde el corazón…"></textarea>
-      <div class="add-form-row">
-        <select id="newNoteAuthor" style="flex: 0 0 120px;">
+      <div class="add-form-row note-add-row">
+        <select id="newNoteAuthor">
           <option value="Noel">Noel 💜</option>
           <option value="Made">Made 💜</option>
         </select>
-        <input id="newNoteAttr" placeholder="— atribución (opcional)" />
         <button class="add-btn" onclick="addNote()">Agregar 💜</button>
       </div>
+    </div>
+
+    <div class="notify-card" id="notifyCard">
+      <div>
+        <strong>Notificaciones</strong>
+        <span id="notifyStatus">Recibe avisos cuando llegue una nota o una fecha importante.</span>
+      </div>
+      <button onclick="requestNotificationPermission()">Activar</button>
     </div>
 
     <div class="surprise-box">
@@ -346,38 +427,63 @@
 
   <!-- CALENDARIO -->
   <div class="page" id="page-calendar">
-    <div class="calendar-header">
-      <h4>Próximos eventos</h4>
-      <button class="upload-btn" onclick="toggleCalendarForm()">
-        <i class="ti ti-plus"></i> Evento
+    <div class="calendar-top">
+      <button class="cal-nav-btn" onclick="changeCalendarMonth(-1)" aria-label="Mes anterior">
+        <i class="ti ti-chevron-left"></i>
+      </button>
+      <div>
+        <h4 id="calendarMonthLabel">Calendario</h4>
+        <p>Toca un día para agregar una fecha especial</p>
+      </div>
+      <button class="cal-nav-btn" onclick="changeCalendarMonth(1)" aria-label="Mes siguiente">
+        <i class="ti ti-chevron-right"></i>
       </button>
     </div>
 
+    <button class="upload-btn calendar-add-main" onclick="openCalendarForm()">
+      <i class="ti ti-plus"></i> Agregar fecha
+    </button>
+
     <div class="calendar-form" id="calendarForm">
-      <input id="calendarTitle" placeholder="Título del evento" maxlength="50" />
+      <input id="calendarTitle" placeholder="Título de la fecha" maxlength="60" />
       <input id="calendarDate" type="date" />
       <textarea id="calendarNote" placeholder="Nota o descripción (opcional)"></textarea>
-      <div class="add-form-row">
-        <select id="calendarAuthor" style="flex: 0 0 120px;">
+
+      <div class="calendar-form-row">
+        <select id="calendarAuthor">
           <option value="Noel">Noel 💜</option>
           <option value="Made">Made 💜</option>
         </select>
-        <select id="calendarReminder" style="flex: 0 0 140px;">
-          <option value="1">Recordar 1 día antes</option>
-          <option value="3">Recordar 3 días</option>
-          <option value="7">Recordar 7 días</option>
-          <option value="14">Recordar 14 días</option>
+        <select id="calendarImportance">
+          <option value="baja">Importancia baja</option>
+          <option value="media" selected>Importancia media</option>
+          <option value="alta">Importancia alta</option>
+          <option value="muy_alta">Muy importante</option>
         </select>
+      </div>
+
+      <div class="calendar-form-row">
+        <select id="calendarReminder">
+          <option value="1">Recordar 1 día antes</option>
+          <option value="3" selected>Recordar 3 días antes</option>
+          <option value="7">Recordar 7 días antes</option>
+          <option value="14">Recordar 14 días antes</option>
+        </select>
+      </div>
+
+      <div class="calendar-actions-row">
         <button class="add-btn" onclick="saveCalendarEvent()">Guardar 💜</button>
-        <button class="add-btn" style="background: #d8b4fe; color: #7c3aed;" onclick="toggleCalendarForm()">Cancelar</button>
+        <button class="add-btn secondary-btn" onclick="closeCalendarForm()">Cancelar</button>
       </div>
     </div>
 
-    <div class="calendar-list" id="calendarList">
-      <div class="empty-grid">
-        <i class="ti ti-calendar-event"></i>Aún no hay eventos.<br>Toca "Evento" para crear uno 💜
-      </div>
+    <div class="calendar-weekdays">
+      <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
     </div>
+
+    <div class="calendar-grid-month" id="calendarGrid"></div>
+
+    <div class="selected-day-panel" id="selectedDayPanel"></div>
   </div>
 
   <div class="nav">
@@ -407,11 +513,11 @@ const sb = supabase.createClient(
 
 // ── Default notes ──────────────────────────────────────────────────────────
 const DEFAULT_NOTES = [
-  { text: "Cada día me despierto agradecido de poder llamarte mía, Made.", attr: "— Noel 💜", label: "nota para ti" },
-  { text: "Haces que los días ordinarios se sientan como la más grande aventura.", attr: "— Noel 💜", label: "nota para ti" },
-  { text: "Sin importar a dónde nos lleve la vida, te elijo a ti. Una y otra vez.", attr: "— Noel 💜", label: "nota para ti" },
-  { text: "Estar contigo se siente como estar en casa, sin importar dónde estemos.", attr: "— Noel 💜", label: "nota para ti" },
-  { text: "Eres mi distracción favorita, mi absolutamente todo.", attr: "— Noel 💜", label: "nota para ti" },
+  { text: "Cada día me despierto agradecido de poder llamarte mía, Made.", attr: null, label: "nota para ti" },
+  { text: "Haces que los días ordinarios se sientan como la más grande aventura.", attr: null, label: "nota para ti" },
+  { text: "Sin importar a dónde nos lleve la vida, te elijo a ti. Una y otra vez.", attr: null, label: "nota para ti" },
+  { text: "Estar contigo se siente como estar en casa, sin importar dónde estemos.", attr: null, label: "nota para ti" },
+  { text: "Eres mi distracción favorita, mi absolutamente todo.", attr: null, label: "nota para ti" },
   { text: "Ever thine, ever mine, ever ours.", attr: "— Ludwig van Beethoven", label: "amada inmortal" },
   { text: "Desde que te dejé, estoy triste. Mi felicidad es estar cerca de ti. Sin cesar revivo en mi memoria tus caricias, tus lágrimas, tu afectuosa solicitud.", attr: "— Napoléon Bonaparte, a Joséphine", label: "palabras a través de la historia" },
   { text: "Te amo sin saber cómo, ni cuándo, ni de dónde. Te amo directamente sin problemas ni orgullo: así te amo porque no sé amar de otra manera.", attr: "— Pablo Neruda", label: "poema para ti" },
@@ -429,12 +535,84 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2200);
 }
 
+function updateNotificationButton() {
+  const card = document.getElementById('notifyCard');
+  const status = document.getElementById('notifyStatus');
+  if (!card || !status) return;
+
+  if (!('Notification' in window)) {
+    status.textContent = 'Este navegador no permite notificaciones.';
+    card.querySelector('button').style.display = 'none';
+    return;
+  }
+
+  const btn = card.querySelector('button');
+  if (Notification.permission === 'granted') {
+    status.textContent = 'Notificaciones activas para notas y fechas importantes.';
+    btn.textContent = 'Activas';
+    btn.disabled = true;
+    btn.style.opacity = '0.65';
+  } else if (Notification.permission === 'denied') {
+    status.textContent = 'Las notificaciones están bloqueadas en el navegador.';
+    btn.textContent = 'Bloqueadas';
+    btn.disabled = true;
+    btn.style.opacity = '0.65';
+  } else {
+    status.textContent = 'Recibe avisos cuando llegue una nota o una fecha importante.';
+    btn.textContent = 'Activar';
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
+}
+
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) {
+    showToast('Este navegador no permite notificaciones');
+    updateNotificationButton();
+    return;
+  }
+
+  const permission = await Notification.requestPermission();
+  updateNotificationButton();
+
+  if (permission === 'granted') {
+    showToast('Notificaciones activadas 💜');
+    sendPhoneNotification('Togethr', 'Notificaciones activadas 💜');
+  } else {
+    showToast('Notificaciones no activadas');
+  }
+}
+
+function sendPhoneNotification(title, body) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+
+  try {
+    const notification = new Notification(title, {
+      body,
+      icon: 'icon-192.png',
+      badge: 'icon-192.png',
+      tag: 'togethr-' + body.slice(0, 24)
+    });
+    setTimeout(() => notification.close(), 6000);
+  } catch (e) {
+    console.warn('No se pudo enviar la notificación:', e);
+  }
+}
+
 function renderNote() {
   if (!notes.length) return;
   const n = notes[idx];
   document.getElementById('noteText').textContent = '\u201c' + n.text + '\u201d';
-  document.getElementById('noteAttr').textContent = (n.attr || '') + (n.author ? ' • Agregada por ' + n.author : '');
-  document.getElementById('noteLabel').textContent = n.label;
+
+  const attrText = (n.attr || '').trim();
+  const isSenderAttr = /noel|made/i.test(attrText);
+  const parts = [];
+  if (attrText && !isSenderAttr) parts.push(attrText);
+  if (n.author) parts.push('Agregada por ' + n.author);
+
+  document.getElementById('noteAttr').textContent = parts.join(' • ');
+  document.getElementById('noteLabel').textContent = n.label || 'nota para ti';
   document.getElementById('notePos').textContent = (idx + 1) + ' / ' + notes.length;
 }
 function nextNote() { idx = (idx + 1) % notes.length; animateNote(); }
@@ -494,15 +672,24 @@ function toggleAdd() {
 async function addNote() {
   const txt = document.getElementById('newNoteText').value.trim();
   if (!txt) return;
-  const attr = document.getElementById('newNoteAttr').value.trim() || '— Noel 💜';
+
   const author = document.getElementById('newNoteAuthor').value;
-  // Mark when we added this note locally to avoid duplicate toast
   window.lastLocalNoteInsertAt = Date.now();
-  const { data, error } = await sb.from('notes').insert({ text: txt, attr, label: 'nota para ti', author }).select('id,text,attr,label,author').single();
-  if (error) { showToast('Error al guardar nota'); return; }
+
+  const { data, error } = await sb
+    .from('notes')
+    .insert({ text: txt, attr: null, label: 'nota para ti', author })
+    .select('id,text,attr,label,author')
+    .single();
+
+  if (error) {
+    console.error('Error al guardar nota:', error);
+    showToast('Error al guardar nota');
+    return;
+  }
+
   notes.push(data);
   document.getElementById('newNoteText').value = '';
-  document.getElementById('newNoteAttr').value = '';
   document.getElementById('newNoteAuthor').value = 'Noel';
   toggleAdd();
   idx = notes.length - 1;
@@ -708,102 +895,270 @@ function toggleReasonsForm() {
 }
 
 // ── Calendar ───────────────────────────────────────────────────────────────
-let calendarEvents = [], editingEventId = null;
+let calendarEvents = [];
+let calendarViewDate = new Date();
+let selectedCalendarDate = toISODate(new Date());
+let editingEventId = null;
+
+function toISODate(date) {
+  const d = new Date(date);
+  const pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+
+function parseLocalDate(value) {
+  const [y, m, d] = value.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function formatDisplayDate(value) {
+  return parseLocalDate(value).toLocaleDateString('es-ES', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+}
+
+function getImportanceClass(importance) {
+  if (importance === 'baja') return 'imp-baja';
+  if (importance === 'alta') return 'imp-alta';
+  if (importance === 'muy_alta') return 'imp-muy_alta';
+  return 'imp-media';
+}
+
+function getImportanceLabel(importance) {
+  if (importance === 'baja') return 'Baja';
+  if (importance === 'alta') return 'Alta';
+  if (importance === 'muy_alta') return 'Muy importante';
+  return 'Media';
+}
 
 function getDateBadge(eventDate) {
-  const event = new Date(eventDate + 'T00:00:00');
+  const event = parseLocalDate(eventDate);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const diff = Math.floor((event - today) / 86400000);
-  
+
   if (diff === 0) return 'Hoy';
   if (diff === 1) return 'Mañana';
   if (diff > 1 && diff <= 7) return 'Faltan ' + diff + ' días';
+  if (diff < 0) return 'Pasó';
   return 'Próximo';
-}
-
-function formatDateInput(date) {
-  if (!date) return '';
-  const d = new Date(date);
-  const pad = (n) => String(n).padStart(2, '0');
-  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
 }
 
 async function loadCalendarEvents() {
   try {
-    const { data, error } = await sb.from('calendar_events').select('*').order('event_date', { ascending: true });
+    const { data, error } = await sb
+      .from('calendar_events')
+      .select('*')
+      .order('event_date', { ascending: true });
+
     if (error) throw error;
+
     calendarEvents = data || [];
-    renderCalendarEvents();
+    renderMonthCalendar();
+    renderSelectedDayPanel();
     checkCalendarReminders();
   } catch (e) {
-    console.error('Error cargando eventos:', e);
+    console.error('Error cargando fechas:', e);
     calendarEvents = [];
-    renderCalendarEvents();
+    renderMonthCalendar();
+    renderSelectedDayPanel();
   }
 }
 
-function renderCalendarEvents() {
-  const container = document.getElementById('calendarList');
-  container.innerHTML = '';
-  
-  if (!calendarEvents.length) {
+function changeCalendarMonth(delta) {
+  calendarViewDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth() + delta, 1);
+  renderMonthCalendar();
+  renderSelectedDayPanel();
+}
+
+function selectCalendarDate(dateString) {
+  selectedCalendarDate = dateString;
+  renderMonthCalendar();
+  renderSelectedDayPanel();
+}
+
+function renderMonthCalendar() {
+  const grid = document.getElementById('calendarGrid');
+  const label = document.getElementById('calendarMonthLabel');
+  if (!grid || !label) return;
+
+  const year = calendarViewDate.getFullYear();
+  const month = calendarViewDate.getMonth();
+  label.textContent = new Date(year, month, 1).toLocaleDateString('es-ES', {
+    month: 'long',
+    year: 'numeric'
+  });
+
+  grid.innerHTML = '';
+
+  const firstOfMonth = new Date(year, month, 1);
+  const mondayIndex = (firstOfMonth.getDay() + 6) % 7;
+  const startDate = new Date(year, month, 1 - mondayIndex);
+  const todayISO = toISODate(new Date());
+
+  for (let i = 0; i < 42; i++) {
+    const cellDate = new Date(startDate);
+    cellDate.setDate(startDate.getDate() + i);
+
+    const dateString = toISODate(cellDate);
+    const dayEvents = calendarEvents.filter(evt => evt.event_date === dateString);
+
+    const cell = document.createElement('button');
+    cell.type = 'button';
+    cell.className = 'calendar-day';
+    if (cellDate.getMonth() !== month) cell.classList.add('outside');
+    if (dateString === todayISO) cell.classList.add('today');
+    if (dateString === selectedCalendarDate) cell.classList.add('selected');
+    cell.onclick = () => {
+      selectCalendarDate(dateString);
+      openCalendarForm(dateString);
+    };
+
+    const number = document.createElement('div');
+    number.className = 'cal-day-number';
+    number.textContent = cellDate.getDate();
+    cell.appendChild(number);
+
+    dayEvents.slice(0, 2).forEach(evt => {
+      const pill = document.createElement('div');
+      pill.className = 'event-pill ' + getImportanceClass(evt.importance);
+      pill.textContent = evt.title;
+      cell.appendChild(pill);
+    });
+
+    if (dayEvents.length > 2) {
+      const more = document.createElement('div');
+      more.className = 'event-more';
+      more.textContent = '+' + (dayEvents.length - 2);
+      cell.appendChild(more);
+    }
+
+    grid.appendChild(cell);
+  }
+}
+
+function renderSelectedDayPanel() {
+  const panel = document.getElementById('selectedDayPanel');
+  if (!panel) return;
+
+  const selectedEvents = calendarEvents.filter(evt => evt.event_date === selectedCalendarDate);
+  const upcomingEvents = calendarEvents
+    .filter(evt => evt.event_date >= toISODate(new Date()))
+    .slice(0, 4);
+
+  panel.innerHTML = '';
+
+  const title = document.createElement('h4');
+  title.textContent = selectedCalendarDate
+    ? 'Fechas del ' + formatDisplayDate(selectedCalendarDate)
+    : 'Próximas fechas';
+  panel.appendChild(title);
+
+  const list = selectedEvents.length ? selectedEvents : upcomingEvents;
+
+  if (!list.length) {
     const empty = document.createElement('div');
-    empty.className = 'empty-grid';
-    empty.innerHTML = '<i class="ti ti-calendar-event"></i>Aún no hay eventos.<br>Toca "Evento" para crear uno 💜';
-    container.appendChild(empty);
+    empty.className = 'selected-day-empty';
+    empty.innerHTML = 'No hay fechas guardadas todavía.<br>Toca un día del calendario para agregar una.';
+    panel.appendChild(empty);
     return;
   }
 
-  calendarEvents.forEach(evt => {
-    const el = document.createElement('div');
-    el.className = 'cal-event';
-    
-    const badge = document.createElement('div');
-    badge.className = 'cal-event-badge';
-    badge.textContent = getDateBadge(evt.event_date);
-    
-    const title = document.createElement('div');
-    title.className = 'cal-event-title';
-    title.textContent = evt.title;
-    
-    const dateEl = document.createElement('div');
-    dateEl.className = 'cal-event-date';
-    const eventDate = new Date(evt.event_date + 'T00:00:00');
-    dateEl.textContent = eventDate.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    
-    let html = badge.outerHTML + title.outerHTML + dateEl.outerHTML;
-    
-    if (evt.note) {
-      html += '<div class="cal-event-note">' + evt.note + '</div>';
-    }
-    
-    html += '<div class="cal-event-author">Agregado por ' + (evt.author || 'Noel') + '</div>';
-    html += '<div class="cal-event-actions">' +
-            '<button onclick="editCalendarEvent(\'' + evt.id + '\')">Editar</button>' +
-            '<button class="del-btn" onclick="deleteCalendarEvent(\'' + evt.id + '\')">Eliminar</button>' +
-            '</div>';
-    
-    el.innerHTML = html;
-    container.appendChild(el);
-  });
+  list.forEach(evt => panel.appendChild(createCalendarEventCard(evt)));
 }
 
-function toggleCalendarForm() {
-  const form = document.getElementById('calendarForm');
-  const open = form.classList.toggle('open');
-  if (open) {
-    document.getElementById('calendarTitle').focus();
-  } else {
-    clearCalendarForm();
+function createCalendarEventCard(evt) {
+  const el = document.createElement('div');
+  el.className = 'cal-event ' + getImportanceClass(evt.importance);
+
+  const badge = document.createElement('div');
+  badge.className = 'cal-event-badge';
+  badge.textContent = getDateBadge(evt.event_date);
+
+  const importance = document.createElement('div');
+  importance.className = 'cal-event-importance';
+  importance.textContent = getImportanceLabel(evt.importance);
+
+  const title = document.createElement('div');
+  title.className = 'cal-event-title';
+  title.textContent = evt.title;
+
+  const dateEl = document.createElement('div');
+  dateEl.className = 'cal-event-date';
+  dateEl.textContent = formatDisplayDate(evt.event_date);
+
+  el.appendChild(badge);
+  el.appendChild(importance);
+  el.appendChild(title);
+  el.appendChild(dateEl);
+
+  if (evt.note) {
+    const note = document.createElement('div');
+    note.className = 'cal-event-note';
+    note.textContent = evt.note;
+    el.appendChild(note);
   }
+
+  const author = document.createElement('div');
+  author.className = 'cal-event-author';
+  author.textContent = 'Agregado por ' + (evt.author || 'Noel');
+  el.appendChild(author);
+
+  const actions = document.createElement('div');
+  actions.className = 'cal-event-actions';
+
+  const editBtn = document.createElement('button');
+  editBtn.type = 'button';
+  editBtn.textContent = 'Editar';
+  editBtn.onclick = () => editCalendarEvent(evt.id);
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.type = 'button';
+  deleteBtn.className = 'del-btn';
+  deleteBtn.textContent = 'Eliminar';
+  deleteBtn.onclick = () => deleteCalendarEvent(evt.id);
+
+  actions.appendChild(editBtn);
+  actions.appendChild(deleteBtn);
+  el.appendChild(actions);
+
+  return el;
 }
 
-function clearCalendarForm() {
+function openCalendarForm(dateString) {
+  const form = document.getElementById('calendarForm');
+  if (!form) return;
+
+  if (!editingEventId) clearCalendarForm(false);
+
+  const dateToUse = dateString || selectedCalendarDate || toISODate(new Date());
+  document.getElementById('calendarDate').value = dateToUse;
+  selectedCalendarDate = dateToUse;
+  form.classList.add('open');
+
+  renderMonthCalendar();
+  renderSelectedDayPanel();
+
+  setTimeout(() => {
+    document.getElementById('calendarTitle').focus();
+    form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
+}
+
+function closeCalendarForm() {
+  clearCalendarForm();
+  document.getElementById('calendarForm').classList.remove('open');
+}
+
+function clearCalendarForm(resetDate = true) {
   document.getElementById('calendarTitle').value = '';
-  document.getElementById('calendarDate').value = '';
+  if (resetDate) document.getElementById('calendarDate').value = selectedCalendarDate || toISODate(new Date());
   document.getElementById('calendarNote').value = '';
   document.getElementById('calendarAuthor').value = 'Noel';
+  document.getElementById('calendarImportance').value = 'media';
   document.getElementById('calendarReminder').value = '3';
   editingEventId = null;
 }
@@ -813,72 +1168,109 @@ async function saveCalendarEvent() {
   const eventDate = document.getElementById('calendarDate').value;
   const note = document.getElementById('calendarNote').value.trim();
   const author = document.getElementById('calendarAuthor').value;
-  const reminderDays = parseInt(document.getElementById('calendarReminder').value);
-  
+  const importance = document.getElementById('calendarImportance').value;
+  const reminderDays = parseInt(document.getElementById('calendarReminder').value, 10);
+
   if (!title || !eventDate) {
     showToast('Completa título y fecha');
     return;
   }
-  
+
+  const payload = {
+    title,
+    event_date: eventDate,
+    note: note || null,
+    author,
+    importance,
+    reminder_days: reminderDays
+  };
+
   if (editingEventId) {
-    const { error } = await sb.from('calendar_events').update({ title, event_date: eventDate, note, author, reminder_days: reminderDays }).eq('id', editingEventId);
-    if (error) { showToast('Error al actualizar'); return; }
-    await loadCalendarEvents();
-    showToast('Evento actualizado 💜');
+    const { error } = await sb.from('calendar_events').update(payload).eq('id', editingEventId);
+    if (error) {
+      console.error('Error al actualizar fecha:', error);
+      showToast('Error al actualizar');
+      return;
+    }
+    showToast('Fecha actualizada 💜');
   } else {
-    const { error } = await sb.from('calendar_events').insert({ title, event_date: eventDate, note, author, reminder_days: reminderDays });
-    if (error) { showToast('Error al guardar evento'); return; }
-    await loadCalendarEvents();
-    showToast('Evento agregado por ' + author + ' 💜');
+    window.lastLocalCalendarInsertAt = Date.now();
+    const { error } = await sb.from('calendar_events').insert(payload);
+    if (error) {
+      console.error('Error al guardar fecha:', error);
+      showToast('Error al guardar fecha');
+      return;
+    }
+    showToast('Fecha agregada por ' + author + ' 💜');
   }
-  
-  clearCalendarForm();
-  document.getElementById('calendarForm').classList.remove('open');
+
+  selectedCalendarDate = eventDate;
+  calendarViewDate = parseLocalDate(eventDate);
+  closeCalendarForm();
+  await loadCalendarEvents();
 }
 
 function editCalendarEvent(id) {
   const evt = calendarEvents.find(e => e.id === id);
   if (!evt) return;
-  
+
+  editingEventId = id;
+  selectedCalendarDate = evt.event_date;
+  calendarViewDate = parseLocalDate(evt.event_date);
+
   document.getElementById('calendarTitle').value = evt.title;
   document.getElementById('calendarDate').value = evt.event_date;
   document.getElementById('calendarNote').value = evt.note || '';
   document.getElementById('calendarAuthor').value = evt.author || 'Noel';
+  document.getElementById('calendarImportance').value = evt.importance || 'media';
   document.getElementById('calendarReminder').value = evt.reminder_days || 3;
-  editingEventId = id;
+
   document.getElementById('calendarForm').classList.add('open');
-  document.getElementById('calendarTitle').focus();
+  renderMonthCalendar();
+  renderSelectedDayPanel();
+
+  setTimeout(() => {
+    document.getElementById('calendarForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    document.getElementById('calendarTitle').focus();
+  }, 100);
 }
 
 async function deleteCalendarEvent(id) {
-  if (!confirm('¿Eliminar este evento?')) return;
+  if (!confirm('¿Eliminar esta fecha?')) return;
+
   const { error } = await sb.from('calendar_events').delete().eq('id', id);
-  if (error) { showToast('Error al eliminar'); return; }
+  if (error) {
+    console.error('Error al eliminar fecha:', error);
+    showToast('Error al eliminar');
+    return;
+  }
+
   await loadCalendarEvents();
-  showToast('Evento eliminado');
+  showToast('Fecha eliminada');
 }
 
 function checkCalendarReminders() {
-  const today = new Date().toISOString().split('T')[0];
-  
+  const today = toISODate(new Date());
+  const todayDate = parseLocalDate(today);
+
   calendarEvents.forEach(evt => {
+    const reminderDays = Number(evt.reminder_days || 3);
+    const eventDate = parseLocalDate(evt.event_date);
+    const daysUntil = Math.floor((eventDate - todayDate) / 86400000);
+
+    if (daysUntil < 0 || daysUntil > reminderDays) return;
+
     const reminderKey = 'togethr_calendar_reminder_' + evt.id + '_' + today;
-    
-    if (!localStorage.getItem(reminderKey)) {
-      const eventDate = new Date(evt.event_date + 'T00:00:00');
-      const todayDate = new Date(today + 'T00:00:00');
-      const daysUntil = Math.floor((eventDate - todayDate) / 86400000);
-      
-      if (daysUntil >= 0 && daysUntil <= evt.reminder_days) {
-        let msg = '';
-        if (daysUntil === 0) msg = 'Hoy: ' + evt.title;
-        else if (daysUntil === 1) msg = 'Mañana: ' + evt.title;
-        else msg = 'En ' + daysUntil + ' días: ' + evt.title;
-        
-        showToast(msg);
-        localStorage.setItem(reminderKey, '1');
-      }
-    }
+    if (localStorage.getItem(reminderKey)) return;
+
+    let msg = '';
+    if (daysUntil === 0) msg = 'Hoy: ' + evt.title;
+    else if (daysUntil === 1) msg = 'Mañana: ' + evt.title;
+    else msg = 'En ' + daysUntil + ' días: ' + evt.title;
+
+    showToast(msg);
+    sendPhoneNotification('Togethr', msg);
+    localStorage.setItem(reminderKey, '1');
   });
 }
 
@@ -1064,12 +1456,18 @@ document.addEventListener('keydown', e => {
 
 // ── Init ───────────────────────────────────────────────────────────────────
 window.lastLocalNoteInsertAt = 0;
+window.lastLocalCalendarInsertAt = 0;
 
 // Realtime subscriptions
 sb.channel('notes_channel')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'notes' }, (payload) => {
-    if (payload.eventType === 'INSERT' && (Date.now() - window.lastLocalNoteInsertAt) > 500) {
-      showToast('Nueva nota de ' + (payload.new.author || 'Noel') + ' 💜');
+    if (payload.eventType === 'INSERT') {
+      const isLocal = (Date.now() - window.lastLocalNoteInsertAt) < 1500;
+      if (!isLocal) {
+        const msg = 'Nueva nota de ' + (payload.new.author || 'Noel') + ' 💜';
+        showToast(msg);
+        sendPhoneNotification('Togethr', msg);
+      }
       loadNotes();
     } else if (payload.eventType === 'UPDATE' || payload.eventType === 'DELETE') {
       loadNotes();
@@ -1080,12 +1478,18 @@ sb.channel('notes_channel')
 sb.channel('calendar_channel')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'calendar_events' }, (payload) => {
     if (payload.eventType === 'INSERT') {
-      showToast('Nuevo evento agregado 💜');
+      const isLocal = (Date.now() - window.lastLocalCalendarInsertAt) < 1500;
+      if (!isLocal) {
+        const msg = 'Nueva fecha agregada 💜';
+        showToast(msg);
+        sendPhoneNotification('Togethr', msg);
+      }
     }
     loadCalendarEvents();
   })
   .subscribe();
 
+updateNotificationButton();
 loadNotes();
 loadPhotos();
 loadReasons();
