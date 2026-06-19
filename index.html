@@ -1787,7 +1787,9 @@ function getActivityText(change) {
 function showActivityNotification(change) {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
 
-  const title = 'Togethr';
+  const isAppleTouchDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const title = isAppleTouchDevice ? '' : 'Togethr';
   const options = {
     body: getActivityText(change),
     icon: 'icon-192.png',
