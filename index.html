@@ -981,6 +981,187 @@
       line-height: 1;
     }
 
+  
+    /* Live Web Push notification card */
+    .notify-card {
+      background: linear-gradient(135deg, #fff, #fdf4ff);
+      border-color: #d8b4fe;
+    }
+
+    .notify-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+
+    .notify-controls select {
+      border: 0.5px solid #d8b4fe;
+      border-radius: 14px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-family: inherit;
+      color: #7c3aed;
+      background: rgba(255,255,255,.9);
+      outline: none;
+    }
+
+    .notify-controls small {
+      flex: 1 1 180px;
+      color: #a78bfa;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    #notifyBtn:disabled {
+      opacity: .62;
+      cursor: not-allowed;
+    }
+
+  
+    /* Reminders tab */
+    .reminders-hero {
+      background: linear-gradient(135deg, #fff, #fdf4ff 55%, #ede9fe);
+      border: 0.5px solid #d8b4fe;
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 12px 28px rgba(124,58,237,.08);
+    }
+
+    .reminders-hero span {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: #a855f7;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .reminders-hero h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      color: #581c87;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .reminders-hero p {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #8b5cf6;
+    }
+
+    .reminder-form input {
+      width: 100%;
+      border: 0.5px solid #ede9fe;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #4c1d95;
+      background: rgba(255,255,255,.86);
+      outline: none;
+    }
+
+    .reminder-form input:focus {
+      border-color: #c084fc;
+      box-shadow: 0 0 0 3px rgba(168,85,247,.10);
+    }
+
+    .reminder-add-row select,
+    .reminder-add-row .add-btn {
+      flex: 1 1 120px;
+      min-width: 0;
+    }
+
+    .reminder-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .reminder-card {
+      background: #fff;
+      border: 0.5px solid #ede9fe;
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 8px 22px rgba(124,58,237,.06);
+    }
+
+    .reminder-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 9px;
+    }
+
+    .reminder-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 19px;
+      color: #581c87;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .reminder-pill {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #7c3aed;
+      background: #f3e8ff;
+      border: 0.5px solid #e9d5ff;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .reminder-meta {
+      color: #a78bfa;
+      font-size: 12px;
+      line-height: 1.4;
+      margin-bottom: 11px;
+    }
+
+    .reminder-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .reminder-actions button {
+      flex: 1 1 90px;
+      border: 0.5px solid #d8b4fe;
+      border-radius: 14px;
+      padding: 8px 10px;
+      background: #fff;
+      color: #7c3aed;
+      font-family: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .reminder-actions .del-btn {
+      border-color: #fca5a5;
+      color: #ef4444;
+      background: #fff1f1;
+    }
+
+    #nav-reminders i { color: #10b981; }
+
+    .nav-it {
+      font-size: 9px !important;
+      gap: 3px !important;
+    }
+
+    .nav-it i {
+      font-size: 22px !important;
+    }
+
   </style>
 </head>
 <body>
@@ -1020,6 +1201,7 @@
     <button class="tab" onclick="switchTab('pet',this)">🐾 Mascota</button>
     <button class="tab" onclick="switchTab('us',this)">💜 Nosotros</button>
     <button class="tab" onclick="switchTab('moments',this)">📸 Momentos</button>
+    <button class="tab" onclick="switchTab('reminders',this)">🔔 Reminders</button>
     <button class="tab" onclick="switchTab('calendar',this)">🗓️ Calendario</button>
   </div>
 
@@ -1049,6 +1231,24 @@
           <option value="Made">Made 💜</option>
         </select>
         <button class="add-btn" onclick="addNote()">Agregar 💜</button>
+      </div>
+    </div>
+
+
+    <div class="activity-card notify-card" id="notifyCard">
+      <div class="activity-head">
+        <div>
+          <strong>Notificaciones en vivo</strong>
+          <span id="notifyStatus">Conecta este iPhone para recibir avisos aunque Togethr esté cerrado.</span>
+        </div>
+        <button type="button" id="notifyBtn" onclick="enablePushNotifications()">Activar</button>
+      </div>
+      <div class="notify-controls">
+        <select id="pushUserName" onchange="localStorage.setItem('togethr_push_user', this.value); updateNotificationButton();">
+          <option value="Noel">Noel 💜</option>
+          <option value="Made">Made 💜</option>
+        </select>
+        <small id="notifyHint">Debe estar instalada en la pantalla de inicio y las notificaciones deben estar permitidas.</small>
       </div>
     </div>
 
@@ -1248,6 +1448,44 @@
     </div>
   </div>
 
+
+  <!-- REMINDERS -->
+  <div class="page" id="page-reminders">
+    <div class="reminders-hero">
+      <span>Reminders</span>
+      <h4>Listas compartidas</h4>
+      <p>Crea listas como shopping, gifts, ideas o pendientes. Cuando una lista se cree o se actualice, quedará lista para enviar notificaciones en vivo.</p>
+    </div>
+
+    <div id="reminderToggle" class="add-toggle" onclick="toggleReminderForm()">
+      <span><i class="ti ti-plus"></i> &nbsp;crear una lista</span>
+      <i class="ti ti-chevron-down chev" id="reminderChevron"></i>
+    </div>
+
+    <div class="add-form reminder-form" id="reminderForm">
+      <input id="reminderTitle" placeholder="Nombre de la lista, por ejemplo: Shopping" />
+      <div class="add-form-row reminder-add-row">
+        <select id="reminderLabel">
+          <option value="Shopping">Shopping 🛒</option>
+          <option value="Gifts">Gifts 🎁</option>
+          <option value="Home">Home 🏠</option>
+          <option value="Dates">Dates 💜</option>
+          <option value="Ideas">Ideas ✨</option>
+          <option value="Other">Other 📝</option>
+        </select>
+        <select id="reminderAuthor">
+          <option value="Noel">Noel 💜</option>
+          <option value="Made">Made 💜</option>
+        </select>
+        <button class="add-btn" id="reminderSaveBtn" onclick="saveReminderList()">Crear lista</button>
+      </div>
+    </div>
+
+    <div class="reminder-list" id="reminderList">
+      <div class="activity-empty">Cargando listas...</div>
+    </div>
+  </div>
+
   <!-- CALENDARIO -->
   <div class="page" id="page-calendar">
     <div class="calendar-top">
@@ -1337,6 +1575,9 @@
     <button class="nav-it" id="nav-moments" onclick="switchTab('moments',null,this)">
       <i class="ti ti-camera"></i>Momentos
     </button>
+    <button class="nav-it" id="nav-reminders" onclick="switchTab('reminders',null,this)">
+      <i class="ti ti-list-check"></i>Reminders
+    </button>
     <button class="nav-it" id="nav-calendar" onclick="switchTab('calendar',null,this)">
       <i class="ti ti-calendar"></i>Calendario
     </button>
@@ -1400,6 +1641,8 @@ function getActivityText(change) {
   if (change.entity === 'calendar' && change.action === 'added') return 'Fecha agregada' + who + title;
   if (change.entity === 'calendar' && change.action === 'updated') return 'Fecha actualizada' + who + title;
   if (change.entity === 'calendar' && change.action === 'deleted') return 'Fecha eliminada' + who + title;
+  if (change.entity === 'reminder_list' && change.action === 'added') return 'Lista creada' + who + title;
+  if (change.entity === 'reminder_list' && change.action === 'updated') return 'Lista actualizada' + who + title;
   if (change.entity === 'photo' && change.action === 'added') return 'Foto agregada' + who + title;
   if (change.entity === 'pet' && change.action === 'care') return 'Mascota cuidada' + who + title;
   if (change.entity === 'pet' && change.action === 'name') return 'Nombre de mascota cambiado' + who + title;
@@ -1510,68 +1753,196 @@ async function logRecentChange(change) {
   }
 }
 
-function updateNotificationButton() {
+
+// ── Live Web Push notifications ────────────────────────────────────────────
+// Public VAPID key for this app. The matching PRIVATE key must be stored only
+// in Supabase Edge Function secrets later. Do not place the private key here.
+const VAPID_PUBLIC_KEY = 'BFM3_W45T0kXNtBAxt6BVER3367BWa2YypMScicSySiYxVsE4k5xhoN_m4TPrmxaoTuvBLD9BD6s7mrZYvEVz4E';
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+
+  return outputArray;
+}
+
+function pushIsSupported() {
+  return (
+    'serviceWorker' in navigator &&
+    'PushManager' in window &&
+    'Notification' in window &&
+    (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  );
+}
+
+function getPushUserName() {
+  const select = document.getElementById('pushUserName');
+  const stored = localStorage.getItem('togethr_push_user');
+  const value = (select && select.value) || stored || 'Noel';
+  localStorage.setItem('togethr_push_user', value);
+  return value;
+}
+
+function restorePushUserName() {
+  const select = document.getElementById('pushUserName');
+  const stored = localStorage.getItem('togethr_push_user');
+  if (select && stored) select.value = stored;
+}
+
+function getDeviceLabel() {
+  const ua = navigator.userAgent || '';
+  if (/iPhone/i.test(ua)) return 'iPhone Home Screen';
+  if (/iPad/i.test(ua)) return 'iPad Home Screen';
+  if (/Android/i.test(ua)) return 'Android';
+  if (/Macintosh/i.test(ua)) return 'Mac';
+  if (/Windows/i.test(ua)) return 'Windows';
+  return 'Browser';
+}
+
+async function getPushRegistration() {
+  if (!pushIsSupported()) return null;
+
+  let registration = await navigator.serviceWorker.getRegistration();
+  if (!registration) {
+    registration = await navigator.serviceWorker.register('./sw.js');
+  }
+
+  return await navigator.serviceWorker.ready;
+}
+
+async function getCurrentPushSubscription() {
+  const registration = await getPushRegistration();
+  if (!registration || !registration.pushManager) return null;
+  return await registration.pushManager.getSubscription();
+}
+
+async function savePushSubscription(subscription) {
+  const json = subscription.toJSON();
+
+  if (!json || !json.endpoint || !json.keys || !json.keys.p256dh || !json.keys.auth) {
+    throw new Error('Push subscription incompleta.');
+  }
+
+  const row = {
+    user_name: getPushUserName(),
+    device_label: getDeviceLabel(),
+    user_agent: navigator.userAgent || '',
+    endpoint: json.endpoint,
+    p256dh: json.keys.p256dh,
+    auth: json.keys.auth,
+    enabled: true,
+    last_seen_at: new Date().toISOString()
+  };
+
+  const { error } = await sb
+    .from('push_subscriptions')
+    .upsert(row, { onConflict: 'endpoint' });
+
+  if (error) throw error;
+
+  return row;
+}
+
+async function updateNotificationButton() {
+  restorePushUserName();
+
   const card = document.getElementById('notifyCard');
   const status = document.getElementById('notifyStatus');
-  if (!card || !status) return;
+  const btn = document.getElementById('notifyBtn');
+  const hint = document.getElementById('notifyHint');
+  if (!card || !status || !btn) return;
 
-  if (!('Notification' in window)) {
-    status.textContent = 'Este navegador no permite notificaciones.';
-    card.querySelector('button').style.display = 'none';
+  if (!pushIsSupported()) {
+    status.textContent = 'Este navegador no permite Web Push aquí.';
+    if (hint) hint.textContent = 'En iPhone debe abrirse desde la app instalada en la pantalla de inicio.';
+    btn.textContent = 'No disponible';
+    btn.disabled = true;
     return;
   }
 
-  const btn = card.querySelector('button');
-  if (Notification.permission === 'granted') {
-    status.textContent = 'Notificaciones activas para notas y fechas importantes.';
-    btn.textContent = 'Activas';
-    btn.disabled = true;
-    btn.style.opacity = '0.65';
-  } else if (Notification.permission === 'denied') {
-    status.textContent = 'Las notificaciones están bloqueadas en el navegador.';
+  if (Notification.permission === 'denied') {
+    status.textContent = 'Las notificaciones están bloqueadas en este iPhone.';
+    if (hint) hint.textContent = 'Actívalas desde Ajustes de iOS para Togethr/Safari.';
     btn.textContent = 'Bloqueadas';
     btn.disabled = true;
-    btn.style.opacity = '0.65';
-  } else {
-    status.textContent = 'Recibe avisos cuando llegue una nota o una fecha importante.';
-    btn.textContent = 'Activar';
-    btn.disabled = false;
-    btn.style.opacity = '1';
-  }
-}
-
-async function requestNotificationPermission() {
-  if (!('Notification' in window)) {
-    showToast('Este navegador no permite notificaciones');
-    updateNotificationButton();
     return;
   }
 
-  const permission = await Notification.requestPermission();
-  updateNotificationButton();
+  if (Notification.permission === 'granted') {
+    try {
+      const subscription = await getCurrentPushSubscription();
 
-  if (permission === 'granted') {
-    showToast('Notificaciones activadas 💜');
-    sendPhoneNotification('Togethr', 'Notificaciones activadas 💜');
-  } else {
-    showToast('Notificaciones no activadas');
+      if (subscription) {
+        status.textContent = 'Este iPhone ya está conectado para notificaciones en vivo.';
+        if (hint) hint.textContent = 'Toca actualizar si cambiaste entre Noel y Made.';
+        btn.textContent = 'Actualizar';
+        btn.disabled = false;
+        return;
+      }
+
+      status.textContent = 'Permiso concedido. Falta conectar este iPhone.';
+      if (hint) hint.textContent = 'Toca conectar para guardar este dispositivo en Supabase.';
+      btn.textContent = 'Conectar';
+      btn.disabled = false;
+      return;
+    } catch (error) {
+      console.warn('No se pudo revisar la suscripción push:', error);
+    }
   }
+
+  status.textContent = 'Recibe avisos aunque Togethr esté cerrado.';
+  if (hint) hint.textContent = 'Debe estar instalada en la pantalla de inicio y debes permitir notificaciones.';
+  btn.textContent = 'Activar';
+  btn.disabled = false;
 }
 
-function sendPhoneNotification(title, body) {
-  if (!('Notification' in window)) return;
-  if (Notification.permission !== 'granted') return;
+async function enablePushNotifications() {
+  const btn = document.getElementById('notifyBtn');
 
   try {
-    const notification = new Notification(title, {
-      body,
-      icon: 'icon-192.png',
-      badge: 'icon-192.png',
-      tag: 'togethr-' + body.slice(0, 24)
-    });
-    setTimeout(() => notification.close(), 6000);
-  } catch (e) {
-    console.warn('No se pudo enviar la notificación:', e);
+    if (!pushIsSupported()) {
+      showToast('Web Push no está disponible aquí');
+      await updateNotificationButton();
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Conectando...';
+    }
+
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      showToast('Notificaciones no activadas');
+      await updateNotificationButton();
+      return;
+    }
+
+    const registration = await getPushRegistration();
+
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+
+    await savePushSubscription(subscription);
+
+    showToast('iPhone conectado a notificaciones 💜');
+    await updateNotificationButton();
+  } catch (error) {
+    console.error('No se pudo activar Web Push:', error);
+    showToast('No se pudo activar. Revisa consola/Supabase.');
+    if (btn) btn.disabled = false;
+    await updateNotificationButton();
   }
 }
 
@@ -2863,6 +3234,252 @@ function checkCalendarReminders() {
   return;
 }
 
+
+// ── Reminders / shared lists ───────────────────────────────────────────────
+let reminderLists = [];
+let editingReminderListId = null;
+
+function getReminderLabelIcon(label) {
+  const map = {
+    Shopping: '🛒',
+    Gifts: '🎁',
+    Home: '🏠',
+    Dates: '💜',
+    Ideas: '✨',
+    Other: '📝'
+  };
+
+  return map[label] || '📝';
+}
+
+function formatReminderDate(value) {
+  if (!value) return '';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) + ' · ' +
+         d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+}
+
+function toggleReminderForm(forceOpen = null) {
+  const form = document.getElementById('reminderForm');
+  const chev = document.getElementById('reminderChevron');
+  const toggle = document.getElementById('reminderToggle');
+  if (!form) return;
+
+  const open = forceOpen === null ? form.classList.toggle('open') : forceOpen;
+  form.classList.toggle('open', open);
+
+  if (chev) chev.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+  if (toggle) toggle.style.borderRadius = open ? '16px 16px 0 0' : '16px';
+
+  if (open) {
+    const input = document.getElementById('reminderTitle');
+    if (input) setTimeout(() => input.focus(), 80);
+  }
+}
+
+function clearReminderForm() {
+  editingReminderListId = null;
+
+  const title = document.getElementById('reminderTitle');
+  const label = document.getElementById('reminderLabel');
+  const author = document.getElementById('reminderAuthor');
+  const btn = document.getElementById('reminderSaveBtn');
+
+  if (title) title.value = '';
+  if (label) label.value = 'Shopping';
+  if (author) author.value = 'Noel';
+  if (btn) btn.textContent = 'Crear lista';
+}
+
+function renderReminderLists() {
+  const list = document.getElementById('reminderList');
+  if (!list) return;
+
+  list.innerHTML = '';
+
+  if (!reminderLists.length) {
+    const empty = document.createElement('div');
+    empty.className = 'activity-empty';
+    empty.innerHTML = '<i class="ti ti-list-check"></i><br>Aún no hay listas.<br>Crea una lista de shopping, gifts o ideas 💜';
+    list.appendChild(empty);
+    return;
+  }
+
+  reminderLists.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'reminder-card';
+
+    const top = document.createElement('div');
+    top.className = 'reminder-card-top';
+
+    const title = document.createElement('div');
+    title.className = 'reminder-title';
+    title.textContent = item.title || 'Lista sin nombre';
+
+    const pill = document.createElement('div');
+    pill.className = 'reminder-pill';
+    pill.textContent = getReminderLabelIcon(item.label) + ' ' + (item.label || 'Other');
+
+    top.appendChild(title);
+    top.appendChild(pill);
+
+    const meta = document.createElement('div');
+    meta.className = 'reminder-meta';
+
+    const author = item.author || 'Noel';
+    const updated = formatReminderDate(item.updated_at || item.created_at);
+    meta.textContent = 'Creada por ' + author + (updated ? ' · Actualizada ' + updated : '');
+
+    const actions = document.createElement('div');
+    actions.className = 'reminder-actions';
+
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.innerHTML = '<i class="ti ti-pencil"></i> Editar';
+    editBtn.onclick = () => editReminderList(item.id);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'del-btn';
+    deleteBtn.innerHTML = '<i class="ti ti-trash"></i> Eliminar';
+    deleteBtn.onclick = () => deleteReminderList(item.id);
+
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+
+    card.appendChild(top);
+    card.appendChild(meta);
+    card.appendChild(actions);
+    list.appendChild(card);
+  });
+}
+
+async function loadReminderLists() {
+  const list = document.getElementById('reminderList');
+
+  try {
+    const { data, error } = await sb
+      .from('reminder_lists')
+      .select('*')
+      .order('updated_at', { ascending: false });
+
+    if (error) throw error;
+
+    reminderLists = data || [];
+    renderReminderLists();
+  } catch (error) {
+    console.warn('No se pudieron cargar las listas:', error);
+
+    if (list) {
+      list.innerHTML = '';
+      const empty = document.createElement('div');
+      empty.className = 'activity-empty';
+      empty.innerHTML = 'No se pudieron cargar las listas.<br>Primero ejecuta el SQL de <b>reminder_lists</b> en Supabase.';
+      list.appendChild(empty);
+    }
+  }
+}
+
+async function saveReminderList() {
+  const titleEl = document.getElementById('reminderTitle');
+  const labelEl = document.getElementById('reminderLabel');
+  const authorEl = document.getElementById('reminderAuthor');
+
+  const title = titleEl ? titleEl.value.trim() : '';
+  const label = labelEl ? labelEl.value : 'Other';
+  const author = authorEl ? authorEl.value : 'Noel';
+
+  if (!title) {
+    showToast('Escribe el nombre de la lista');
+    return;
+  }
+
+  try {
+    if (editingReminderListId) {
+      window.lastLocalReminderUpdateAt = Date.now();
+
+      const { error } = await sb
+        .from('reminder_lists')
+        .update({
+          title,
+          label,
+          author,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingReminderListId);
+
+      if (error) throw error;
+
+      await loadReminderLists();
+      showToast('Lista actualizada 💜');
+      logRecentChange({ entity: 'reminder_list', action: 'updated', title, author });
+    } else {
+      window.lastLocalReminderInsertAt = Date.now();
+
+      const { error } = await sb
+        .from('reminder_lists')
+        .insert({
+          title,
+          label,
+          author
+        });
+
+      if (error) throw error;
+
+      await loadReminderLists();
+      showToast('Lista creada por ' + author + ' 💜');
+      logRecentChange({ entity: 'reminder_list', action: 'added', title, author });
+    }
+
+    clearReminderForm();
+    toggleReminderForm(false);
+  } catch (error) {
+    console.error('Error guardando lista:', error);
+    showToast('Error al guardar la lista');
+  }
+}
+
+function editReminderList(id) {
+  const item = reminderLists.find(list => list.id === id);
+  if (!item) return;
+
+  editingReminderListId = id;
+
+  const title = document.getElementById('reminderTitle');
+  const label = document.getElementById('reminderLabel');
+  const author = document.getElementById('reminderAuthor');
+  const btn = document.getElementById('reminderSaveBtn');
+
+  if (title) title.value = item.title || '';
+  if (label) label.value = item.label || 'Other';
+  if (author) author.value = item.author || 'Noel';
+  if (btn) btn.textContent = 'Guardar cambios';
+
+  toggleReminderForm(true);
+}
+
+async function deleteReminderList(id) {
+  if (!confirm('¿Eliminar esta lista?')) return;
+
+  try {
+    const { error } = await sb.from('reminder_lists').delete().eq('id', id);
+    if (error) throw error;
+
+    if (editingReminderListId === id) {
+      clearReminderForm();
+      toggleReminderForm(false);
+    }
+
+    await loadReminderLists();
+    showToast('Lista eliminada');
+  } catch (error) {
+    console.error('Error eliminando lista:', error);
+    showToast('Error al eliminar la lista');
+  }
+}
+
+
 // ── Tabs ───────────────────────────────────────────────────────────────────
 function switchTab(name, tabEl) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
@@ -2877,12 +3494,13 @@ function switchTab(name, tabEl) {
   if (tabEl) {
     tabEl.classList.add('on');
   } else {
-    const map = { notes: 0, pet: 1, us: 2, moments: 3, calendar: 4 };
+    const map = { notes: 0, pet: 1, us: 2, moments: 3, reminders: 4, calendar: 5 };
     const tab = document.querySelectorAll('.tab')[map[name]];
     if (tab) tab.classList.add('on');
   }
 
   if (name === 'pet') renderPet();
+  if (name === 'reminders') renderReminderLists();
 }
 
 // ── Photos ─────────────────────────────────────────────────────────────────
@@ -3481,6 +4099,41 @@ sb.channel('pet_channel')
   })
   .subscribe();
 
+
+sb.channel('reminder_lists_channel')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'reminder_lists' }, (payload) => {
+    if (payload.eventType === 'INSERT') {
+      const isLocal = (Date.now() - window.lastLocalReminderInsertAt) < 1500;
+      if (!isLocal) {
+        addRecentChangeLocal({
+          entity: 'reminder_list',
+          action: 'added',
+          title: payload.new.title || '',
+          author: payload.new.author || 'Noel',
+          created_at: payload.new.created_at || new Date().toISOString()
+        });
+        showToast('Nueva lista creada: ' + (payload.new.title || 'Reminders'));
+      }
+      loadReminderLists();
+    } else if (payload.eventType === 'UPDATE') {
+      const isLocal = (Date.now() - window.lastLocalReminderUpdateAt) < 1500;
+      if (!isLocal) {
+        addRecentChangeLocal({
+          entity: 'reminder_list',
+          action: 'updated',
+          title: payload.new.title || '',
+          author: payload.new.author || 'Noel',
+          created_at: payload.new.updated_at || new Date().toISOString()
+        });
+        showToast('Lista actualizada: ' + (payload.new.title || 'Reminders'));
+      }
+      loadReminderLists();
+    } else if (payload.eventType === 'DELETE') {
+      loadReminderLists();
+    }
+  })
+  .subscribe();
+
 sb.channel('activity_channel')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'activity_log' }, () => {
     loadRecentChanges();
@@ -3494,6 +4147,8 @@ loadNotes();
 loadPhotos();
 loadReasons();
 loadCalendarEvents();
+loadReminderLists();
+updateNotificationButton();
 </script>
 </body>
 </html>
