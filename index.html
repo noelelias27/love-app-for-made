@@ -431,6 +431,7 @@
     .days-note { font-size: 13px; color: #c084fc; font-style: italic; margin-top: 8px; font-family: 'Playfair Display', serif; }
     .us-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .stat-card { background: #fff; border-radius: 16px; border: 0.5px solid #ede9fe; padding: 16px; text-align: center; }
+    .stat-card.choice-card { grid-column: 1 / -1; width: min(100%, 240px); justify-self: center; padding: 22px 20px; }
     .stat-num { font-family: 'Playfair Display', serif; font-size: 26px; color: #7c3aed; font-weight: 600; }
     .stat-lbl { font-size: 12px; color: #a78bfa; margin-top: 4px; }
     .reasons-card { background: #fff; border-radius: 18px; border: 0.5px solid #ede9fe; padding: 18px; }
@@ -612,15 +613,25 @@
 
 
     /* Update: stronger note display + Nosotros memory slideshow */
-    .note-card { overflow: hidden !important; min-height: 190px; }
-    .note-body { display: block !important; min-height: 74px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 280px; overflow-y: auto; padding-right: 4px; }
+    .note-card { overflow: visible !important; min-height: 0; display: flex; flex-direction: column; }
+    .note-body { display: block !important; min-height: 112px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: clamp(180px, 34dvh, 360px); overflow-y: auto; padding-right: 8px; scrollbar-gutter: stable; }
     .note-body.compact { font-size: 15px; line-height: 1.6; }
     .note-body.long { font-size: 14px; line-height: 1.5; }
     .note-body::-webkit-scrollbar { width: 6px; }
     .note-body::-webkit-scrollbar-thumb { background: #d8b4fe; border-radius: 999px; }
     .note-attr { display: block !important; }
-    .note-nav { flex-wrap: wrap; }
-    .note-pos { min-width: 46px; text-align: center; }
+    .note-nav { flex-wrap: nowrap; align-items: center; flex-shrink: 0; margin-top: 14px; }
+    .note-nav button { flex: 1 1 0; min-width: 0; padding: 8px 10px; }
+    .note-nav .edit-note-btn,
+    .note-nav .del-note-btn { flex: 0 0 38px; width: 38px; padding: 8px 0; }
+    .note-nav .edit-note-btn { border-color: #c4b5fd; color: #7c3aed; }
+    .note-pos { flex: 0 0 50px; min-width: 50px; text-align: center; }
+    .note-edit-form { display: none; margin-top: 12px; padding-top: 12px; border-top: 0.5px solid #ede9fe; }
+    .note-edit-form.open { display: block; }
+    .note-edit-form textarea { width: 100%; min-height: 130px; border: 0.5px solid #d8b4fe; border-radius: 12px; padding: 11px; color: #4c1d95; background: #fdfcff; font-family: inherit; font-size: 14px; line-height: 1.55; resize: vertical; outline: none; }
+    .note-edit-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .note-edit-actions button { flex: 1; border: 0.5px solid #d8b4fe; border-radius: 12px; padding: 8px 10px; color: #7c3aed; background: #fff; font-family: inherit; cursor: pointer; }
+    .note-edit-actions .save-note-btn { color: #fff; border-color: #7c3aed; background: #7c3aed; }
     .memory-slideshow { background: linear-gradient(135deg, #fdf4ff, #ede9fe); border: 0.5px solid #d8b4fe; border-radius: 20px; padding: 10px; margin-bottom: 16px; box-shadow: 0 12px 35px rgba(124,58,237,.10); }
     .memory-slide-frame { position: relative; min-height: 230px; border-radius: 17px; overflow: hidden; background: radial-gradient(circle at top left, #f5d0fe, #a78bfa 55%, #7c3aed); cursor: pointer; }
     .memory-slide-frame img { width: 100%; height: 230px; object-fit: cover; display: block; opacity: 0; transform: scale(1.02); transition: opacity .55s ease, transform .55s ease; }
@@ -657,6 +668,12 @@
     .reason-author { font-size: 12px; color: #a78bfa; margin-top: -4px; }
     .reason-add-row select { flex: 1 1 140px !important; min-width: 0; }
     .reason-add-row .add-btn { flex: 1 1 120px; min-width: 0; }
+    .note-add-row select:disabled,
+    .reason-add-row select:disabled,
+    #petActor:disabled,
+    #reminderAuthor:disabled,
+    #calendarAuthor:disabled,
+    .list-item-form select:disabled { opacity: 1; color: #7c3aed; background: #f3e8ff; cursor: default; }
     #nav-notes i { color: #ec4899; }
     #nav-us i { color: #8b5cf6; }
     #nav-moments i { color: #f59e0b; }
@@ -1086,19 +1103,54 @@
       background: #fff;
       border: 0.5px solid #ede9fe;
       border-radius: 18px;
-      padding: 14px;
+      padding: 0;
+      overflow: hidden;
       box-shadow: 0 8px 22px rgba(124,58,237,.06);
     }
 
-    .reminder-card-top {
+    .reminder-summary {
+      width: 100%;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 9px;
+      gap: 14px;
+      border: none;
+      background: #fff;
+      padding: 16px;
+      text-align: left;
+      font-family: inherit;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .reminder-summary:active {
+      background: #faf5ff;
+    }
+
+    .reminder-summary-copy {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .reminder-chevron {
+      flex: 0 0 32px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #7c3aed;
+      background: #f3e8ff;
+      transition: transform .2s ease;
+    }
+
+    .reminder-card.open .reminder-chevron {
+      transform: rotate(180deg);
     }
 
     .reminder-title {
+      display: block;
       font-family: 'Playfair Display', serif;
       font-size: 19px;
       color: #581c87;
@@ -1106,25 +1158,22 @@
       overflow-wrap: anywhere;
     }
 
-    .reminder-pill {
-      flex: 0 0 auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      color: #7c3aed;
-      background: #f3e8ff;
-      border: 0.5px solid #e9d5ff;
-      border-radius: 999px;
-      padding: 5px 9px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
     .reminder-meta {
+      display: block;
       color: #a78bfa;
       font-size: 12px;
       line-height: 1.4;
-      margin-bottom: 11px;
+      margin-top: 5px;
+    }
+
+    .reminder-details {
+      display: none;
+      padding: 0 14px 14px;
+      border-top: 0.5px solid #f3e8ff;
+    }
+
+    .reminder-details.open {
+      display: block;
     }
 
     .reminder-actions {
@@ -1199,6 +1248,8 @@
       font-size: 17px;
     }
 
+    .list-check:disabled { opacity: .55; cursor: default; }
+
     .list-delete {
       background: #fff1f1;
       color: #ef4444;
@@ -1268,6 +1319,7 @@
       font-family: inherit;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
+      margin-bottom: 14px;
     }
 
     #nav-reminders i { color: #10b981; }
@@ -1346,11 +1398,19 @@
       <div class="note-label" id="noteLabel">nota para ti</div>
       <div class="note-body" id="noteText"></div>
       <div class="note-attr" id="noteAttr"></div>
+      <div class="note-edit-form" id="noteEditForm">
+        <textarea id="editNoteText" aria-label="Editar nota"></textarea>
+        <div class="note-edit-actions">
+          <button type="button" onclick="cancelEditNote()">Cancelar</button>
+          <button type="button" class="save-note-btn" onclick="saveNoteEdit()">Guardar</button>
+        </div>
+      </div>
       <div class="note-nav">
         <button onclick="prevNote()">← anterior</button>
         <span class="note-pos" id="notePos"></span>
         <button onclick="nextNote()">siguiente →</button>
-        <button class="del-note-btn" onclick="deleteNote()" title="Eliminar nota"><i class="ti ti-trash"></i></button>
+        <button class="edit-note-btn" id="editNoteBtn" onclick="startEditNote()" title="Editar nota" aria-label="Editar nota"><i class="ti ti-pencil"></i></button>
+        <button class="del-note-btn" id="deleteNoteBtn" onclick="deleteNote()" title="Eliminar nota" aria-label="Eliminar nota"><i class="ti ti-trash"></i></button>
       </div>
     </div>
 
@@ -1361,7 +1421,7 @@
     <div class="add-form" id="addForm">
       <textarea id="newNoteText" placeholder="Escribe algo desde el corazón…"></textarea>
       <div class="add-form-row note-add-row">
-        <select id="newNoteAuthor">
+        <select id="newNoteAuthor" disabled aria-label="Autor de la nota">
           <option value="Noel">Noel 💜</option>
           <option value="Made">Made 💜</option>
         </select>
@@ -1379,24 +1439,11 @@
         <button type="button" id="notifyBtn" onclick="enablePushNotifications()">Activar</button>
       </div>
       <div class="notify-controls">
-        <select id="pushUserName" onchange="localStorage.setItem('togethr_push_user', this.value); updateNotificationButton();">
+        <select id="pushUserName" onchange="setCurrentUser(this.value)">
           <option value="Noel">Noel 💜</option>
           <option value="Made">Made 💜</option>
         </select>
         <small id="notifyHint">Debe estar instalada en la pantalla de inicio y las notificaciones deben estar permitidas.</small>
-      </div>
-    </div>
-
-    <div class="activity-card" id="activityCard">
-      <div class="activity-head">
-        <div>
-          <strong>Notificaciones</strong>
-          <span>Lista de cambios recientes</span>
-        </div>
-        <button type="button" onclick="loadRecentChanges()">Actualizar</button>
-      </div>
-      <div class="activity-list" id="recentChangesList">
-        <div class="activity-empty">Aún no hay cambios recientes.</div>
       </div>
     </div>
 
@@ -1498,18 +1545,14 @@
         <div class="stat-num">∞</div>
         <div class="stat-lbl">razones por las que te amo</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card choice-card">
         <div class="stat-num">1</div>
         <div class="stat-lbl">persona que elijo cada día</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">💜</div>
-        <div class="stat-lbl">siempre y para siempre</div>
       </div>
     </div>
     <div class="reasons-card">
 
-  <h4>Razones por las cuales te amo</h4>
+  <h4>Mensajes bonitos</h4>
 
   <div id="reasonsList"></div>
 
@@ -1519,7 +1562,7 @@
 
     <span>
       <i class="ti ti-plus"></i>
-      &nbsp; agregar razón
+      &nbsp; agregar mensaje
     </span>
 
     <i class="ti ti-chevron-down chev"
@@ -1532,10 +1575,10 @@
 
     <textarea
       id="newReasonText"
-      placeholder="Otra razón por la cual te amo..."></textarea>
+      placeholder="Escribe un mensaje bonito..."></textarea>
 
     <div class="add-form-row reason-add-row">
-      <select id="newReasonAuthor" aria-label="Quién agrega la razón">
+      <select id="newReasonAuthor" disabled aria-label="Quién agrega la razón">
         <option value="Noel">Noel 💜</option>
         <option value="Made">Made 💜</option>
       </select>
@@ -1589,7 +1632,6 @@
     <div class="reminders-hero">
       <span>Listas</span>
       <h4>Listas compartidas</h4>
-      <p>Crea listas de compras, regalos, casa o ideas y agrega productos directamente dentro de cada lista.</p>
     </div>
 
     <div id="reminderToggle" class="add-toggle" onclick="toggleReminderForm()">
@@ -1745,6 +1787,7 @@ const DEFAULT_NOTES = [
 
 // ── Notes ──────────────────────────────────────────────────────────────────
 let notes = [], idx = 0;
+let editingNoteId = null;
 
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -1769,10 +1812,11 @@ function getActivityText(change) {
   const title = change.title ? ': ' + change.title : '';
 
   if (change.entity === 'note' && change.action === 'added') return 'Nota agregada' + who + title;
+  if (change.entity === 'note' && change.action === 'updated') return 'Nota actualizada' + who + title;
   if (change.entity === 'note' && change.action === 'deleted') return 'Nota eliminada' + who + title;
-  if (change.entity === 'reason' && change.action === 'added') return 'Razón agregada' + who + title;
-  if (change.entity === 'reason' && change.action === 'updated') return 'Razón actualizada' + who + title;
-  if (change.entity === 'reason' && change.action === 'deleted') return 'Razón eliminada' + who + title;
+  if (change.entity === 'reason' && change.action === 'added') return 'Mensaje agregado' + who + title;
+  if (change.entity === 'reason' && change.action === 'updated') return 'Mensaje actualizado' + who + title;
+  if (change.entity === 'reason' && change.action === 'deleted') return 'Mensaje eliminado' + who + title;
   if (change.entity === 'calendar' && change.action === 'added') return 'Fecha agregada' + who + title;
   if (change.entity === 'calendar' && change.action === 'updated') return 'Fecha actualizada' + who + title;
   if (change.entity === 'calendar' && change.action === 'deleted') return 'Fecha eliminada' + who + title;
@@ -1916,9 +1960,34 @@ async function logRecentChange(change) {
   addRecentChangeLocal({ ...entry, created_at: new Date().toISOString() });
 
   try {
-    await sb.from('activity_log').insert(entry);
+    const { error } = await sb.from('activity_log').insert(entry);
+    if (error) throw error;
   } catch (e) {
     console.warn('No se pudo guardar el cambio reciente en Supabase:', e);
+  }
+}
+
+let changeAuditWarningShown = false;
+
+async function registerChange(change) {
+  const actor = normalizeCurrentUser(change.actor || getCurrentUser());
+  const entry = {
+    entity: change.entity || 'app',
+    action: change.action || 'updated',
+    record_id: change.recordId ? String(change.recordId) : null,
+    actor,
+    owner: change.owner ? normalizeCurrentUser(change.owner) : actor,
+    details: change.details || {}
+  };
+
+  try {
+    const { error } = await sb.from('change_audit').insert(entry);
+    if (error) throw error;
+  } catch (error) {
+    if (!changeAuditWarningShown) {
+      console.warn('La auditoría necesita la migración de ownership:', error);
+      changeAuditWarningShown = true;
+    }
   }
 }
 
@@ -1950,18 +2019,54 @@ function pushIsSupported() {
   );
 }
 
+function normalizeCurrentUser(value) {
+  return value === 'Made' ? 'Made' : 'Noel';
+}
+
+function getCurrentUser() {
+  return normalizeCurrentUser(localStorage.getItem('togethr_push_user') || 'Noel');
+}
+
+function isOwnedByCurrentUser(author) {
+  return normalizeCurrentUser(author) === getCurrentUser();
+}
+
+function syncCurrentUserControls() {
+  const currentUser = getCurrentUser();
+  ['pushUserName', 'newNoteAuthor', 'newReasonAuthor', 'petActor', 'reminderAuthor', 'calendarAuthor'].forEach(id => {
+    const control = document.getElementById(id);
+    if (!control) return;
+    control.value = currentUser;
+    if (id !== 'pushUserName') control.disabled = true;
+  });
+}
+
+function setCurrentUser(value) {
+  const currentUser = normalizeCurrentUser(value);
+  localStorage.setItem('togethr_push_user', currentUser);
+  syncCurrentUserControls();
+  cancelEditNote(false);
+  renderNote();
+  renderReasons();
+  if (editingEventId) closeCalendarForm();
+  renderSelectedDayPanel();
+  if (editingReminderListId) {
+    clearReminderForm();
+    toggleReminderForm(false);
+  }
+  renderReminderLists();
+  togglePhotoEditMode(false);
+  updateNotificationButton();
+}
+
 function getPushUserName() {
-  const select = document.getElementById('pushUserName');
-  const stored = localStorage.getItem('togethr_push_user');
-  const value = (select && select.value) || stored || 'Noel';
+  const value = getCurrentUser();
   localStorage.setItem('togethr_push_user', value);
   return value;
 }
 
 function restorePushUserName() {
-  const select = document.getElementById('pushUserName');
-  const stored = localStorage.getItem('togethr_push_user');
-  if (select && stored) select.value = stored;
+  syncCurrentUserControls();
 }
 
 function getDeviceLabel() {
@@ -2018,6 +2123,25 @@ async function savePushSubscription(subscription) {
   return row;
 }
 
+async function restoreDeviceIdentity(subscription) {
+  if (!subscription || !subscription.endpoint) return null;
+
+  const { data, error } = await sb
+    .from('push_subscriptions')
+    .select('user_name')
+    .eq('endpoint', subscription.endpoint)
+    .maybeSingle();
+
+  if (error || !data || !data.user_name) return null;
+
+  const deviceUser = normalizeCurrentUser(data.user_name);
+  localStorage.setItem('togethr_push_user', deviceUser);
+  syncCurrentUserControls();
+  const select = document.getElementById('pushUserName');
+  if (select) select.disabled = true;
+  return deviceUser;
+}
+
 async function updateNotificationButton() {
   restorePushUserName();
 
@@ -2025,7 +2149,9 @@ async function updateNotificationButton() {
   const status = document.getElementById('notifyStatus');
   const btn = document.getElementById('notifyBtn');
   const hint = document.getElementById('notifyHint');
+  const userSelect = document.getElementById('pushUserName');
   if (!card || !status || !btn) return;
+  if (userSelect) userSelect.disabled = false;
 
   if (!pushIsSupported()) {
     status.textContent = 'Este navegador no permite Web Push aquí.';
@@ -2048,8 +2174,9 @@ async function updateNotificationButton() {
       const subscription = await getCurrentPushSubscription();
 
       if (subscription) {
+        const deviceUser = await restoreDeviceIdentity(subscription);
         status.textContent = 'Este iPhone ya está conectado para notificaciones en vivo.';
-        if (hint) hint.textContent = 'Toca actualizar si cambiaste entre Noel y Made.';
+        if (hint) hint.textContent = deviceUser ? 'Identidad de este dispositivo: ' + deviceUser + '.' : 'Este dispositivo ya tiene una suscripción activa.';
         btn.textContent = 'Actualizar';
         btn.disabled = false;
         return;
@@ -2120,6 +2247,8 @@ function renderNote() {
   const attrEl = document.getElementById('noteAttr');
   const labelEl = document.getElementById('noteLabel');
   const posEl = document.getElementById('notePos');
+  const editBtn = document.getElementById('editNoteBtn');
+  const deleteBtn = document.getElementById('deleteNoteBtn');
 
   if (!notes.length) {
     textEl.textContent = 'No hay notas todavía. Agrega una para empezar 💜';
@@ -2127,6 +2256,9 @@ function renderNote() {
     attrEl.textContent = '';
     labelEl.textContent = 'inicio';
     posEl.textContent = '0 / 0';
+    if (editBtn) editBtn.hidden = true;
+    if (deleteBtn) deleteBtn.hidden = true;
+    cancelEditNote(false);
     return;
   }
 
@@ -2147,9 +2279,13 @@ function renderNote() {
   attrEl.textContent = parts.join(' • ');
   labelEl.textContent = n.label || 'nota para ti';
   posEl.textContent = (idx + 1) + ' / ' + notes.length;
+  const canManage = !!n.id && isOwnedByCurrentUser(n.author || 'Noel');
+  if (editBtn) editBtn.hidden = !canManage;
+  if (deleteBtn) deleteBtn.hidden = !canManage;
+  if (editingNoteId && editingNoteId !== n.id) cancelEditNote(false);
 }
-function nextNote() { idx = (idx + 1) % notes.length; animateNote(); }
-function prevNote() { idx = (idx - 1 + notes.length) % notes.length; animateNote(); }
+function nextNote() { cancelEditNote(false); idx = (idx + 1) % notes.length; animateNote(); }
+function prevNote() { cancelEditNote(false); idx = (idx - 1 + notes.length) % notes.length; animateNote(); }
 function animateNote() {
   const el = document.getElementById('noteText');
   el.style.transition = 'opacity .25s'; el.style.opacity = '0';
@@ -2157,6 +2293,7 @@ function animateNote() {
 }
 
 async function loadNotes() {
+  const selectedNoteId = notes[idx] ? notes[idx].id : null;
   try {
     // Order by created_at — works regardless of whether position column exists
     const { data, error } = await sb.from('notes').select('id,text,attr,label,author').order('created_at', { ascending: true });
@@ -2170,7 +2307,8 @@ async function loadNotes() {
     } else {
       notes = data;
     }
-    idx = 0;
+    const preservedIndex = selectedNoteId ? notes.findIndex(note => note.id === selectedNoteId) : -1;
+    idx = preservedIndex >= 0 ? preservedIndex : 0;
     await ensureNote15Made();
     renderNote();
   } catch (e) {
@@ -2199,18 +2337,87 @@ async function ensureNote15Made() {
   }
 }
 
+function startEditNote() {
+  const note = notes[idx];
+  if (!note || !note.id || !isOwnedByCurrentUser(note.author || 'Noel')) {
+    showToast('Solo quien creó esta nota puede editarla');
+    return;
+  }
+
+  editingNoteId = note.id;
+  const form = document.getElementById('noteEditForm');
+  const textarea = document.getElementById('editNoteText');
+  if (textarea) textarea.value = note.text || '';
+  if (form) form.classList.add('open');
+  if (textarea) setTimeout(() => textarea.focus(), 60);
+}
+
+function cancelEditNote(restoreFocus = true) {
+  editingNoteId = null;
+  const form = document.getElementById('noteEditForm');
+  const textarea = document.getElementById('editNoteText');
+  if (form) form.classList.remove('open');
+  if (textarea) textarea.value = '';
+  if (restoreFocus) {
+    const btn = document.getElementById('editNoteBtn');
+    if (btn && !btn.hidden) btn.focus();
+  }
+}
+
+async function saveNoteEdit() {
+  const note = notes.find(item => item.id === editingNoteId);
+  const textarea = document.getElementById('editNoteText');
+  const text = textarea ? textarea.value.trim() : '';
+
+  if (!note || !isOwnedByCurrentUser(note.author || 'Noel')) {
+    showToast('Solo quien creó esta nota puede editarla');
+    cancelEditNote(false);
+    return;
+  }
+
+  if (!text) {
+    showToast('La nota no puede quedar vacía');
+    return;
+  }
+
+  const owner = note.author || 'Noel';
+  const { error } = await sb
+    .from('notes')
+    .update({ text })
+    .eq('id', note.id)
+    .eq('author', owner);
+
+  if (error) {
+    console.error('Error al actualizar nota:', error);
+    showToast('Error al actualizar nota');
+    return;
+  }
+
+  note.text = text;
+  cancelEditNote(false);
+  renderNote();
+  showToast('Nota actualizada');
+  await registerChange({ entity: 'note', action: 'updated', recordId: note.id, owner, details: { title: text.slice(0, 80) } });
+  logRecentChange({ entity: 'note', action: 'updated', title: text.slice(0, 40), author: owner });
+}
+
 async function deleteNote() {
+  const note = notes[idx];
+  if (!note || !isOwnedByCurrentUser(note.author || 'Noel')) {
+    showToast('Solo quien creó esta nota puede eliminarla');
+    return;
+  }
   if (notes.length === 1) { showToast('No puedes eliminar la última nota 💜'); return; }
   if (!confirm('¿Eliminar esta nota?')) return;
-  const note = notes[idx];
   if (!note.id) { showToast('Error al eliminar'); return; }
   window.lastLocalNoteDeleteAt = Date.now();
-  const { error } = await sb.from('notes').delete().eq('id', note.id);
+  const { error } = await sb.from('notes').delete().eq('id', note.id).eq('author', note.author || 'Noel');
   if (error) { showToast('Error al eliminar'); return; }
   notes.splice(idx, 1);
   if (idx >= notes.length) idx = notes.length - 1;
   animateNote();
   showToast('Nota eliminada');
+  await registerChange({ entity: 'note', action: 'deleted', recordId: note.id, owner: note.author || 'Noel', details: { title: note.text.slice(0, 80) } });
   logRecentChange({ entity: 'note', action: 'deleted', title: note.text.slice(0, 40), author: note.author || 'Noel' });
 }
 
@@ -2226,7 +2433,7 @@ async function addNote() {
   const txt = document.getElementById('newNoteText').value.trim();
   if (!txt) return;
 
-  const author = document.getElementById('newNoteAuthor').value;
+  const author = getCurrentUser();
   window.lastLocalNoteInsertAt = Date.now();
 
   const { data, error } = await sb
@@ -2243,11 +2450,12 @@ async function addNote() {
 
   notes.push(data);
   document.getElementById('newNoteText').value = '';
-  document.getElementById('newNoteAuthor').value = 'Noel';
+  document.getElementById('newNoteAuthor').value = author;
   toggleAdd();
   idx = notes.length - 1;
   animateNote();
   showToast('Nota agregada por ' + author + ' 💜');
+  await registerChange({ entity: 'note', action: 'added', recordId: data.id, owner: author, details: { title: txt.slice(0, 80) } });
   logRecentChange({ entity: 'note', action: 'added', title: txt.slice(0, 40), author });
 }
 
@@ -2260,6 +2468,7 @@ let petVisualTimer = null;
 const DEFAULT_PET_STATE = {
   id: PET_ID,
   name: 'Zeus',
+  name_author: 'Noel',
   type: 'pet',
   love: 78,
   food: 72,
@@ -2331,6 +2540,7 @@ function normalizePetState(state) {
     ...(state || {}),
     id: (state && state.id) || PET_ID,
     name: normalizedName,
+    name_author: (state && state.name_author) || DEFAULT_PET_STATE.name_author,
     type: 'pet',
     love: clampPetValue((state && state.love) ?? DEFAULT_PET_STATE.love),
     food: clampPetValue((state && state.food) ?? DEFAULT_PET_STATE.food),
@@ -2538,7 +2748,7 @@ async function careForPet(action) {
   const config = PET_ACTIONS[action];
   if (!config) return;
 
-  const actor = document.getElementById('petActor')?.value || 'Noel';
+  const actor = getCurrentUser();
   const base = getPetDisplayState(petState || DEFAULT_PET_STATE);
   const petName = base.name || 'Zeus';
   const actionLabel = config.label.replace('Zeus', petName);
@@ -2582,6 +2792,7 @@ async function careForPet(action) {
     petState = normalizePetState(data || next);
     localStorage.setItem('togethr_pet_state', JSON.stringify(petState));
     renderPet();
+    await registerChange({ entity: 'pet', action: 'care', recordId: PET_ID, owner: actor, details: { care: action, label: actionLabel } });
   } catch (e) {
     console.warn('No se pudo guardar Zeus en Supabase:', e);
   }
@@ -2597,9 +2808,15 @@ async function savePetName() {
     return;
   }
 
-  const actor = document.getElementById('petActor')?.value || 'Noel';
+  const actor = getCurrentUser();
   const base = normalizePetState(petState || DEFAULT_PET_STATE);
   const oldName = base.name || 'Zeus';
+
+  if (base.name_author && !isOwnedByCurrentUser(base.name_author)) {
+    showToast('Solo quien eligió el nombre puede cambiarlo');
+    input.value = oldName;
+    return;
+  }
 
   if (newName === oldName) {
     showToast('Ese ya es su nombre 💜');
@@ -2609,6 +2826,7 @@ async function savePetName() {
   const next = normalizePetState({
     ...base,
     name: newName,
+    name_author: actor,
     last_action: 'cambió el nombre de la mascota',
     last_actor: actor,
     last_speech: 'Ahora me llamo ' + newName + '.',
@@ -2634,6 +2852,7 @@ async function savePetName() {
     petState = normalizePetState(data || next);
     localStorage.setItem('togethr_pet_state', JSON.stringify(petState));
     renderPet();
+    await registerChange({ entity: 'pet', action: 'name', recordId: PET_ID, owner: actor, details: { from: oldName, to: newName } });
   } catch (e) {
     console.warn('No se pudo guardar el nombre de la mascota en Supabase:', e);
   }
@@ -2730,7 +2949,7 @@ function renderReasons() {
   if (!reasons.length) {
     const empty = document.createElement('div');
     empty.className = 'empty-grid';
-    empty.innerHTML = '<i class="ti ti-heart"></i>Aún no hay razones guardadas.';
+    empty.innerHTML = '<i class="ti ti-heart"></i>Aún no hay mensajes guardados.';
     container.appendChild(empty);
     return;
   }
@@ -2753,26 +2972,29 @@ function renderReasons() {
     authorEl.className = 'reason-author';
     authorEl.textContent = 'Agregada por ' + getReasonAuthor(reason) + (reason.created_at ? ' · ' + formatActivityTime(reason.created_at) : '');
 
-    const actions = document.createElement('div');
-    actions.className = 'reason-actions';
-
-    const editBtn = document.createElement('button');
-    editBtn.type = 'button';
-    editBtn.className = 'reason-button';
-    editBtn.textContent = 'Editar';
-    editBtn.onclick = () => startEditReason(reason.id, reason.text, item);
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.type = 'button';
-    deleteBtn.className = 'reason-button';
-    deleteBtn.textContent = 'Eliminar';
-    deleteBtn.onclick = () => deleteReason(reason.id);
-
-    actions.appendChild(editBtn);
-    actions.appendChild(deleteBtn);
     content.appendChild(textEl);
     content.appendChild(authorEl);
-    content.appendChild(actions);
+
+    if (isOwnedByCurrentUser(getReasonAuthor(reason))) {
+      const actions = document.createElement('div');
+      actions.className = 'reason-actions';
+
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'reason-button';
+      editBtn.textContent = 'Editar';
+      editBtn.onclick = () => startEditReason(reason.id, reason.text, item);
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.className = 'reason-button';
+      deleteBtn.textContent = 'Eliminar';
+      deleteBtn.onclick = () => deleteReason(reason.id);
+
+      actions.appendChild(editBtn);
+      actions.appendChild(deleteBtn);
+      content.appendChild(actions);
+    }
     item.appendChild(icon);
     item.appendChild(content);
     container.appendChild(item);
@@ -2800,6 +3022,12 @@ async function loadReasons() {
 }
 
 function startEditReason(id, text, item) {
+  const reason = reasons.find(entry => entry.id === id);
+  if (!reason || !isOwnedByCurrentUser(getReasonAuthor(reason))) {
+    showToast('Solo quien creó este mensaje puede editarlo');
+    return;
+  }
+
   const content = item.querySelector('.reason-content');
   content.innerHTML = '';
 
@@ -2833,22 +3061,34 @@ async function saveReason(id, text) {
   if (!text) return;
   const current = reasons.find(reason => reason.id === id);
   const author = current ? getReasonAuthor(current) : 'Noel';
+  if (!current || !isOwnedByCurrentUser(author)) {
+    showToast('Solo quien creó este mensaje puede editarlo');
+    await loadReasons();
+    return;
+  }
   window.lastLocalReasonUpdateAt = Date.now();
-  const { error } = await sb.from('reasons').update({ text }).eq('id', id);
+  const { error } = await sb.from('reasons').update({ text }).eq('id', id).eq('author', author);
   if (error) { showToast('Error al actualizar'); return; }
   await loadReasons();
-  showToast('Razón actualizada');
+  showToast('Mensaje actualizado');
+  await registerChange({ entity: 'reason', action: 'updated', recordId: id, owner: author, details: { title: text.slice(0, 80) } });
   logRecentChange({ entity: 'reason', action: 'updated', title: text.slice(0, 40), author });
 }
 
 async function deleteReason(id) {
-  if (!confirm('¿Eliminar esta razón?')) return;
   const deletedReason = reasons.find(reason => reason.id === id);
+  const author = deletedReason ? getReasonAuthor(deletedReason) : '';
+  if (!deletedReason || !isOwnedByCurrentUser(author)) {
+    showToast('Solo quien creó este mensaje puede eliminarlo');
+    return;
+  }
+  if (!confirm('¿Eliminar este mensaje?')) return;
   window.lastLocalReasonDeleteAt = Date.now();
-  const { error } = await sb.from('reasons').delete().eq('id', id);
+  const { error } = await sb.from('reasons').delete().eq('id', id).eq('author', author);
   if (error) { showToast('Error al eliminar'); return; }
   await loadReasons();
-  showToast('Razón eliminada');
+  showToast('Mensaje eliminado');
+  await registerChange({ entity: 'reason', action: 'deleted', recordId: id, owner: author, details: { title: deletedReason.text.slice(0, 80) } });
   logRecentChange({
     entity: 'reason',
     action: 'deleted',
@@ -2862,10 +3102,10 @@ async function addReason() {
   if (!text) return;
 
   const authorEl = document.getElementById('newReasonAuthor');
-  const author = authorEl ? authorEl.value : 'Noel';
+  const author = getCurrentUser();
 
   window.lastLocalReasonInsertAt = Date.now();
-  const { error } = await sb.from('reasons').insert({ text, author });
+  const { data, error } = await sb.from('reasons').insert({ text, author }).select('id').single();
   if (error) {
     console.error('Error agregando razón:', error);
     showToast('Error');
@@ -2873,9 +3113,10 @@ async function addReason() {
   }
 
   document.getElementById('newReasonText').value = '';
-  if (authorEl) authorEl.value = 'Noel';
+  if (authorEl) authorEl.value = author;
   await loadReasons();
-  showToast('Razón agregada por ' + author + ' 💜');
+  showToast('Mensaje agregado por ' + author + ' 💜');
+  await registerChange({ entity: 'reason', action: 'added', recordId: data && data.id, owner: author, details: { title: text.slice(0, 80) } });
   logRecentChange({ entity: 'reason', action: 'added', title: text.slice(0, 40), author });
 }
 
@@ -3240,23 +3481,25 @@ function createCalendarEventCard(evt) {
   author.textContent = 'Agregado por ' + (evt.author || 'Noel');
   el.appendChild(author);
 
-  const actions = document.createElement('div');
-  actions.className = 'cal-event-actions';
+  if (isOwnedByCurrentUser(evt.author || 'Noel')) {
+    const actions = document.createElement('div');
+    actions.className = 'cal-event-actions';
 
-  const editBtn = document.createElement('button');
-  editBtn.type = 'button';
-  editBtn.textContent = 'Editar';
-  editBtn.onclick = () => editCalendarEvent(evt.id);
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.textContent = 'Editar';
+    editBtn.onclick = () => editCalendarEvent(evt.id);
 
-  const deleteBtn = document.createElement('button');
-  deleteBtn.type = 'button';
-  deleteBtn.className = 'del-btn';
-  deleteBtn.textContent = 'Eliminar';
-  deleteBtn.onclick = () => deleteCalendarEvent(evt.id);
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'del-btn';
+    deleteBtn.textContent = 'Eliminar';
+    deleteBtn.onclick = () => deleteCalendarEvent(evt.id);
 
-  actions.appendChild(editBtn);
-  actions.appendChild(deleteBtn);
-  el.appendChild(actions);
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+    el.appendChild(actions);
+  }
 
   return el;
 }
@@ -3290,7 +3533,7 @@ function clearCalendarForm(resetDate = true) {
   document.getElementById('calendarTitle').value = '';
   if (resetDate) document.getElementById('calendarDate').value = selectedCalendarDate || toISODate(new Date());
   document.getElementById('calendarNote').value = '';
-  document.getElementById('calendarAuthor').value = 'Noel';
+  document.getElementById('calendarAuthor').value = getCurrentUser();
   document.getElementById('calendarCategory').value = 'cita';
   document.getElementById('calendarImportance').value = 'media';
   document.getElementById('calendarReminder').value = '3';
@@ -3302,7 +3545,7 @@ async function saveCalendarEvent() {
   let title = document.getElementById('calendarTitle').value.trim();
   const eventDate = document.getElementById('calendarDate').value;
   const note = document.getElementById('calendarNote').value.trim();
-  const author = document.getElementById('calendarAuthor').value;
+  const author = getCurrentUser();
   const category = document.getElementById('calendarCategory').value;
   const importance = document.getElementById('calendarImportance').value;
   const reminderDays = parseInt(document.getElementById('calendarReminder').value, 10);
@@ -3327,23 +3570,33 @@ async function saveCalendarEvent() {
   };
 
   if (editingEventId) {
-    const { error } = await sb.from('calendar_events').update(payload).eq('id', editingEventId);
+    const existing = calendarEvents.find(evt => evt.id === editingEventId);
+    const owner = existing ? (existing.author || 'Noel') : '';
+    if (!existing || !isOwnedByCurrentUser(owner)) {
+      showToast('Solo quien creó esta fecha puede editarla');
+      closeCalendarForm();
+      return;
+    }
+    payload.author = owner;
+    const { error } = await sb.from('calendar_events').update(payload).eq('id', editingEventId).eq('author', owner);
     if (error) {
       console.error('Error al actualizar fecha:', error);
       showToast('Error al actualizar');
       return;
     }
     showToast('Fecha actualizada 💜');
+    await registerChange({ entity: 'calendar', action: 'updated', recordId: editingEventId, owner, details: { title, event_date: eventDate } });
     logRecentChange({ entity: 'calendar', action: 'updated', title, author });
   } else {
     window.lastLocalCalendarInsertAt = Date.now();
-    const { error } = await sb.from('calendar_events').insert(payload);
+    const { data, error } = await sb.from('calendar_events').insert(payload).select('id').single();
     if (error) {
       console.error('Error al guardar fecha:', error);
       showToast('Error al guardar fecha');
       return;
     }
     showToast('Fecha agregada por ' + author + ' 💜');
+    await registerChange({ entity: 'calendar', action: 'added', recordId: data && data.id, owner: author, details: { title, event_date: eventDate } });
     logRecentChange({ entity: 'calendar', action: 'added', title, author });
   }
 
@@ -3356,6 +3609,10 @@ async function saveCalendarEvent() {
 function editCalendarEvent(id) {
   const evt = calendarEvents.find(e => e.id === id);
   if (!evt) return;
+  if (!isOwnedByCurrentUser(evt.author || 'Noel')) {
+    showToast('Solo quien creó esta fecha puede editarla');
+    return;
+  }
 
   editingEventId = id;
   selectedCalendarDate = evt.event_date;
@@ -3381,19 +3638,25 @@ function editCalendarEvent(id) {
 }
 
 async function deleteCalendarEvent(id) {
+  const deletedEvent = calendarEvents.find(e => e.id === id);
+  const owner = deletedEvent ? (deletedEvent.author || 'Noel') : '';
+  if (!deletedEvent || !isOwnedByCurrentUser(owner)) {
+    showToast('Solo quien creó esta fecha puede eliminarla');
+    return;
+  }
   if (!confirm('¿Eliminar esta fecha?')) return;
 
   window.lastLocalCalendarDeleteAt = Date.now();
-  const { error } = await sb.from('calendar_events').delete().eq('id', id);
+  const { error } = await sb.from('calendar_events').delete().eq('id', id).eq('author', owner);
   if (error) {
     console.error('Error al eliminar fecha:', error);
     showToast('Error al eliminar');
     return;
   }
 
-  const deletedEvent = calendarEvents.find(e => e.id === id);
   await loadCalendarEvents();
   showToast('Fecha eliminada');
+  await registerChange({ entity: 'calendar', action: 'deleted', recordId: id, owner, details: { title: deletedEvent.title, event_date: deletedEvent.event_date } });
   logRecentChange({ entity: 'calendar', action: 'deleted', title: deletedEvent ? deletedEvent.title : '', author: deletedEvent ? deletedEvent.author : '' });
 }
 
@@ -3407,6 +3670,7 @@ function checkCalendarReminders() {
 // ── Listas / shared lists ─────────────────────────────────────────────────
 let reminderLists = [];
 let editingReminderListId = null;
+const expandedReminderLists = new Set();
 
 const DEFAULT_LIST_PRODUCTS = [
   ['Leche', 'Leche'],
@@ -3524,8 +3788,14 @@ function clearReminderForm() {
 
   if (title) title.value = '';
   if (label) label.value = 'Shopping';
-  if (author) author.value = 'Noel';
+  if (author) author.value = getCurrentUser();
   if (btn) btn.textContent = 'Crear lista';
+}
+
+function toggleReminderDetails(id) {
+  if (expandedReminderLists.has(id)) expandedReminderLists.delete(id);
+  else expandedReminderLists.add(id);
+  renderReminderLists();
 }
 
 function renderReminderLists() {
@@ -3544,30 +3814,44 @@ function renderReminderLists() {
 
   reminderLists.forEach(item => {
     const card = document.createElement('div');
-    card.className = 'reminder-card';
+    const isExpanded = expandedReminderLists.has(item.id);
+    card.className = 'reminder-card' + (isExpanded ? ' open' : '');
     const items = normalizeReminderItems(item.items);
     item.items = items;
 
-    const top = document.createElement('div');
-    top.className = 'reminder-card-top';
+    const summary = document.createElement('button');
+    summary.type = 'button';
+    summary.className = 'reminder-summary';
+    summary.setAttribute('aria-expanded', String(isExpanded));
+    summary.setAttribute('aria-label', (isExpanded ? 'Cerrar ' : 'Abrir ') + (item.title || 'lista'));
+    summary.onclick = () => toggleReminderDetails(item.id);
 
-    const title = document.createElement('div');
+    const summaryCopy = document.createElement('span');
+    summaryCopy.className = 'reminder-summary-copy';
+
+    const title = document.createElement('span');
     title.className = 'reminder-title';
     title.textContent = item.title || 'Lista sin nombre';
 
-    const pill = document.createElement('div');
-    pill.className = 'reminder-pill';
-    pill.textContent = getReminderLabelIcon(item.label) + ' ' + getReminderLabelName(item.label);
-
-    top.appendChild(title);
-    top.appendChild(pill);
-
-    const meta = document.createElement('div');
+    const meta = document.createElement('span');
     meta.className = 'reminder-meta';
 
     const author = item.author || 'Noel';
-    const updated = formatReminderDate(item.updated_at || item.created_at);
-    meta.textContent = 'Creada por ' + author + (updated ? ' · Actualizada ' + updated : '');
+    const created = formatReminderDate(item.created_at);
+    meta.textContent = 'Creada por ' + author + (created ? ' · ' + created : '');
+
+    const chevron = document.createElement('span');
+    chevron.className = 'reminder-chevron';
+    chevron.setAttribute('aria-hidden', 'true');
+    chevron.innerHTML = '<i class="ti ti-chevron-down"></i>';
+
+    summaryCopy.appendChild(title);
+    summaryCopy.appendChild(meta);
+    summary.appendChild(summaryCopy);
+    summary.appendChild(chevron);
+
+    const details = document.createElement('div');
+    details.className = 'reminder-details' + (isExpanded ? ' open' : '');
 
     const itemsBox = document.createElement('div');
     itemsBox.className = 'list-items';
@@ -3581,13 +3865,15 @@ function renderReminderLists() {
       items.forEach(product => {
         const row = document.createElement('div');
         row.className = 'list-item' + (product.done ? ' done' : '');
+        const canManageProduct = isOwnedByCurrentUser(product.author || 'Noel');
 
         const checkBtn = document.createElement('button');
         checkBtn.type = 'button';
         checkBtn.className = 'list-check';
         checkBtn.setAttribute('aria-label', product.done ? 'Marcar pendiente' : 'Marcar completado');
         checkBtn.innerHTML = product.done ? '<i class="ti ti-check"></i>' : '<i class="ti ti-circle"></i>';
-        checkBtn.onclick = () => toggleReminderItem(item.id, product.id);
+        checkBtn.disabled = !canManageProduct;
+        if (canManageProduct) checkBtn.onclick = () => toggleReminderItem(item.id, product.id);
 
         const textWrap = document.createElement('div');
 
@@ -3607,7 +3893,8 @@ function renderReminderLists() {
         removeBtn.className = 'list-delete';
         removeBtn.setAttribute('aria-label', 'Eliminar producto');
         removeBtn.innerHTML = '<i class="ti ti-x"></i>';
-        removeBtn.onclick = () => deleteReminderItem(item.id, product.id);
+        removeBtn.hidden = !canManageProduct;
+        if (canManageProduct) removeBtn.onclick = () => deleteReminderItem(item.id, product.id);
 
         row.appendChild(checkBtn);
         row.appendChild(textWrap);
@@ -3633,12 +3920,14 @@ function renderReminderLists() {
     productSelect.appendChild(customOption);
 
     const productAuthor = document.createElement('select');
+    productAuthor.disabled = true;
     ['Noel', 'Made'].forEach(name => {
       const option = document.createElement('option');
       option.value = name;
       option.textContent = name + ' 💜';
       productAuthor.appendChild(option);
     });
+    productAuthor.value = getCurrentUser();
 
     const customInput = document.createElement('input');
     customInput.className = 'list-product-custom';
@@ -3667,25 +3956,27 @@ function renderReminderLists() {
     const actions = document.createElement('div');
     actions.className = 'reminder-actions';
 
-    const editBtn = document.createElement('button');
-    editBtn.type = 'button';
-    editBtn.innerHTML = '<i class="ti ti-pencil"></i> Editar';
-    editBtn.onclick = () => editReminderList(item.id);
+    if (isOwnedByCurrentUser(item.author || 'Noel')) {
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.innerHTML = '<i class="ti ti-pencil"></i> Editar';
+      editBtn.onclick = () => editReminderList(item.id);
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.type = 'button';
-    deleteBtn.className = 'del-btn';
-    deleteBtn.innerHTML = '<i class="ti ti-trash"></i> Eliminar';
-    deleteBtn.onclick = () => deleteReminderList(item.id);
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.className = 'del-btn';
+      deleteBtn.innerHTML = '<i class="ti ti-trash"></i> Eliminar';
+      deleteBtn.onclick = () => deleteReminderList(item.id);
 
-    actions.appendChild(editBtn);
-    actions.appendChild(deleteBtn);
+      actions.appendChild(editBtn);
+      actions.appendChild(deleteBtn);
+    }
 
-    card.appendChild(top);
-    card.appendChild(meta);
-    card.appendChild(itemsBox);
-    card.appendChild(itemForm);
-    card.appendChild(actions);
+    details.appendChild(itemsBox);
+    details.appendChild(itemForm);
+    if (actions.childElementCount) details.appendChild(actions);
+    card.appendChild(summary);
+    card.appendChild(details);
     list.appendChild(card);
   });
 }
@@ -3716,9 +4007,9 @@ async function loadReminderLists() {
   }
 }
 
-async function updateReminderItems(listId, nextItems, toastMessage, activityTitle) {
+async function updateReminderItems(listId, nextItems, toastMessage) {
   const current = reminderLists.find(list => list.id === listId);
-  if (!current) return;
+  if (!current) return false;
 
   const items = normalizeReminderItems(nextItems);
   window.lastLocalReminderUpdateAt = Date.now();
@@ -3739,15 +4030,11 @@ async function updateReminderItems(listId, nextItems, toastMessage, activityTitl
     current.updated_at = updatedAt;
     renderReminderLists();
     if (toastMessage) showToast(toastMessage);
-    logRecentChange({
-      entity: 'reminder_list',
-      action: 'updated',
-      title: activityTitle || current.title || 'Lista',
-      author: ''
-    });
+    return true;
   } catch (error) {
     console.error('Error actualizando productos:', error);
     showToast('Error al guardar producto. Revisa el SQL de Listas.');
+    return false;
   }
 }
 
@@ -3758,7 +4045,7 @@ async function addReminderItem(listId, productSelect, customInput, authorSelect)
   const selected = productSelect ? productSelect.value : '';
   const custom = customInput ? customInput.value.trim() : '';
   const name = selected === '__custom' ? custom : selected;
-  const author = authorSelect ? authorSelect.value : 'Noel';
+  const author = getCurrentUser();
 
   if (!name) {
     showToast('Escribe el producto');
@@ -3775,26 +4062,49 @@ async function addReminderItem(listId, productSelect, customInput, authorSelect)
     customInput.classList.remove('show');
   }
 
-  await updateReminderItems(listId, items, 'Producto agregado 💜', (current.title || 'Lista') + ': ' + name);
+  const saved = await updateReminderItems(listId, items, 'Producto agregado 💜');
+  const addedItem = items[items.length - 1];
+  if (saved) {
+    await registerChange({ entity: 'reminder_item', action: 'added', recordId: listId + ':' + addedItem.id, owner: author, details: { list_id: listId, name } });
+  }
 }
 
 async function toggleReminderItem(listId, itemId) {
   const current = reminderLists.find(list => list.id === listId);
   if (!current) return;
 
+  const target = normalizeReminderItems(current.items).find(item => item.id === itemId);
+  if (!target || !isOwnedByCurrentUser(target.author || 'Noel')) {
+    showToast('Solo quien agregó este producto puede cambiarlo');
+    return;
+  }
+
   const items = normalizeReminderItems(current.items).map(item => (
     item.id === itemId ? { ...item, done: !item.done } : item
   ));
 
-  await updateReminderItems(listId, items, 'Lista actualizada', current.title || 'Lista');
+  const saved = await updateReminderItems(listId, items, 'Lista actualizada');
+  if (saved) {
+    const updatedItem = items.find(item => item.id === itemId);
+    await registerChange({ entity: 'reminder_item', action: 'toggled', recordId: listId + ':' + itemId, owner: target.author || 'Noel', details: { list_id: listId, name: target.name, done: !!(updatedItem && updatedItem.done) } });
+  }
 }
 
 async function deleteReminderItem(listId, itemId) {
   const current = reminderLists.find(list => list.id === listId);
   if (!current) return;
 
+  const target = normalizeReminderItems(current.items).find(item => item.id === itemId);
+  if (!target || !isOwnedByCurrentUser(target.author || 'Noel')) {
+    showToast('Solo quien agregó este producto puede eliminarlo');
+    return;
+  }
+
   const items = normalizeReminderItems(current.items).filter(item => item.id !== itemId);
-  await updateReminderItems(listId, items, 'Producto eliminado', current.title || 'Lista');
+  const saved = await updateReminderItems(listId, items, 'Producto eliminado');
+  if (saved) {
+    await registerChange({ entity: 'reminder_item', action: 'deleted', recordId: listId + ':' + itemId, owner: target.author || 'Noel', details: { list_id: listId, name: target.name } });
+  }
 }
 
 async function saveReminderList() {
@@ -3804,7 +4114,7 @@ async function saveReminderList() {
 
   const title = titleEl ? titleEl.value.trim() : '';
   const label = labelEl ? labelEl.value : 'Other';
-  const author = authorEl ? authorEl.value : 'Noel';
+  const author = getCurrentUser();
 
   if (!title) {
     showToast('Escribe el nombre de la lista');
@@ -3813,6 +4123,14 @@ async function saveReminderList() {
 
   try {
     if (editingReminderListId) {
+      const existing = reminderLists.find(list => list.id === editingReminderListId);
+      const owner = existing ? (existing.author || 'Noel') : '';
+      if (!existing || !isOwnedByCurrentUser(owner)) {
+        showToast('Solo quien creó esta lista puede editarla');
+        clearReminderForm();
+        toggleReminderForm(false);
+        return;
+      }
       window.lastLocalReminderUpdateAt = Date.now();
 
       const { error } = await sb
@@ -3820,32 +4138,37 @@ async function saveReminderList() {
         .update({
           title,
           label,
-          author,
+          author: owner,
           updated_at: new Date().toISOString()
         })
-        .eq('id', editingReminderListId);
+        .eq('id', editingReminderListId)
+        .eq('author', owner);
 
       if (error) throw error;
 
       await loadReminderLists();
       showToast('Lista actualizada 💜');
-      logRecentChange({ entity: 'reminder_list', action: 'updated', title, author });
+      await registerChange({ entity: 'reminder_list', action: 'updated', recordId: editingReminderListId, owner, details: { title, label } });
+      logRecentChange({ entity: 'reminder_list', action: 'updated', title, author: owner });
     } else {
       window.lastLocalReminderInsertAt = Date.now();
 
-      const { error } = await sb
+      const { data, error } = await sb
         .from('reminder_lists')
         .insert({
           title,
           label,
           author,
           items: []
-        });
+        })
+        .select('id')
+        .single();
 
       if (error) throw error;
 
       await loadReminderLists();
       showToast('Lista creada por ' + author + ' 💜');
+      await registerChange({ entity: 'reminder_list', action: 'added', recordId: data && data.id, owner: author, details: { title, label } });
       logRecentChange({ entity: 'reminder_list', action: 'added', title, author });
     }
 
@@ -3860,6 +4183,10 @@ async function saveReminderList() {
 function editReminderList(id) {
   const item = reminderLists.find(list => list.id === id);
   if (!item) return;
+  if (!isOwnedByCurrentUser(item.author || 'Noel')) {
+    showToast('Solo quien creó esta lista puede editarla');
+    return;
+  }
 
   editingReminderListId = id;
 
@@ -3877,10 +4204,21 @@ function editReminderList(id) {
 }
 
 async function deleteReminderList(id) {
+  const item = reminderLists.find(list => list.id === id);
+  const owner = item ? (item.author || 'Noel') : '';
+  if (!item || !isOwnedByCurrentUser(owner)) {
+    showToast('Solo quien creó esta lista puede eliminarla');
+    return;
+  }
+  const hasOtherOwners = normalizeReminderItems(item.items).some(product => !isOwnedByCurrentUser(product.author || 'Noel'));
+  if (hasOtherOwners) {
+    showToast('La lista contiene productos de la otra persona');
+    return;
+  }
   if (!confirm('¿Eliminar esta lista?')) return;
 
   try {
-    const { error } = await sb.from('reminder_lists').delete().eq('id', id);
+    const { error } = await sb.from('reminder_lists').delete().eq('id', id).eq('author', owner);
     if (error) throw error;
 
     if (editingReminderListId === id) {
@@ -3890,6 +4228,8 @@ async function deleteReminderList(id) {
 
     await loadReminderLists();
     showToast('Lista eliminada');
+    expandedReminderLists.delete(id);
+    await registerChange({ entity: 'reminder_list', action: 'deleted', recordId: id, owner, details: { title: item.title } });
   } catch (error) {
     console.error('Error eliminando lista:', error);
     showToast('Error al eliminar la lista');
@@ -3925,12 +4265,10 @@ const BUCKET = 'photos';
 let photoEditMode = false;
 let selectedPhotoPaths = new Set();
 let photoMeta = {};
+let photoOwnershipReady = false;
 
 function getPhotoActionAuthor() {
-  // Momentos no uses a visible Noel/Made selector.
-  // Photo activity is logged without a person, so the history simply says
-  // that photos were added. Likes/deletes are no longer logged as notifications.
-  return null;
+  return getCurrentUser();
 }
 
 function getEmptyPhotoMarkup() {
@@ -3949,27 +4287,50 @@ function updatePhotoEmptyState() {
 async function loadPhotoMeta() {
   photoMeta = {};
   try {
-    const { data, error } = await sb.from('photos').select('storage_path,liked').not('storage_path', 'is', null);
+    const { data, error } = await sb.from('photos').select('storage_path,liked,author,liked_by,updated_by').not('storage_path', 'is', null);
     if (error) throw error;
+    photoOwnershipReady = true;
     (data || []).forEach(row => {
-      if (row.storage_path) photoMeta[row.storage_path] = { liked: !!row.liked };
+      const likedBy = Array.isArray(row.liked_by) ? row.liked_by.filter(name => name === 'Noel' || name === 'Made') : [];
+      if (row.storage_path) photoMeta[row.storage_path] = {
+        liked: likedBy.length ? true : !!row.liked,
+        author: normalizeCurrentUser(row.author || 'Noel'),
+        likedBy,
+        updatedBy: row.updated_by || ''
+      };
     });
   } catch (e) {
-    console.warn('Photo metadata unavailable. Likes will work locally until SQL is updated.', e);
+    photoOwnershipReady = false;
+    try {
+      const { data, error } = await sb.from('photos').select('storage_path,liked').not('storage_path', 'is', null);
+      if (error) throw error;
+      (data || []).forEach(row => {
+        if (row.storage_path) photoMeta[row.storage_path] = { liked: !!row.liked, author: 'Noel', likedBy: row.liked ? ['Noel'] : [] };
+      });
+    } catch (fallbackError) {
+      console.warn('Photo metadata unavailable:', fallbackError);
+    }
   }
 }
 
-async function persistPhotoMeta(path, url, liked) {
+async function persistPhotoMeta(path, url, liked, author = 'Noel', likedBy = [], updatedBy = '') {
   if (!path) return;
   try {
     const { data: existing, error: findErr } = await sb.from('photos').select('id').eq('storage_path', path).limit(1);
     if (findErr) throw findErr;
 
+    const payload = { image_url: url, liked: !!liked };
+    if (photoOwnershipReady) {
+      payload.author = normalizeCurrentUser(author);
+      payload.liked_by = likedBy;
+      payload.updated_by = updatedBy || getCurrentUser();
+    }
+
     if (existing && existing.length) {
-      const { error } = await sb.from('photos').update({ image_url: url, liked: !!liked }).eq('id', existing[0].id);
+      const { error } = await sb.from('photos').update(payload).eq('id', existing[0].id);
       if (error) throw error;
     } else {
-      const { error } = await sb.from('photos').insert({ image_url: url, storage_path: path, liked: !!liked });
+      const { error } = await sb.from('photos').insert({ ...payload, storage_path: path });
       if (error) throw error;
     }
   } catch (e) {
@@ -3977,7 +4338,7 @@ async function persistPhotoMeta(path, url, liked) {
   }
 }
 
-function addPhotoCell(path, url, liked = false) {
+function addPhotoCell(path, url, liked = false, author = 'Noel', likedBy = []) {
   const grid = document.getElementById('photoGrid');
   const empty = grid.querySelector('.empty-grid');
   if (empty) empty.remove();
@@ -3987,6 +4348,8 @@ function addPhotoCell(path, url, liked = false) {
   cell.className = 'photo-cell' + (liked ? ' liked' : '') + (photoEditMode ? ' editing' : '');
   cell.dataset.path = path;
   cell.dataset.url = url;
+  cell.dataset.author = normalizeCurrentUser(author);
+  cell.dataset.likedBy = JSON.stringify(likedBy);
 
   const img = document.createElement('img');
   img.src = url;
@@ -4044,6 +4407,11 @@ function updatePhotoSelectionUI() {
 
 function togglePhotoSelection(path) {
   if (!photoEditMode || !path) return;
+  const meta = photoMeta[path] || {};
+  if (!isOwnedByCurrentUser(meta.author || 'Noel')) {
+    showToast('Solo quien agregó esta foto puede eliminarla');
+    return;
+  }
   if (selectedPhotoPaths.has(path)) selectedPhotoPaths.delete(path);
   else selectedPhotoPaths.add(path);
   updatePhotoSelectionUI();
@@ -4053,7 +4421,14 @@ async function togglePhotoLike(path, url) {
   const cell = document.querySelector('[data-path="' + CSS.escape(path) + '"]');
   if (!cell) return;
 
-  const liked = !cell.classList.contains('liked');
+  const currentUser = getCurrentUser();
+  const meta = photoMeta[path] || { author: cell.dataset.author || 'Noel', likedBy: [] };
+  const likedBy = new Set(Array.isArray(meta.likedBy) ? meta.likedBy : []);
+  const wasLikedByCurrentUser = likedBy.has(currentUser);
+  if (wasLikedByCurrentUser) likedBy.delete(currentUser);
+  else likedBy.add(currentUser);
+  const nextLikedBy = Array.from(likedBy);
+  const liked = nextLikedBy.length > 0;
 
   cell.classList.toggle('liked', liked);
 
@@ -4063,7 +4438,8 @@ async function togglePhotoLike(path, url) {
     btn.setAttribute('aria-label', liked ? 'Quitar de favoritas' : 'Marcar como favorita');
   }
 
-  photoMeta[path] = { liked };
+  photoMeta[path] = { ...meta, liked, likedBy: nextLikedBy, updatedBy: currentUser };
+  cell.dataset.likedBy = JSON.stringify(nextLikedBy);
 
   const memoryPhoto = memoryPhotos.find(photo => photo.path === path || photo.url === url);
   if (memoryPhoto) memoryPhoto.liked = liked;
@@ -4071,13 +4447,15 @@ async function togglePhotoLike(path, url) {
   reorderMemoryPhotos();
   renderMemorySlideshow();
 
-  await persistPhotoMeta(path, url, liked);
+  await persistPhotoMeta(path, url, liked, meta.author || 'Noel', nextLikedBy, currentUser);
+  await registerChange({ entity: 'photo', action: wasLikedByCurrentUser ? 'unliked' : 'liked', recordId: path, owner: meta.author || 'Noel', details: { path } });
 
   showToast(liked ? 'Foto marcada como favorita 💜' : 'Foto quitada de favoritas');
 }
 
 async function deleteSelectedPhotos() {
-  const paths = Array.from(selectedPhotoPaths);
+  const currentUser = getCurrentUser();
+  const paths = Array.from(selectedPhotoPaths).filter(path => isOwnedByCurrentUser((photoMeta[path] && photoMeta[path].author) || 'Noel'));
   if (!paths.length) return;
 
   const msg = paths.length === 1 ? '¿Eliminar esta foto?' : '¿Eliminar estas ' + paths.length + ' fotos?';
@@ -4090,7 +4468,7 @@ async function deleteSelectedPhotos() {
   }
 
   try {
-    await sb.from('photos').delete().in('storage_path', paths);
+    await sb.from('photos').delete().in('storage_path', paths).eq('author', currentUser);
   } catch (e) {
     console.warn('Could not delete photo metadata:', e);
   }
@@ -4111,6 +4489,7 @@ async function deleteSelectedPhotos() {
   renderMemorySlideshow();
 
   showToast(paths.length === 1 ? 'Foto eliminada' : 'Fotos eliminadas');
+  await registerChange({ entity: 'photo', action: 'deleted', recordId: paths.join(','), owner: currentUser, details: { paths, count: paths.length } });
 }
 
 async function addPhotos(e) {
@@ -4123,13 +4502,14 @@ async function addPhotos(e) {
 
   for (const file of files) {
     const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-    const path = `photo_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const path = `${author.toLowerCase()}_photo_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
     const { error } = await sb.storage.from(BUCKET).upload(path, file, { cacheControl: '3600', upsert: false });
     if (error) { showToast('Error al subir foto'); continue; }
 
     const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
-    await persistPhotoMeta(path, data.publicUrl, false);
-    addPhotoCell(path, data.publicUrl, false);
+    await persistPhotoMeta(path, data.publicUrl, false, author, [], author);
+    photoMeta[path] = { liked: false, author, likedBy: [], updatedBy: author };
+    addPhotoCell(path, data.publicUrl, false, author, []);
     addedCount += 1;
   }
 
@@ -4138,6 +4518,7 @@ async function addPhotos(e) {
   renderMemorySlideshow();
 
   if (addedCount > 0) {
+    await registerChange({ entity: 'photo', action: 'added', recordId: 'batch-' + Date.now(), owner: author, details: { count: addedCount } });
     await logRecentChange({
       entity: 'photo',
       action: 'added',
@@ -4175,7 +4556,8 @@ async function loadPhotos() {
 
   for (const f of files) {
     const { data: urlData } = sb.storage.from(BUCKET).getPublicUrl(f.name);
-    addPhotoCell(f.name, urlData.publicUrl, !!(photoMeta[f.name] && photoMeta[f.name].liked));
+    const meta = photoMeta[f.name] || { liked: false, author: 'Noel', likedBy: [] };
+    addPhotoCell(f.name, urlData.publicUrl, !!meta.liked, meta.author || 'Noel', meta.likedBy || []);
   }
   reorderMemoryPhotos();
   renderMemorySlideshow();
@@ -4533,17 +4915,6 @@ sb.channel('reminder_lists_channel')
       }
       loadReminderLists();
     } else if (payload.eventType === 'UPDATE') {
-      const isLocal = (Date.now() - window.lastLocalReminderUpdateAt) < 1500;
-      if (!isLocal) {
-        addRecentChangeLocal({
-          entity: 'reminder_list',
-          action: 'updated',
-          title: payload.new.title || '',
-          author: payload.new.author || 'Noel',
-          created_at: payload.new.updated_at || new Date().toISOString()
-        });
-        showToast('Lista actualizada: ' + (payload.new.title || 'Listas'));
-      }
       loadReminderLists();
     } else if (payload.eventType === 'DELETE') {
       loadReminderLists();
@@ -4551,14 +4922,8 @@ sb.channel('reminder_lists_channel')
   })
   .subscribe();
 
-sb.channel('activity_channel')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'activity_log' }, () => {
-    loadRecentChanges();
-  })
-  .subscribe();
-
+syncCurrentUserControls();
 renderMemorySlideshow();
-loadRecentChanges();
 loadPetState();
 loadNotes();
 loadPhotos();
