@@ -1020,7 +1020,7 @@
     }
 
   
-    /* Reminders tab */
+    /* Listas tab */
     .reminders-hero {
       background: linear-gradient(135deg, #fff, #fdf4ff 55%, #ede9fe);
       border: 0.5px solid #d8b4fe;
@@ -1151,6 +1151,125 @@
       background: #fff1f1;
     }
 
+    .list-items {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin: 10px 0 12px;
+    }
+
+    .list-empty {
+      border: 0.5px dashed #d8b4fe;
+      border-radius: 14px;
+      padding: 10px;
+      color: #a78bfa;
+      font-size: 12px;
+      text-align: center;
+      background: #faf5ff;
+    }
+
+    .list-item {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr) 32px;
+      align-items: center;
+      gap: 8px;
+      border: 0.5px solid #ede9fe;
+      border-radius: 14px;
+      padding: 8px;
+      background: #fdfcff;
+    }
+
+    .list-check,
+    .list-delete {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .list-check {
+      background: #ede9fe;
+      color: #7c3aed;
+      font-size: 17px;
+    }
+
+    .list-delete {
+      background: #fff1f1;
+      color: #ef4444;
+      font-size: 16px;
+    }
+
+    .list-item.done .list-name {
+      color: #a78bfa;
+      text-decoration: line-through;
+    }
+
+    .list-item.done .list-check {
+      background: #10b981;
+      color: #fff;
+    }
+
+    .list-name {
+      color: #4c1d95;
+      font-size: 14px;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .list-item-meta {
+      color: #c084fc;
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    .list-item-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .list-item-form select,
+    .list-item-form input {
+      min-width: 0;
+      border: 0.5px solid #ede9fe;
+      border-radius: 12px;
+      padding: 9px 10px;
+      font-size: 12px;
+      font-family: inherit;
+      color: #4c1d95;
+      background: rgba(255,255,255,.92);
+      outline: none;
+    }
+
+    .list-product-custom {
+      display: none;
+      grid-column: 1 / -1;
+    }
+
+    .list-product-custom.show {
+      display: block;
+    }
+
+    .list-item-add-btn {
+      grid-column: 1 / -1;
+      border: none;
+      border-radius: 14px;
+      padding: 9px 12px;
+      color: #fff;
+      background: linear-gradient(135deg, #34d399, #10b981);
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     #nav-reminders i { color: #10b981; }
 
     .nav-it {
@@ -1159,8 +1278,24 @@
     }
 
     .nav-it i {
-      font-size: 22px !important;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff !important;
+      font-size: 18px !important;
+      line-height: 1;
+      box-shadow: 0 7px 16px rgba(124,58,237,.18);
     }
+
+    #nav-notes i { background: #ec4899; }
+    #nav-pet i { background: #a855f7; }
+    #nav-us i { background: #8b5cf6; }
+    #nav-moments i { background: #f59e0b; }
+    #nav-reminders i { background: #10b981; }
+    #nav-calendar i { background: #6366f1; }
 
   </style>
 </head>
@@ -1201,7 +1336,7 @@
     <button class="tab" onclick="switchTab('pet',this)">🐾 Mascota</button>
     <button class="tab" onclick="switchTab('us',this)">💜 Nosotros</button>
     <button class="tab" onclick="switchTab('moments',this)">📸 Momentos</button>
-    <button class="tab" onclick="switchTab('reminders',this)">🔔 Reminders</button>
+    <button class="tab" onclick="switchTab('reminders',this)">✅ Listas</button>
     <button class="tab" onclick="switchTab('calendar',this)">🗓️ Calendario</button>
   </div>
 
@@ -1449,12 +1584,12 @@
   </div>
 
 
-  <!-- REMINDERS -->
+  <!-- LISTAS -->
   <div class="page" id="page-reminders">
     <div class="reminders-hero">
-      <span>Reminders</span>
+      <span>Listas</span>
       <h4>Listas compartidas</h4>
-      <p>Crea listas como shopping, gifts, ideas o pendientes. Cuando una lista se cree o se actualice, quedará lista para enviar notificaciones en vivo.</p>
+      <p>Crea listas de compras, regalos, casa o ideas y agrega productos directamente dentro de cada lista.</p>
     </div>
 
     <div id="reminderToggle" class="add-toggle" onclick="toggleReminderForm()">
@@ -1463,15 +1598,15 @@
     </div>
 
     <div class="add-form reminder-form" id="reminderForm">
-      <input id="reminderTitle" placeholder="Nombre de la lista, por ejemplo: Shopping" />
+      <input id="reminderTitle" placeholder="Nombre de la lista, por ejemplo: Compras" />
       <div class="add-form-row reminder-add-row">
         <select id="reminderLabel">
-          <option value="Shopping">Shopping 🛒</option>
-          <option value="Gifts">Gifts 🎁</option>
-          <option value="Home">Home 🏠</option>
-          <option value="Dates">Dates 💜</option>
+          <option value="Shopping">Compras 🛒</option>
+          <option value="Gifts">Regalos 🎁</option>
+          <option value="Home">Casa 🏠</option>
+          <option value="Dates">Citas 💜</option>
           <option value="Ideas">Ideas ✨</option>
-          <option value="Other">Other 📝</option>
+          <option value="Other">Otros 📝</option>
         </select>
         <select id="reminderAuthor">
           <option value="Noel">Noel 💜</option>
@@ -1564,7 +1699,7 @@
 
   <div class="nav">
     <button class="nav-it on" id="nav-notes" onclick="switchTab('notes',null,this)">
-      <i class="ti ti-heart"></i>Inicio
+      <i class="ti ti-heart-filled"></i>Inicio
     </button>
     <button class="nav-it" id="nav-pet" onclick="switchTab('pet',null,this)">
       <i class="ti ti-paw"></i>Mascota
@@ -1576,7 +1711,7 @@
       <i class="ti ti-camera"></i>Momentos
     </button>
     <button class="nav-it" id="nav-reminders" onclick="switchTab('reminders',null,this)">
-      <i class="ti ti-list-check"></i>Reminders
+      <i class="ti ti-list-check"></i>Listas
     </button>
     <button class="nav-it" id="nav-calendar" onclick="switchTab('calendar',null,this)">
       <i class="ti ti-calendar"></i>Calendario
@@ -1649,6 +1784,37 @@ function getActivityText(change) {
   return (change.title || 'Cambio reciente');
 }
 
+function showActivityNotification(change) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+  const title = 'Togethr';
+  const options = {
+    body: getActivityText(change),
+    icon: 'icon-192.png',
+    badge: 'icon-192.png',
+    tag: 'togethr-' + (change.id || Date.now()),
+    renotify: false
+  };
+
+  try {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration()
+        .then(registration => {
+          if (registration && registration.showNotification) {
+            registration.showNotification(title, options);
+          } else {
+            new Notification(title, options);
+          }
+        })
+        .catch(() => new Notification(title, options));
+    } else {
+      new Notification(title, options);
+    }
+  } catch (e) {
+    console.warn('No se pudo mostrar la notificación local:', e);
+  }
+}
+
 function formatActivityTime(value) {
   const d = value ? new Date(value) : new Date();
   if (Number.isNaN(d.getTime())) return '';
@@ -1714,6 +1880,7 @@ function addRecentChangeLocal(change) {
   recentChanges = [entry, ...recentChanges.filter(c => c.id !== entry.id)].slice(0, 20);
   saveRecentChangesLocal();
   renderRecentChanges();
+  showActivityNotification(entry);
 }
 
 async function loadRecentChanges() {
@@ -1896,8 +2063,8 @@ async function updateNotificationButton() {
     }
   }
 
-  status.textContent = 'Recibe avisos aunque Togethr esté cerrado.';
-  if (hint) hint.textContent = 'Debe estar instalada en la pantalla de inicio y debes permitir notificaciones.';
+  status.textContent = 'Recibe avisos cuando algo cambie en Togethr.';
+  if (hint) hint.textContent = 'Los avisos dentro de la app funcionan al permitir notificaciones. Para avisos con Togethr cerrado, falta conectar la función Push en Supabase.';
   btn.textContent = 'Activar';
   btn.disabled = false;
 }
@@ -3235,9 +3402,29 @@ function checkCalendarReminders() {
 }
 
 
-// ── Reminders / shared lists ───────────────────────────────────────────────
+// ── Listas / shared lists ─────────────────────────────────────────────────
 let reminderLists = [];
 let editingReminderListId = null;
+
+const DEFAULT_LIST_PRODUCTS = [
+  ['Leche', 'Leche'],
+  ['Huevos', 'Huevos'],
+  ['Pan', 'Pan'],
+  ['Arroz', 'Arroz'],
+  ['Pollo', 'Pollo'],
+  ['Carne', 'Carne'],
+  ['Pasta', 'Pasta'],
+  ['Queso', 'Queso'],
+  ['Cafe', 'Cafe'],
+  ['Agua', 'Agua'],
+  ['Frutas', 'Frutas'],
+  ['Vegetales', 'Vegetales'],
+  ['Snacks', 'Snacks'],
+  ['Detergente', 'Detergente'],
+  ['Papel de bano', 'Papel de baño'],
+  ['Shampoo', 'Shampoo'],
+  ['Medicina', 'Medicina']
+];
 
 function getReminderLabelIcon(label) {
   const map = {
@@ -3252,12 +3439,59 @@ function getReminderLabelIcon(label) {
   return map[label] || '📝';
 }
 
+function getReminderLabelName(label) {
+  const map = {
+    Shopping: 'Compras',
+    Gifts: 'Regalos',
+    Home: 'Casa',
+    Dates: 'Citas',
+    Ideas: 'Ideas',
+    Other: 'Otros'
+  };
+
+  return map[label] || (label || 'Otros');
+}
+
 function formatReminderDate(value) {
   if (!value) return '';
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return '';
   return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) + ' · ' +
          d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+}
+
+function normalizeReminderItems(rawItems) {
+  let items = rawItems || [];
+
+  if (typeof items === 'string') {
+    try {
+      items = JSON.parse(items);
+    } catch (e) {
+      items = [];
+    }
+  }
+
+  if (!Array.isArray(items)) return [];
+
+  return items
+    .filter(item => item && item.name)
+    .map(item => ({
+      id: item.id || ('item_' + Date.now() + '_' + Math.random().toString(36).slice(2)),
+      name: String(item.name).trim(),
+      author: item.author || 'Noel',
+      done: !!item.done,
+      created_at: item.created_at || new Date().toISOString()
+    }));
+}
+
+function makeReminderItem(name, author) {
+  return {
+    id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('item_' + Date.now() + '_' + Math.random().toString(36).slice(2)),
+    name,
+    author,
+    done: false,
+    created_at: new Date().toISOString()
+  };
 }
 
 function toggleReminderForm(forceOpen = null) {
@@ -3301,7 +3535,7 @@ function renderReminderLists() {
   if (!reminderLists.length) {
     const empty = document.createElement('div');
     empty.className = 'activity-empty';
-    empty.innerHTML = '<i class="ti ti-list-check"></i><br>Aún no hay listas.<br>Crea una lista de shopping, gifts o ideas 💜';
+    empty.innerHTML = '<i class="ti ti-list-check"></i><br>Aún no hay listas.<br>Crea una lista de compras, regalos o ideas 💜';
     list.appendChild(empty);
     return;
   }
@@ -3309,6 +3543,8 @@ function renderReminderLists() {
   reminderLists.forEach(item => {
     const card = document.createElement('div');
     card.className = 'reminder-card';
+    const items = normalizeReminderItems(item.items);
+    item.items = items;
 
     const top = document.createElement('div');
     top.className = 'reminder-card-top';
@@ -3319,7 +3555,7 @@ function renderReminderLists() {
 
     const pill = document.createElement('div');
     pill.className = 'reminder-pill';
-    pill.textContent = getReminderLabelIcon(item.label) + ' ' + (item.label || 'Other');
+    pill.textContent = getReminderLabelIcon(item.label) + ' ' + getReminderLabelName(item.label);
 
     top.appendChild(title);
     top.appendChild(pill);
@@ -3330,6 +3566,101 @@ function renderReminderLists() {
     const author = item.author || 'Noel';
     const updated = formatReminderDate(item.updated_at || item.created_at);
     meta.textContent = 'Creada por ' + author + (updated ? ' · Actualizada ' + updated : '');
+
+    const itemsBox = document.createElement('div');
+    itemsBox.className = 'list-items';
+
+    if (!items.length) {
+      const emptyItems = document.createElement('div');
+      emptyItems.className = 'list-empty';
+      emptyItems.textContent = 'Aún no hay productos en esta lista.';
+      itemsBox.appendChild(emptyItems);
+    } else {
+      items.forEach(product => {
+        const row = document.createElement('div');
+        row.className = 'list-item' + (product.done ? ' done' : '');
+
+        const checkBtn = document.createElement('button');
+        checkBtn.type = 'button';
+        checkBtn.className = 'list-check';
+        checkBtn.setAttribute('aria-label', product.done ? 'Marcar pendiente' : 'Marcar completado');
+        checkBtn.innerHTML = product.done ? '<i class="ti ti-check"></i>' : '<i class="ti ti-circle"></i>';
+        checkBtn.onclick = () => toggleReminderItem(item.id, product.id);
+
+        const textWrap = document.createElement('div');
+
+        const name = document.createElement('div');
+        name.className = 'list-name';
+        name.textContent = product.name;
+
+        const productMeta = document.createElement('div');
+        productMeta.className = 'list-item-meta';
+        productMeta.textContent = 'Agregado por ' + (product.author || 'Noel');
+
+        textWrap.appendChild(name);
+        textWrap.appendChild(productMeta);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'list-delete';
+        removeBtn.setAttribute('aria-label', 'Eliminar producto');
+        removeBtn.innerHTML = '<i class="ti ti-x"></i>';
+        removeBtn.onclick = () => deleteReminderItem(item.id, product.id);
+
+        row.appendChild(checkBtn);
+        row.appendChild(textWrap);
+        row.appendChild(removeBtn);
+        itemsBox.appendChild(row);
+      });
+    }
+
+    const itemForm = document.createElement('div');
+    itemForm.className = 'list-item-form';
+
+    const productSelect = document.createElement('select');
+    DEFAULT_LIST_PRODUCTS.forEach(([value, label]) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      productSelect.appendChild(option);
+    });
+
+    const customOption = document.createElement('option');
+    customOption.value = '__custom';
+    customOption.textContent = 'Escribir otro...';
+    productSelect.appendChild(customOption);
+
+    const productAuthor = document.createElement('select');
+    ['Noel', 'Made'].forEach(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      option.textContent = name + ' 💜';
+      productAuthor.appendChild(option);
+    });
+
+    const customInput = document.createElement('input');
+    customInput.className = 'list-product-custom';
+    customInput.placeholder = 'Nombre del producto';
+
+    productSelect.onchange = () => {
+      customInput.classList.toggle('show', productSelect.value === '__custom');
+      if (productSelect.value === '__custom') setTimeout(() => customInput.focus(), 60);
+    };
+
+    const addItemBtn = document.createElement('button');
+    addItemBtn.type = 'button';
+    addItemBtn.className = 'list-item-add-btn';
+    addItemBtn.innerHTML = '<i class="ti ti-plus"></i> Agregar producto';
+    addItemBtn.onclick = () => addReminderItem(item.id, productSelect, customInput, productAuthor);
+
+    customInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') addReminderItem(item.id, productSelect, customInput, productAuthor);
+    });
+
+    itemForm.appendChild(productSelect);
+    itemForm.appendChild(productAuthor);
+    itemForm.appendChild(customInput);
+    itemForm.appendChild(addItemBtn);
 
     const actions = document.createElement('div');
     actions.className = 'reminder-actions';
@@ -3350,6 +3681,8 @@ function renderReminderLists() {
 
     card.appendChild(top);
     card.appendChild(meta);
+    card.appendChild(itemsBox);
+    card.appendChild(itemForm);
     card.appendChild(actions);
     list.appendChild(card);
   });
@@ -3375,10 +3708,91 @@ async function loadReminderLists() {
       list.innerHTML = '';
       const empty = document.createElement('div');
       empty.className = 'activity-empty';
-      empty.innerHTML = 'No se pudieron cargar las listas.<br>Primero ejecuta el SQL de <b>reminder_lists</b> en Supabase.';
+      empty.innerHTML = 'No se pudieron cargar las listas.<br>Primero ejecuta el SQL actualizado de <b>reminder_lists</b> en Supabase.';
       list.appendChild(empty);
     }
   }
+}
+
+async function updateReminderItems(listId, nextItems, toastMessage, activityTitle) {
+  const current = reminderLists.find(list => list.id === listId);
+  if (!current) return;
+
+  const items = normalizeReminderItems(nextItems);
+  window.lastLocalReminderUpdateAt = Date.now();
+
+  try {
+    const updatedAt = new Date().toISOString();
+    const { error } = await sb
+      .from('reminder_lists')
+      .update({
+        items,
+        updated_at: updatedAt
+      })
+      .eq('id', listId);
+
+    if (error) throw error;
+
+    current.items = items;
+    current.updated_at = updatedAt;
+    renderReminderLists();
+    if (toastMessage) showToast(toastMessage);
+    logRecentChange({
+      entity: 'reminder_list',
+      action: 'updated',
+      title: activityTitle || current.title || 'Lista',
+      author: ''
+    });
+  } catch (error) {
+    console.error('Error actualizando productos:', error);
+    showToast('Error al guardar producto. Revisa el SQL de Listas.');
+  }
+}
+
+async function addReminderItem(listId, productSelect, customInput, authorSelect) {
+  const current = reminderLists.find(list => list.id === listId);
+  if (!current) return;
+
+  const selected = productSelect ? productSelect.value : '';
+  const custom = customInput ? customInput.value.trim() : '';
+  const name = selected === '__custom' ? custom : selected;
+  const author = authorSelect ? authorSelect.value : 'Noel';
+
+  if (!name) {
+    showToast('Escribe el producto');
+    if (customInput) customInput.focus();
+    return;
+  }
+
+  const items = normalizeReminderItems(current.items);
+  items.push(makeReminderItem(name, author));
+
+  if (productSelect) productSelect.value = DEFAULT_LIST_PRODUCTS[0][0];
+  if (customInput) {
+    customInput.value = '';
+    customInput.classList.remove('show');
+  }
+
+  await updateReminderItems(listId, items, 'Producto agregado 💜', (current.title || 'Lista') + ': ' + name);
+}
+
+async function toggleReminderItem(listId, itemId) {
+  const current = reminderLists.find(list => list.id === listId);
+  if (!current) return;
+
+  const items = normalizeReminderItems(current.items).map(item => (
+    item.id === itemId ? { ...item, done: !item.done } : item
+  ));
+
+  await updateReminderItems(listId, items, 'Lista actualizada', current.title || 'Lista');
+}
+
+async function deleteReminderItem(listId, itemId) {
+  const current = reminderLists.find(list => list.id === listId);
+  if (!current) return;
+
+  const items = normalizeReminderItems(current.items).filter(item => item.id !== itemId);
+  await updateReminderItems(listId, items, 'Producto eliminado', current.title || 'Lista');
 }
 
 async function saveReminderList() {
@@ -3422,7 +3836,8 @@ async function saveReminderList() {
         .insert({
           title,
           label,
-          author
+          author,
+          items: []
         });
 
       if (error) throw error;
@@ -4112,7 +4527,7 @@ sb.channel('reminder_lists_channel')
           author: payload.new.author || 'Noel',
           created_at: payload.new.created_at || new Date().toISOString()
         });
-        showToast('Nueva lista creada: ' + (payload.new.title || 'Reminders'));
+        showToast('Nueva lista creada: ' + (payload.new.title || 'Listas'));
       }
       loadReminderLists();
     } else if (payload.eventType === 'UPDATE') {
@@ -4125,7 +4540,7 @@ sb.channel('reminder_lists_channel')
           author: payload.new.author || 'Noel',
           created_at: payload.new.updated_at || new Date().toISOString()
         });
-        showToast('Lista actualizada: ' + (payload.new.title || 'Reminders'));
+        showToast('Lista actualizada: ' + (payload.new.title || 'Listas'));
       }
       loadReminderLists();
     } else if (payload.eventType === 'DELETE') {
