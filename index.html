@@ -670,6 +670,7 @@
     .reason-add-row .add-btn { flex: 1 1 120px; min-width: 0; }
     .note-add-row select:disabled,
     .reason-add-row select:disabled,
+    #pushUserName:disabled,
     #petActor:disabled,
     #reminderAuthor:disabled,
     #calendarAuthor:disabled,
@@ -1439,7 +1440,7 @@
         <button type="button" id="notifyBtn" onclick="enablePushNotifications()">Activar</button>
       </div>
       <div class="notify-controls">
-        <select id="pushUserName" onchange="setCurrentUser(this.value)">
+        <select id="pushUserName" onchange="setCurrentUser(this.value)" aria-label="Identidad para notificaciones">
           <option value="Noel">Noel 💜</option>
           <option value="Made">Made 💜</option>
         </select>
@@ -1970,7 +1971,7 @@ async function logRecentChange(change) {
 let changeAuditWarningShown = false;
 
 async function registerChange(change) {
-  const actor = normalizeCurrentUser(change.actor || getCurrentUser());
+  const actor = normalizeCurrentUser(change.actor || getCurrentUser() || change.owner || '');
   const entry = {
     entity: change.entity || 'app',
     action: change.action || 'updated',
@@ -2019,16 +2020,53 @@ function pushIsSupported() {
   );
 }
 
+const CURRENT_USER_KEY = 'togethr_push_user';
+
 function normalizeCurrentUser(value) {
-  return value === 'Made' ? 'Made' : 'Noel';
+  if (value === 'Made') return 'Made';
+  if (value === 'Noel') return 'Noel';
+  return '';
+}
+
+function readStoredCurrentUser() {
+  try {
+    return normalizeCurrentUser(localStorage.getItem(CURRENT_USER_KEY));
+  } catch (error) {
+    return '';
+  }
+}
+
+function writeStoredCurrentUser(value) {
+  const user = normalizeCurrentUser(value);
+  if (!user) return '';
+  try {
+    localStorage.setItem(CURRENT_USER_KEY, user);
+  } catch (error) {
+    console.warn('No se pudo guardar la identidad local:', error);
+  }
+  return user;
+}
+
+function getIdentitySelect() {
+  return document.getElementById('pushUserName');
+}
+
+function getSelectedIdentity() {
+  const select = getIdentitySelect();
+  return normalizeCurrentUser(select && select.value) || 'Noel';
 }
 
 function getCurrentUser() {
-  return normalizeCurrentUser(localStorage.getItem('togethr_push_user') || 'Noel');
+  return readStoredCurrentUser() || getSelectedIdentity();
 }
 
 function isOwnedByCurrentUser(author) {
-  return normalizeCurrentUser(author) === getCurrentUser();
+  const currentUser = getCurrentUser();
+  return !!currentUser && normalizeCurrentUser(author) === currentUser;
+}
+
+function canEditSharedContent() {
+  return !!getCurrentUser();
 }
 
 function syncCurrentUserControls() {
@@ -2037,13 +2075,40 @@ function syncCurrentUserControls() {
     const control = document.getElementById(id);
     if (!control) return;
     control.value = currentUser;
-    if (id !== 'pushUserName') control.disabled = true;
+    control.disabled = true;
   });
+
+  const identitySelect = getIdentitySelect();
+  if (identitySelect) {
+    const locked = !!readStoredCurrentUser();
+    identitySelect.value = currentUser || 'Noel';
+    identitySelect.disabled = locked;
+    identitySelect.title = locked
+      ? 'Identidad bloqueada en este dispositivo'
+      : 'Elige Noel o Made. Luego no se podrá cambiar aquí.';
+  }
 }
 
 function setCurrentUser(value) {
-  const currentUser = normalizeCurrentUser(value);
-  localStorage.setItem('togethr_push_user', currentUser);
+  const requested = normalizeCurrentUser(value) || getSelectedIdentity();
+  const stored = readStoredCurrentUser();
+
+  if (stored) {
+    syncCurrentUserControls();
+    if (requested && requested !== stored) {
+      showToast('La identidad ya está fijada como ' + stored);
+    }
+    return stored;
+  }
+
+  const user = writeStoredCurrentUser(requested);
+  syncCurrentUserControls();
+  refreshIdentityBoundViews();
+  showToast('Identidad fijada como ' + user + ' 💜');
+  return user;
+}
+
+function refreshIdentityBoundViews() {
   syncCurrentUserControls();
   cancelEditNote(false);
   renderNote();
@@ -2059,14 +2124,31 @@ function setCurrentUser(value) {
   updateNotificationButton();
 }
 
+function requireCurrentUser(actionLabel = 'hacer cambios') {
+  const stored = readStoredCurrentUser();
+  if (stored) return stored;
+
+  const currentUser = setCurrentUser(getSelectedIdentity());
+  if (currentUser) return currentUser;
+
+  showToast('Elige Noel o Made para ' + actionLabel);
+  const select = getIdentitySelect();
+  if (select) select.focus();
+  return '';
+}
+
 function getPushUserName() {
-  const value = getCurrentUser();
-  localStorage.setItem('togethr_push_user', value);
-  return value;
+  return getCurrentUser();
 }
 
 function restorePushUserName() {
   syncCurrentUserControls();
+}
+
+function initIdentity() {
+  if (!getIdentitySelect()) return;
+  syncCurrentUserControls();
+  refreshIdentityBoundViews();
 }
 
 function getDeviceLabel() {
@@ -2097,6 +2179,9 @@ async function getCurrentPushSubscription() {
 }
 
 async function savePushSubscription(subscription) {
+  const currentUser = requireCurrentUser('activar notificaciones');
+  if (!currentUser) throw new Error('Sesión requerida para notificaciones.');
+
   const json = subscription.toJSON();
 
   if (!json || !json.endpoint || !json.keys || !json.keys.p256dh || !json.keys.auth) {
@@ -2104,7 +2189,7 @@ async function savePushSubscription(subscription) {
   }
 
   const row = {
-    user_name: getPushUserName(),
+    user_name: currentUser,
     device_label: getDeviceLabel(),
     user_agent: navigator.userAgent || '',
     endpoint: json.endpoint,
@@ -2135,10 +2220,7 @@ async function restoreDeviceIdentity(subscription) {
   if (error || !data || !data.user_name) return null;
 
   const deviceUser = normalizeCurrentUser(data.user_name);
-  localStorage.setItem('togethr_push_user', deviceUser);
   syncCurrentUserControls();
-  const select = document.getElementById('pushUserName');
-  if (select) select.disabled = true;
   return deviceUser;
 }
 
@@ -2151,7 +2233,15 @@ async function updateNotificationButton() {
   const hint = document.getElementById('notifyHint');
   const userSelect = document.getElementById('pushUserName');
   if (!card || !status || !btn) return;
-  if (userSelect) userSelect.disabled = false;
+  if (userSelect) userSelect.disabled = !!readStoredCurrentUser();
+
+  if (!getCurrentUser()) {
+    status.textContent = 'Elige Noel o Made para conectar notificaciones.';
+    if (hint) hint.textContent = 'La identidad elegida se bloqueará en este dispositivo.';
+    btn.textContent = 'Elige identidad';
+    btn.disabled = true;
+    return;
+  }
 
   if (!pushIsSupported()) {
     status.textContent = 'Este navegador no permite Web Push aquí.';
@@ -2175,8 +2265,13 @@ async function updateNotificationButton() {
 
       if (subscription) {
         const deviceUser = await restoreDeviceIdentity(subscription);
-        status.textContent = 'Este iPhone ya está conectado para notificaciones en vivo.';
-        if (hint) hint.textContent = deviceUser ? 'Identidad de este dispositivo: ' + deviceUser + '.' : 'Este dispositivo ya tiene una suscripción activa.';
+        const currentUser = getCurrentUser();
+      status.textContent = 'Este iPhone ya está conectado para notificaciones en vivo.';
+      if (hint) {
+        hint.textContent = deviceUser && deviceUser !== currentUser
+          ? 'Antes estaba como ' + deviceUser + '. Toca actualizar para guardarlo como ' + currentUser + '.'
+          : 'Identidad bloqueada en este dispositivo: ' + currentUser + '.';
+      }
         btn.textContent = 'Actualizar';
         btn.disabled = false;
         return;
@@ -2193,7 +2288,7 @@ async function updateNotificationButton() {
   }
 
   status.textContent = 'Recibe avisos cuando algo cambie en Togethr.';
-  if (hint) hint.textContent = 'Los avisos dentro de la app funcionan al permitir notificaciones. Para avisos con Togethr cerrado, falta conectar la función Push en Supabase.';
+  if (hint) hint.textContent = 'La identidad elegida se bloqueará al activar notificaciones o hacer un cambio.';
   btn.textContent = 'Activar';
   btn.disabled = false;
 }
@@ -2202,6 +2297,8 @@ async function enablePushNotifications() {
   const btn = document.getElementById('notifyBtn');
 
   try {
+    if (!requireCurrentUser('activar notificaciones')) return;
+
     if (!pushIsSupported()) {
       showToast('Web Push no está disponible aquí');
       await updateNotificationButton();
@@ -2309,7 +2406,7 @@ async function loadNotes() {
     }
     const preservedIndex = selectedNoteId ? notes.findIndex(note => note.id === selectedNoteId) : -1;
     idx = preservedIndex >= 0 ? preservedIndex : 0;
-    await ensureNote15Made();
+    await ensureMadeAuthoredNotes();
     renderNote();
   } catch (e) {
     console.error('Error cargando notas:', e);
@@ -2320,20 +2417,42 @@ async function loadNotes() {
   }
 }
 
-async function ensureNote15Made() {
-  // One-time correction requested: note #15 was written by Made.
-  if (!notes || notes.length < 15) return;
+function normalizeNoteMarkerText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
 
-  const note15 = notes[14];
-  if (!note15 || !note15.id || note15.author === 'Made') return;
+function isMadeAuthoredNote(note, index) {
+  const searchable = normalizeNoteMarkerText(((note && note.text) || '') + ' ' + ((note && note.attr) || ''));
 
-  note15.author = 'Made';
+  return (
+    index === 14 ||
+    searchable.includes('agregada por made') ||
+    searchable.includes('por que ver por separadas esta vida y la siguiente') ||
+    searchable.includes('el tiempo siempre es escaso para quienes lo necesitan')
+  );
+}
+
+async function ensureMadeAuthoredNotes() {
+  if (!notes || !notes.length) return;
+
+  const idsToUpdate = [];
+  notes.forEach((note, index) => {
+    if (!note || !isMadeAuthoredNote(note, index) || note.author === 'Made') return;
+
+    note.author = 'Made';
+    if (note.id) idsToUpdate.push(note.id);
+  });
+
+  if (!idsToUpdate.length) return;
 
   try {
-    const { error } = await sb.from('notes').update({ author: 'Made' }).eq('id', note15.id);
+    const { error } = await sb.from('notes').update({ author: 'Made' }).in('id', idsToUpdate);
     if (error) throw error;
   } catch (e) {
-    console.warn('No se pudo actualizar la nota #15 a Made:', e);
+    console.warn('No se pudieron actualizar las notas de Made:', e);
   }
 }
 
@@ -2433,7 +2552,8 @@ async function addNote() {
   const txt = document.getElementById('newNoteText').value.trim();
   if (!txt) return;
 
-  const author = getCurrentUser();
+  const author = requireCurrentUser('agregar una nota');
+  if (!author) return;
   window.lastLocalNoteInsertAt = Date.now();
 
   const { data, error } = await sb
@@ -2748,7 +2868,8 @@ async function careForPet(action) {
   const config = PET_ACTIONS[action];
   if (!config) return;
 
-  const actor = getCurrentUser();
+  const actor = requireCurrentUser('cuidar a la mascota');
+  if (!actor) return;
   const base = getPetDisplayState(petState || DEFAULT_PET_STATE);
   const petName = base.name || 'Zeus';
   const actionLabel = config.label.replace('Zeus', petName);
@@ -2808,15 +2929,10 @@ async function savePetName() {
     return;
   }
 
-  const actor = getCurrentUser();
+  const actor = requireCurrentUser('cambiar el nombre');
+  if (!actor) return;
   const base = normalizePetState(petState || DEFAULT_PET_STATE);
   const oldName = base.name || 'Zeus';
-
-  if (base.name_author && !isOwnedByCurrentUser(base.name_author)) {
-    showToast('Solo quien eligió el nombre puede cambiarlo');
-    input.value = oldName;
-    return;
-  }
 
   if (newName === oldName) {
     showToast('Ese ya es su nombre 💜');
@@ -3102,7 +3218,8 @@ async function addReason() {
   if (!text) return;
 
   const authorEl = document.getElementById('newReasonAuthor');
-  const author = getCurrentUser();
+  const author = requireCurrentUser('agregar un mensaje');
+  if (!author) return;
 
   window.lastLocalReasonInsertAt = Date.now();
   const { data, error } = await sb.from('reasons').insert({ text, author }).select('id').single();
@@ -3481,7 +3598,7 @@ function createCalendarEventCard(evt) {
   author.textContent = 'Agregado por ' + (evt.author || 'Noel');
   el.appendChild(author);
 
-  if (isOwnedByCurrentUser(evt.author || 'Noel')) {
+  if (canEditSharedContent()) {
     const actions = document.createElement('div');
     actions.className = 'cal-event-actions';
 
@@ -3545,7 +3662,8 @@ async function saveCalendarEvent() {
   let title = document.getElementById('calendarTitle').value.trim();
   const eventDate = document.getElementById('calendarDate').value;
   const note = document.getElementById('calendarNote').value.trim();
-  const author = getCurrentUser();
+  const author = requireCurrentUser('guardar fechas');
+  if (!author) return;
   const category = document.getElementById('calendarCategory').value;
   const importance = document.getElementById('calendarImportance').value;
   const reminderDays = parseInt(document.getElementById('calendarReminder').value, 10);
@@ -3571,14 +3689,14 @@ async function saveCalendarEvent() {
 
   if (editingEventId) {
     const existing = calendarEvents.find(evt => evt.id === editingEventId);
-    const owner = existing ? (existing.author || 'Noel') : '';
-    if (!existing || !isOwnedByCurrentUser(owner)) {
-      showToast('Solo quien creó esta fecha puede editarla');
+    const owner = existing ? (existing.author || author) : author;
+    if (!existing) {
+      showToast('No se encontró esta fecha');
       closeCalendarForm();
       return;
     }
     payload.author = owner;
-    const { error } = await sb.from('calendar_events').update(payload).eq('id', editingEventId).eq('author', owner);
+    const { error } = await sb.from('calendar_events').update(payload).eq('id', editingEventId);
     if (error) {
       console.error('Error al actualizar fecha:', error);
       showToast('Error al actualizar');
@@ -3609,8 +3727,7 @@ async function saveCalendarEvent() {
 function editCalendarEvent(id) {
   const evt = calendarEvents.find(e => e.id === id);
   if (!evt) return;
-  if (!isOwnedByCurrentUser(evt.author || 'Noel')) {
-    showToast('Solo quien creó esta fecha puede editarla');
+  if (!requireCurrentUser('editar fechas')) {
     return;
   }
 
@@ -3640,14 +3757,14 @@ function editCalendarEvent(id) {
 async function deleteCalendarEvent(id) {
   const deletedEvent = calendarEvents.find(e => e.id === id);
   const owner = deletedEvent ? (deletedEvent.author || 'Noel') : '';
-  if (!deletedEvent || !isOwnedByCurrentUser(owner)) {
-    showToast('Solo quien creó esta fecha puede eliminarla');
+  if (!deletedEvent || !requireCurrentUser('eliminar fechas')) {
+    showToast('No se encontró esta fecha');
     return;
   }
   if (!confirm('¿Eliminar esta fecha?')) return;
 
   window.lastLocalCalendarDeleteAt = Date.now();
-  const { error } = await sb.from('calendar_events').delete().eq('id', id).eq('author', owner);
+  const { error } = await sb.from('calendar_events').delete().eq('id', id);
   if (error) {
     console.error('Error al eliminar fecha:', error);
     showToast('Error al eliminar');
@@ -3865,7 +3982,7 @@ function renderReminderLists() {
       items.forEach(product => {
         const row = document.createElement('div');
         row.className = 'list-item' + (product.done ? ' done' : '');
-        const canManageProduct = isOwnedByCurrentUser(product.author || 'Noel');
+        const canManageProduct = canEditSharedContent();
 
         const checkBtn = document.createElement('button');
         checkBtn.type = 'button';
@@ -3956,7 +4073,7 @@ function renderReminderLists() {
     const actions = document.createElement('div');
     actions.className = 'reminder-actions';
 
-    if (isOwnedByCurrentUser(item.author || 'Noel')) {
+    if (canEditSharedContent()) {
       const editBtn = document.createElement('button');
       editBtn.type = 'button';
       editBtn.innerHTML = '<i class="ti ti-pencil"></i> Editar';
@@ -4045,7 +4162,8 @@ async function addReminderItem(listId, productSelect, customInput, authorSelect)
   const selected = productSelect ? productSelect.value : '';
   const custom = customInput ? customInput.value.trim() : '';
   const name = selected === '__custom' ? custom : selected;
-  const author = getCurrentUser();
+  const author = requireCurrentUser('agregar productos');
+  if (!author) return;
 
   if (!name) {
     showToast('Escribe el producto');
@@ -4074,8 +4192,8 @@ async function toggleReminderItem(listId, itemId) {
   if (!current) return;
 
   const target = normalizeReminderItems(current.items).find(item => item.id === itemId);
-  if (!target || !isOwnedByCurrentUser(target.author || 'Noel')) {
-    showToast('Solo quien agregó este producto puede cambiarlo');
+  if (!target || !requireCurrentUser('cambiar productos')) {
+    showToast('No se encontró este producto');
     return;
   }
 
@@ -4095,8 +4213,8 @@ async function deleteReminderItem(listId, itemId) {
   if (!current) return;
 
   const target = normalizeReminderItems(current.items).find(item => item.id === itemId);
-  if (!target || !isOwnedByCurrentUser(target.author || 'Noel')) {
-    showToast('Solo quien agregó este producto puede eliminarlo');
+  if (!target || !requireCurrentUser('eliminar productos')) {
+    showToast('No se encontró este producto');
     return;
   }
 
@@ -4114,7 +4232,8 @@ async function saveReminderList() {
 
   const title = titleEl ? titleEl.value.trim() : '';
   const label = labelEl ? labelEl.value : 'Other';
-  const author = getCurrentUser();
+  const author = requireCurrentUser('guardar listas');
+  if (!author) return;
 
   if (!title) {
     showToast('Escribe el nombre de la lista');
@@ -4124,9 +4243,9 @@ async function saveReminderList() {
   try {
     if (editingReminderListId) {
       const existing = reminderLists.find(list => list.id === editingReminderListId);
-      const owner = existing ? (existing.author || 'Noel') : '';
-      if (!existing || !isOwnedByCurrentUser(owner)) {
-        showToast('Solo quien creó esta lista puede editarla');
+      const owner = existing ? (existing.author || author) : author;
+      if (!existing) {
+        showToast('No se encontró esta lista');
         clearReminderForm();
         toggleReminderForm(false);
         return;
@@ -4141,8 +4260,7 @@ async function saveReminderList() {
           author: owner,
           updated_at: new Date().toISOString()
         })
-        .eq('id', editingReminderListId)
-        .eq('author', owner);
+        .eq('id', editingReminderListId);
 
       if (error) throw error;
 
@@ -4183,8 +4301,7 @@ async function saveReminderList() {
 function editReminderList(id) {
   const item = reminderLists.find(list => list.id === id);
   if (!item) return;
-  if (!isOwnedByCurrentUser(item.author || 'Noel')) {
-    showToast('Solo quien creó esta lista puede editarla');
+  if (!requireCurrentUser('editar listas')) {
     return;
   }
 
@@ -4206,19 +4323,14 @@ function editReminderList(id) {
 async function deleteReminderList(id) {
   const item = reminderLists.find(list => list.id === id);
   const owner = item ? (item.author || 'Noel') : '';
-  if (!item || !isOwnedByCurrentUser(owner)) {
-    showToast('Solo quien creó esta lista puede eliminarla');
-    return;
-  }
-  const hasOtherOwners = normalizeReminderItems(item.items).some(product => !isOwnedByCurrentUser(product.author || 'Noel'));
-  if (hasOtherOwners) {
-    showToast('La lista contiene productos de la otra persona');
+  if (!item || !requireCurrentUser('eliminar listas')) {
+    showToast('No se encontró esta lista');
     return;
   }
   if (!confirm('¿Eliminar esta lista?')) return;
 
   try {
-    const { error } = await sb.from('reminder_lists').delete().eq('id', id).eq('author', owner);
+    const { error } = await sb.from('reminder_lists').delete().eq('id', id);
     if (error) throw error;
 
     if (editingReminderListId === id) {
@@ -4268,7 +4380,7 @@ let photoMeta = {};
 let photoOwnershipReady = false;
 
 function getPhotoActionAuthor() {
-  return getCurrentUser();
+  return requireCurrentUser('agregar fotos');
 }
 
 function getEmptyPhotoMarkup() {
@@ -4407,9 +4519,7 @@ function updatePhotoSelectionUI() {
 
 function togglePhotoSelection(path) {
   if (!photoEditMode || !path) return;
-  const meta = photoMeta[path] || {};
-  if (!isOwnedByCurrentUser(meta.author || 'Noel')) {
-    showToast('Solo quien agregó esta foto puede eliminarla');
+  if (!requireCurrentUser('editar fotos')) {
     return;
   }
   if (selectedPhotoPaths.has(path)) selectedPhotoPaths.delete(path);
@@ -4421,7 +4531,8 @@ async function togglePhotoLike(path, url) {
   const cell = document.querySelector('[data-path="' + CSS.escape(path) + '"]');
   if (!cell) return;
 
-  const currentUser = getCurrentUser();
+  const currentUser = requireCurrentUser('marcar fotos');
+  if (!currentUser) return;
   const meta = photoMeta[path] || { author: cell.dataset.author || 'Noel', likedBy: [] };
   const likedBy = new Set(Array.isArray(meta.likedBy) ? meta.likedBy : []);
   const wasLikedByCurrentUser = likedBy.has(currentUser);
@@ -4454,8 +4565,9 @@ async function togglePhotoLike(path, url) {
 }
 
 async function deleteSelectedPhotos() {
-  const currentUser = getCurrentUser();
-  const paths = Array.from(selectedPhotoPaths).filter(path => isOwnedByCurrentUser((photoMeta[path] && photoMeta[path].author) || 'Noel'));
+  const currentUser = requireCurrentUser('eliminar fotos');
+  if (!currentUser) return;
+  const paths = Array.from(selectedPhotoPaths);
   if (!paths.length) return;
 
   const msg = paths.length === 1 ? '¿Eliminar esta foto?' : '¿Eliminar estas ' + paths.length + ' fotos?';
@@ -4468,7 +4580,7 @@ async function deleteSelectedPhotos() {
   }
 
   try {
-    await sb.from('photos').delete().in('storage_path', paths).eq('author', currentUser);
+    await sb.from('photos').delete().in('storage_path', paths);
   } catch (e) {
     console.warn('Could not delete photo metadata:', e);
   }
@@ -4498,6 +4610,7 @@ async function addPhotos(e) {
   if (!files.length) return;
 
   const author = getPhotoActionAuthor();
+  if (!author) return;
   let addedCount = 0;
 
   for (const file of files) {
@@ -4922,7 +5035,7 @@ sb.channel('reminder_lists_channel')
   })
   .subscribe();
 
-syncCurrentUserControls();
+initIdentity();
 renderMemorySlideshow();
 loadPetState();
 loadNotes();
