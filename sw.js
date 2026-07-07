@@ -23,12 +23,15 @@ self.addEventListener('push', event => {
   const isAppleTouchDevice = /iPad|iPhone|iPod/.test(self.navigator.userAgent || '');
   const title = isAppleTouchDevice ? '' : (data.title || APP_NAME);
   const body = data.body || data.message || 'Hay algo nuevo en Togethr.';
+  const priority = data.priority || data.notification_priority || 'normal';
+  const isHighPriority = priority === 'high';
   const options = {
     body,
     icon: data.icon || ICON,
     badge: data.badge || ICON,
-    tag: data.tag || ('togethr-' + Date.now()),
-    renotify: false,
+    tag: data.tag || ((isHighPriority ? 'togethr-priority-' : 'togethr-') + Date.now()),
+    renotify: isHighPriority,
+    requireInteraction: isHighPriority && !isAppleTouchDevice,
     data: {
       url: data.url || './'
     }

@@ -1805,7 +1805,36 @@ function shouldShowRecentChange(change) {
   // Photo like/delete activity was removed from the notifications list.
   // The photo actions still work; they just don't create recent-change items.
   if (change.entity === 'photo' && ['deleted', 'liked', 'unliked'].includes(change.action)) return false;
+  // Pet care and individual list-item actions should stay quiet for everyone.
+  if (change.entity === 'pet') return false;
+  if (change.entity === 'reminder_item') return false;
   return true;
+}
+
+const HIGH_PRIORITY_NOTIFICATION_RULES = {
+  note: ['added', 'updated', 'deleted'],
+  reason: ['added'],
+  reminder_list: ['added', 'updated']
+};
+
+function getChangeNotificationPolicy(change) {
+  if (!change || !change.entity || !change.action) return null;
+  if (change.entity === 'pet' || change.entity === 'reminder_item') return null;
+
+  const highPriorityActions = HIGH_PRIORITY_NOTIFICATION_RULES[change.entity];
+  if (highPriorityActions && highPriorityActions.includes(change.action)) {
+    return { notify: true, priority: 'high', audience: 'all' };
+  }
+
+  if (change.entity === 'calendar' || (change.entity === 'photo' && change.action === 'added')) {
+    return { notify: true, priority: 'normal', audience: 'all' };
+  }
+
+  return null;
+}
+
+function shouldNotifyChange(change) {
+  return !!getChangeNotificationPolicy(change);
 }
 
 function getActivityText(change) {
@@ -1830,17 +1859,20 @@ function getActivityText(change) {
 }
 
 function showActivityNotification(change) {
+  if (!shouldNotifyChange(change)) return;
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
 
   const isAppleTouchDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const title = isAppleTouchDevice ? '' : 'Togethr';
+  const policy = getChangeNotificationPolicy(change) || { priority: 'normal' };
   const options = {
     body: getActivityText(change),
     icon: 'icon-192.png',
     badge: 'icon-192.png',
-    tag: 'togethr-' + (change.id || Date.now()),
-    renotify: false
+    tag: (policy.priority === 'high' ? 'togethr-priority-' : 'togethr-') + (change.id || Date.now()),
+    renotify: policy.priority === 'high',
+    requireInteraction: policy.priority === 'high' && !isAppleTouchDevice
   };
 
   try {
@@ -1971,14 +2003,22 @@ async function logRecentChange(change) {
 let changeAuditWarningShown = false;
 
 async function registerChange(change) {
+  if (!shouldShowRecentChange(change)) return;
+
   const actor = normalizeCurrentUser(change.actor || getCurrentUser() || change.owner || '');
+  const notificationPolicy = getChangeNotificationPolicy(change);
   const entry = {
     entity: change.entity || 'app',
     action: change.action || 'updated',
     record_id: change.recordId ? String(change.recordId) : null,
     actor,
     owner: change.owner ? normalizeCurrentUser(change.owner) : actor,
-    details: change.details || {}
+    details: {
+      ...(change.details || {}),
+      notify: !!notificationPolicy,
+      notification_priority: notificationPolicy ? notificationPolicy.priority : 'none',
+      notification_audience: notificationPolicy ? notificationPolicy.audience : 'none'
+    }
   };
 
   try {
