@@ -1032,6 +1032,13 @@
       line-height: 1.35;
     }
 
+    .notify-recipients {
+      margin-top: 8px;
+      color: #a78bfa;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
     #notifyBtn:disabled {
       opacity: .62;
       cursor: not-allowed;
@@ -1446,6 +1453,7 @@
         </select>
         <small id="notifyHint">Debe estar instalada en la pantalla de inicio y las notificaciones deben estar permitidas.</small>
       </div>
+      <div class="notify-recipients" id="notifyRecipients">Noel: revisando · Made: revisando</div>
     </div>
 
   </div>
@@ -2017,7 +2025,8 @@ async function registerChange(change) {
       ...(change.details || {}),
       notify: !!notificationPolicy,
       notification_priority: notificationPolicy ? notificationPolicy.priority : 'none',
-      notification_audience: notificationPolicy ? notificationPolicy.audience : 'none'
+      notification_audience: notificationPolicy ? notificationPolicy.audience : 'none',
+      notification_recipients: notificationPolicy ? ['Noel', 'Made'] : []
     }
   };
 
@@ -2241,9 +2250,18 @@ async function savePushSubscription(subscription) {
 
   const { error } = await sb
     .from('push_subscriptions')
-    .upsert(row, { onConflict: 'endpoint' });
+    .insert(row);
 
-  if (error) throw error;
+  if (error) {
+    if (error.code !== '23505') throw error;
+
+    const { error: updateError } = await sb
+      .from('push_subscriptions')
+      .update(row)
+      .eq('endpoint', row.endpoint);
+
+    if (updateError) throw updateError;
+  }
 
   return row;
 }
@@ -2264,6 +2282,55 @@ async function restoreDeviceIdentity(subscription) {
   return deviceUser;
 }
 
+function summarizeNotificationRecipients(rows) {
+  const summary = {
+    Noel: { enabled: 0, last_seen_at: null },
+    Made: { enabled: 0, last_seen_at: null }
+  };
+
+  (rows || []).forEach(row => {
+    const user = normalizeCurrentUser(row.user_name);
+    if (!summary[user] || !row.enabled) return;
+    summary[user].enabled += Number(row.device_count || 1);
+    if (row.last_seen_at && (!summary[user].last_seen_at || new Date(row.last_seen_at) > new Date(summary[user].last_seen_at))) {
+      summary[user].last_seen_at = row.last_seen_at;
+    }
+  });
+
+  return summary;
+}
+
+function formatNotificationRecipient(name, info) {
+  const count = info && info.enabled ? info.enabled : 0;
+  if (!count) return name + ': pendiente';
+  return name + ': ' + count + (count === 1 ? ' dispositivo listo' : ' dispositivos listos');
+}
+
+async function updateNotificationRecipientStatus() {
+  const recipients = document.getElementById('notifyRecipients');
+  if (!recipients) return;
+
+  recipients.textContent = 'Noel: revisando · Made: revisando';
+
+  try {
+    const { data, error } = await sb
+      .from('push_subscription_status')
+      .select('user_name,enabled,device_count,last_seen_at')
+      .eq('enabled', true);
+
+    if (error) throw error;
+
+    const summary = summarizeNotificationRecipients(data || []);
+    recipients.textContent = [
+      formatNotificationRecipient('Noel', summary.Noel),
+      formatNotificationRecipient('Made', summary.Made)
+    ].join(' · ');
+  } catch (error) {
+    recipients.textContent = 'No se pudo revisar si Noel y Made están conectados.';
+    console.warn('No se pudo revisar destinatarios de notificaciones:', error);
+  }
+}
+
 async function updateNotificationButton() {
   restorePushUserName();
 
@@ -2274,6 +2341,7 @@ async function updateNotificationButton() {
   const userSelect = document.getElementById('pushUserName');
   if (!card || !status || !btn) return;
   if (userSelect) userSelect.disabled = !!readStoredCurrentUser();
+  await updateNotificationRecipientStatus();
 
   if (!getCurrentUser()) {
     status.textContent = 'Elige Noel o Made para conectar notificaciones.';
