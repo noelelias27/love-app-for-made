@@ -2003,10 +2003,10 @@ async function logRecentChange(change) {
 let changeAuditWarningShown = false;
 
 async function registerChange(change) {
-  if (!shouldShowRecentChange(change)) return;
+  const notificationPolicy = getChangeNotificationPolicy(change);
+  if (!shouldShowRecentChange(change) || !notificationPolicy) return;
 
   const actor = normalizeCurrentUser(change.actor || getCurrentUser() || change.owner || '');
-  const notificationPolicy = getChangeNotificationPolicy(change);
   const entry = {
     entity: change.entity || 'app',
     action: change.action || 'updated',
