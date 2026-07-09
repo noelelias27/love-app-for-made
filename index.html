@@ -1307,13 +1307,8 @@
       outline: none;
     }
 
-    .list-product-custom {
-      display: none;
-      grid-column: 1 / -1;
-    }
-
-    .list-product-custom.show {
-      display: block;
+    .list-product-input {
+      grid-column: 1 / 2;
     }
 
     .list-item-add-btn {
@@ -3897,25 +3892,34 @@ let reminderLists = [];
 let editingReminderListId = null;
 const expandedReminderLists = new Set();
 
-const DEFAULT_LIST_PRODUCTS = [
-  ['Leche', 'Leche'],
-  ['Huevos', 'Huevos'],
-  ['Pan', 'Pan'],
-  ['Arroz', 'Arroz'],
-  ['Pollo', 'Pollo'],
-  ['Carne', 'Carne'],
-  ['Pasta', 'Pasta'],
-  ['Queso', 'Queso'],
-  ['Cafe', 'Cafe'],
-  ['Agua', 'Agua'],
-  ['Frutas', 'Frutas'],
-  ['Vegetales', 'Vegetales'],
-  ['Snacks', 'Snacks'],
-  ['Detergente', 'Detergente'],
-  ['Papel de bano', 'Papel de baño'],
-  ['Shampoo', 'Shampoo'],
-  ['Medicina', 'Medicina']
-];
+function getListProductInputId(listId) {
+  return 'listProductInput_' + String(listId).replace(/[^a-zA-Z0-9_-]/g, '_');
+}
+
+function focusProductInputElement(input, selectionStart, selectionEnd) {
+  if (!input) return;
+
+  try {
+    input.focus({ preventScroll: true });
+  } catch (error) {
+    input.focus();
+  }
+
+  if (typeof selectionStart === 'number' && typeof input.setSelectionRange === 'function') {
+    const end = typeof selectionEnd === 'number' ? selectionEnd : selectionStart;
+    input.setSelectionRange(selectionStart, end);
+  }
+}
+
+function focusListProductInput(listId, value, selectionStart, selectionEnd) {
+  setTimeout(() => {
+    const input = document.getElementById(getListProductInputId(listId));
+    if (!input) return;
+
+    if (typeof value === 'string') input.value = value;
+    focusProductInputElement(input, selectionStart, selectionEnd);
+  }, 80);
+}
 
 function getReminderLabelIcon(label) {
   const map = {
@@ -4027,6 +4031,16 @@ function renderReminderLists() {
   const list = document.getElementById('reminderList');
   if (!list) return;
 
+  const activeElement = document.activeElement;
+  const focusedProductInput = activeElement && activeElement.classList && activeElement.classList.contains('list-product-input')
+    ? {
+        listId: activeElement.dataset.listId,
+        value: activeElement.value,
+        selectionStart: activeElement.selectionStart,
+        selectionEnd: activeElement.selectionEnd
+      }
+    : null;
+
   list.innerHTML = '';
 
   if (!reminderLists.length) {
@@ -4131,19 +4145,6 @@ function renderReminderLists() {
     const itemForm = document.createElement('div');
     itemForm.className = 'list-item-form';
 
-    const productSelect = document.createElement('select');
-    DEFAULT_LIST_PRODUCTS.forEach(([value, label]) => {
-      const option = document.createElement('option');
-      option.value = value;
-      option.textContent = label;
-      productSelect.appendChild(option);
-    });
-
-    const customOption = document.createElement('option');
-    customOption.value = '__custom';
-    customOption.textContent = 'Escribir otro...';
-    productSelect.appendChild(customOption);
-
     const productAuthor = document.createElement('select');
     productAuthor.disabled = true;
     ['Noel', 'Made'].forEach(name => {
@@ -4154,28 +4155,31 @@ function renderReminderLists() {
     });
     productAuthor.value = getCurrentUser();
 
-    const customInput = document.createElement('input');
-    customInput.className = 'list-product-custom';
-    customInput.placeholder = 'Nombre del producto';
-
-    productSelect.onchange = () => {
-      customInput.classList.toggle('show', productSelect.value === '__custom');
-      if (productSelect.value === '__custom') setTimeout(() => customInput.focus(), 60);
-    };
+    const productInput = document.createElement('input');
+    productInput.id = getListProductInputId(item.id);
+    productInput.className = 'list-product-input';
+    productInput.dataset.listId = item.id;
+    productInput.type = 'text';
+    productInput.inputMode = 'text';
+    productInput.autocomplete = 'off';
+    productInput.placeholder = 'Escribe un producto';
+    productInput.enterKeyHint = 'next';
 
     const addItemBtn = document.createElement('button');
     addItemBtn.type = 'button';
     addItemBtn.className = 'list-item-add-btn';
     addItemBtn.innerHTML = '<i class="ti ti-plus"></i> Agregar producto';
-    addItemBtn.onclick = () => addReminderItem(item.id, productSelect, customInput, productAuthor);
+    addItemBtn.onclick = () => addReminderItem(item.id, productInput);
 
-    customInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') addReminderItem(item.id, productSelect, customInput, productAuthor);
+    productInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addReminderItem(item.id, productInput);
+      }
     });
 
-    itemForm.appendChild(productSelect);
+    itemForm.appendChild(productInput);
     itemForm.appendChild(productAuthor);
-    itemForm.appendChild(customInput);
     itemForm.appendChild(addItemBtn);
 
     const actions = document.createElement('div');
@@ -4204,6 +4208,15 @@ function renderReminderLists() {
     card.appendChild(details);
     list.appendChild(card);
   });
+
+  if (focusedProductInput && focusedProductInput.listId) {
+    focusListProductInput(
+      focusedProductInput.listId,
+      focusedProductInput.value,
+      focusedProductInput.selectionStart,
+      focusedProductInput.selectionEnd
+    );
+  }
 }
 
 async function loadReminderLists() {
@@ -4263,35 +4276,36 @@ async function updateReminderItems(listId, nextItems, toastMessage) {
   }
 }
 
-async function addReminderItem(listId, productSelect, customInput, authorSelect) {
+async function addReminderItem(listId, productInput) {
   const current = reminderLists.find(list => list.id === listId);
   if (!current) return;
 
-  const selected = productSelect ? productSelect.value : '';
-  const custom = customInput ? customInput.value.trim() : '';
-  const name = selected === '__custom' ? custom : selected;
+  const name = productInput ? productInput.value.trim() : '';
   const author = requireCurrentUser('agregar productos');
   if (!author) return;
 
   if (!name) {
     showToast('Escribe el producto');
-    if (customInput) customInput.focus();
+    focusListProductInput(listId);
     return;
   }
 
   const items = normalizeReminderItems(current.items);
   items.push(makeReminderItem(name, author));
 
-  if (productSelect) productSelect.value = DEFAULT_LIST_PRODUCTS[0][0];
-  if (customInput) {
-    customInput.value = '';
-    customInput.classList.remove('show');
+  if (productInput) {
+    productInput.value = '';
+    focusProductInputElement(productInput);
   }
 
   const saved = await updateReminderItems(listId, items, 'Producto agregado 💜');
   const addedItem = items[items.length - 1];
   if (saved) {
+    focusListProductInput(listId);
     await registerChange({ entity: 'reminder_item', action: 'added', recordId: listId + ':' + addedItem.id, owner: author, details: { list_id: listId, name } });
+  } else if (productInput) {
+    productInput.value = name;
+    focusListProductInput(listId, name, name.length, name.length);
   }
 }
 
