@@ -1032,6 +1032,13 @@
       line-height: 1.35;
     }
 
+    .notify-recipients {
+      margin-top: 8px;
+      color: #a78bfa;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
     #notifyBtn:disabled {
       opacity: .62;
       cursor: not-allowed;
@@ -1446,6 +1453,7 @@
         </select>
         <small id="notifyHint">Debe estar instalada en la pantalla de inicio y las notificaciones deben estar permitidas.</small>
       </div>
+      <div class="notify-recipients" id="notifyRecipients">Noel: revisando · Made: revisando</div>
     </div>
 
   </div>
@@ -1805,7 +1813,36 @@ function shouldShowRecentChange(change) {
   // Photo like/delete activity was removed from the notifications list.
   // The photo actions still work; they just don't create recent-change items.
   if (change.entity === 'photo' && ['deleted', 'liked', 'unliked'].includes(change.action)) return false;
+  // Pet care and individual list-item actions should stay quiet for everyone.
+  if (change.entity === 'pet') return false;
+  if (change.entity === 'reminder_item') return false;
   return true;
+}
+
+const HIGH_PRIORITY_NOTIFICATION_RULES = {
+  note: ['added', 'updated', 'deleted'],
+  reason: ['added'],
+  reminder_list: ['added', 'updated']
+};
+
+function getChangeNotificationPolicy(change) {
+  if (!change || !change.entity || !change.action) return null;
+  if (change.entity === 'pet' || change.entity === 'reminder_item') return null;
+
+  const highPriorityActions = HIGH_PRIORITY_NOTIFICATION_RULES[change.entity];
+  if (highPriorityActions && highPriorityActions.includes(change.action)) {
+    return { notify: true, priority: 'high', audience: 'all' };
+  }
+
+  if (change.entity === 'calendar' || (change.entity === 'photo' && change.action === 'added')) {
+    return { notify: true, priority: 'normal', audience: 'all' };
+  }
+
+  return null;
+}
+
+function shouldNotifyChange(change) {
+  return !!getChangeNotificationPolicy(change);
 }
 
 function getActivityText(change) {
@@ -1830,17 +1867,20 @@ function getActivityText(change) {
 }
 
 function showActivityNotification(change) {
+  if (!shouldNotifyChange(change)) return;
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
 
   const isAppleTouchDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const title = isAppleTouchDevice ? '' : 'Togethr';
+  const policy = getChangeNotificationPolicy(change) || { priority: 'normal' };
   const options = {
     body: getActivityText(change),
     icon: 'icon-192.png',
     badge: 'icon-192.png',
-    tag: 'togethr-' + (change.id || Date.now()),
-    renotify: false
+    tag: (policy.priority === 'high' ? 'togethr-priority-' : 'togethr-') + (change.id || Date.now()),
+    renotify: policy.priority === 'high',
+    requireInteraction: policy.priority === 'high' && !isAppleTouchDevice
   };
 
   try {
@@ -1971,6 +2011,9 @@ async function logRecentChange(change) {
 let changeAuditWarningShown = false;
 
 async function registerChange(change) {
+  const notificationPolicy = getChangeNotificationPolicy(change);
+  if (!shouldShowRecentChange(change) || !notificationPolicy) return;
+
   const actor = normalizeCurrentUser(change.actor || getCurrentUser() || change.owner || '');
   const entry = {
     entity: change.entity || 'app',
@@ -1978,7 +2021,13 @@ async function registerChange(change) {
     record_id: change.recordId ? String(change.recordId) : null,
     actor,
     owner: change.owner ? normalizeCurrentUser(change.owner) : actor,
-    details: change.details || {}
+    details: {
+      ...(change.details || {}),
+      notify: !!notificationPolicy,
+      notification_priority: notificationPolicy ? notificationPolicy.priority : 'none',
+      notification_audience: notificationPolicy ? notificationPolicy.audience : 'none',
+      notification_recipients: notificationPolicy ? ['Noel', 'Made'] : []
+    }
   };
 
   try {
@@ -2201,9 +2250,18 @@ async function savePushSubscription(subscription) {
 
   const { error } = await sb
     .from('push_subscriptions')
-    .upsert(row, { onConflict: 'endpoint' });
+    .insert(row);
 
-  if (error) throw error;
+  if (error) {
+    if (error.code !== '23505') throw error;
+
+    const { error: updateError } = await sb
+      .from('push_subscriptions')
+      .update(row)
+      .eq('endpoint', row.endpoint);
+
+    if (updateError) throw updateError;
+  }
 
   return row;
 }
@@ -2224,6 +2282,55 @@ async function restoreDeviceIdentity(subscription) {
   return deviceUser;
 }
 
+function summarizeNotificationRecipients(rows) {
+  const summary = {
+    Noel: { enabled: 0, last_seen_at: null },
+    Made: { enabled: 0, last_seen_at: null }
+  };
+
+  (rows || []).forEach(row => {
+    const user = normalizeCurrentUser(row.user_name);
+    if (!summary[user] || !row.enabled) return;
+    summary[user].enabled += Number(row.device_count || 1);
+    if (row.last_seen_at && (!summary[user].last_seen_at || new Date(row.last_seen_at) > new Date(summary[user].last_seen_at))) {
+      summary[user].last_seen_at = row.last_seen_at;
+    }
+  });
+
+  return summary;
+}
+
+function formatNotificationRecipient(name, info) {
+  const count = info && info.enabled ? info.enabled : 0;
+  if (!count) return name + ': pendiente';
+  return name + ': ' + count + (count === 1 ? ' dispositivo listo' : ' dispositivos listos');
+}
+
+async function updateNotificationRecipientStatus() {
+  const recipients = document.getElementById('notifyRecipients');
+  if (!recipients) return;
+
+  recipients.textContent = 'Noel: revisando · Made: revisando';
+
+  try {
+    const { data, error } = await sb
+      .from('push_subscription_status')
+      .select('user_name,enabled,device_count,last_seen_at')
+      .eq('enabled', true);
+
+    if (error) throw error;
+
+    const summary = summarizeNotificationRecipients(data || []);
+    recipients.textContent = [
+      formatNotificationRecipient('Noel', summary.Noel),
+      formatNotificationRecipient('Made', summary.Made)
+    ].join(' · ');
+  } catch (error) {
+    recipients.textContent = 'No se pudo revisar si Noel y Made están conectados.';
+    console.warn('No se pudo revisar destinatarios de notificaciones:', error);
+  }
+}
+
 async function updateNotificationButton() {
   restorePushUserName();
 
@@ -2234,6 +2341,7 @@ async function updateNotificationButton() {
   const userSelect = document.getElementById('pushUserName');
   if (!card || !status || !btn) return;
   if (userSelect) userSelect.disabled = !!readStoredCurrentUser();
+  await updateNotificationRecipientStatus();
 
   if (!getCurrentUser()) {
     status.textContent = 'Elige Noel o Made para conectar notificaciones.';
