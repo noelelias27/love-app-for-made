@@ -1,6 +1,20 @@
 const APP_NAME = 'Togethr';
 const ICON = './icon-192.png';
 
+function makeNotificationTag(data, priority, body) {
+  const source = data.tag ||
+    data.notification_id ||
+    data.change_id ||
+    data.id ||
+    data.record_id ||
+    data.created_at ||
+    body ||
+    'update';
+
+  return (priority === 'high' ? 'togethr-priority-' : 'togethr-') +
+    String(source).replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 96);
+}
+
 self.addEventListener('install', event => {
   self.skipWaiting();
 });
@@ -29,8 +43,8 @@ self.addEventListener('push', event => {
     body,
     icon: data.icon || ICON,
     badge: data.badge || ICON,
-    tag: data.tag || ((isHighPriority ? 'togethr-priority-' : 'togethr-') + Date.now()),
-    renotify: isHighPriority,
+    tag: makeNotificationTag(data, priority, body),
+    renotify: false,
     requireInteraction: isHighPriority && !isAppleTouchDevice,
     data: {
       url: data.url || './'

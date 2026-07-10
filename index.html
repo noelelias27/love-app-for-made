@@ -1962,7 +1962,6 @@ function addRecentChangeLocal(change) {
   recentChanges = [entry, ...recentChanges.filter(c => c.id !== entry.id)].slice(0, 20);
   saveRecentChangesLocal();
   renderRecentChanges();
-  showActivityNotification(entry);
 }
 
 async function loadRecentChanges() {
@@ -2222,6 +2221,51 @@ async function getCurrentPushSubscription() {
   return await registration.pushManager.getSubscription();
 }
 
+async function getStoredPushSubscriptions(endpoint) {
+  if (!endpoint) return [];
+
+  const { data, error } = await sb
+    .from('push_subscriptions')
+    .select('id,user_name,enabled,last_seen_at')
+    .eq('endpoint', endpoint)
+    .order('enabled', { ascending: false })
+    .order('last_seen_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+async function disableDuplicatePushSubscriptions(row, keepId) {
+  const patch = {
+    enabled: false,
+    last_seen_at: row.last_seen_at
+  };
+
+  try {
+    if (keepId) {
+      const { error } = await sb
+        .from('push_subscriptions')
+        .update(patch)
+        .eq('endpoint', row.endpoint)
+        .neq('id', keepId);
+
+      if (error) throw error;
+    }
+
+    const { error: sameDeviceError } = await sb
+      .from('push_subscriptions')
+      .update(patch)
+      .eq('user_name', row.user_name)
+      .eq('device_label', row.device_label)
+      .eq('user_agent', row.user_agent)
+      .neq('endpoint', row.endpoint);
+
+    if (sameDeviceError) throw sameDeviceError;
+  } catch (error) {
+    console.warn('No se pudieron desactivar suscripciones push duplicadas:', error);
+  }
+}
+
 async function savePushSubscription(subscription) {
   const currentUser = requireCurrentUser('activar notificaciones');
   if (!currentUser) throw new Error('Sesión requerida para notificaciones.');
@@ -2243,36 +2287,87 @@ async function savePushSubscription(subscription) {
     last_seen_at: new Date().toISOString()
   };
 
-  const { error } = await sb
-    .from('push_subscriptions')
-    .insert(row);
+  let existingRows = [];
+  try {
+    existingRows = await getStoredPushSubscriptions(row.endpoint);
+  } catch (error) {
+    console.warn('No se pudieron revisar suscripciones push existentes:', error);
+  }
 
-  if (error) {
-    if (error.code !== '23505') throw error;
+  if (existingRows.length) {
+    const currentRow = existingRows.find(item => item.enabled) || existingRows[0];
+    const keepId = currentRow && currentRow.id;
 
-    const { error: updateError } = await sb
+    if (keepId) {
+      const { error: updateError } = await sb
+        .from('push_subscriptions')
+        .update(row)
+        .eq('id', keepId);
+
+      if (updateError) throw updateError;
+      await disableDuplicatePushSubscriptions(row, keepId);
+      return { ...row, id: keepId };
+    }
+
+    const { error: updateByEndpointError } = await sb
       .from('push_subscriptions')
       .update(row)
       .eq('endpoint', row.endpoint);
 
-    if (updateError) throw updateError;
+    if (updateByEndpointError) throw updateByEndpointError;
+    await disableDuplicatePushSubscriptions(row, null);
+    return row;
   }
 
+  const { error: upsertError } = await sb
+    .from('push_subscriptions')
+    .upsert(row, { onConflict: 'endpoint' });
+
+  if (upsertError) {
+    const { error: insertError } = await sb
+      .from('push_subscriptions')
+      .insert(row);
+
+    if (insertError) {
+      if (insertError.code !== '23505') throw insertError;
+
+      const { error: updateError } = await sb
+        .from('push_subscriptions')
+        .update(row)
+        .eq('endpoint', row.endpoint);
+
+      if (updateError) throw updateError;
+    }
+  }
+
+  await disableDuplicatePushSubscriptions(row, null);
   return row;
+}
+
+async function refreshSavedPushSubscription(subscription) {
+  try {
+    if (subscription) await savePushSubscription(subscription);
+  } catch (error) {
+    console.warn('No se pudo refrescar la suscripción push guardada:', error);
+  }
 }
 
 async function restoreDeviceIdentity(subscription) {
   if (!subscription || !subscription.endpoint) return null;
 
-  const { data, error } = await sb
-    .from('push_subscriptions')
-    .select('user_name')
-    .eq('endpoint', subscription.endpoint)
-    .maybeSingle();
+  let rows = [];
+  try {
+    rows = await getStoredPushSubscriptions(subscription.endpoint);
+  } catch (error) {
+    console.warn('No se pudo restaurar identidad del dispositivo:', error);
+    return null;
+  }
 
-  if (error || !data || !data.user_name) return null;
+  const data = rows.find(row => row.enabled && row.user_name) || rows.find(row => row.user_name);
+  if (!data || !data.user_name) return null;
 
   const deviceUser = normalizeCurrentUser(data.user_name);
+  if (deviceUser && !readStoredCurrentUser()) writeStoredCurrentUser(deviceUser);
   syncCurrentUserControls();
   return deviceUser;
 }
@@ -2368,13 +2463,15 @@ async function updateNotificationButton() {
 
       if (subscription) {
         const deviceUser = await restoreDeviceIdentity(subscription);
+        await refreshSavedPushSubscription(subscription);
+        await updateNotificationRecipientStatus();
         const currentUser = getCurrentUser();
-      status.textContent = 'Este iPhone ya está conectado para notificaciones en vivo.';
-      if (hint) {
-        hint.textContent = deviceUser && deviceUser !== currentUser
-          ? 'Antes estaba como ' + deviceUser + '. Toca actualizar para guardarlo como ' + currentUser + '.'
-          : 'Identidad bloqueada en este dispositivo: ' + currentUser + '.';
-      }
+        status.textContent = 'Este iPhone ya está conectado para notificaciones en vivo.';
+        if (hint) {
+          hint.textContent = deviceUser && deviceUser !== currentUser
+            ? 'Antes estaba como ' + deviceUser + '. Toca actualizar para guardarlo como ' + currentUser + '.'
+            : 'Identidad bloqueada en este dispositivo: ' + currentUser + '.';
+        }
         btn.textContent = 'Actualizar';
         btn.disabled = false;
         return;
@@ -4201,8 +4298,8 @@ function renderReminderLists() {
       actions.appendChild(deleteBtn);
     }
 
-    details.appendChild(itemsBox);
     details.appendChild(itemForm);
+    details.appendChild(itemsBox);
     if (actions.childElementCount) details.appendChild(actions);
     card.appendChild(summary);
     card.appendChild(details);
